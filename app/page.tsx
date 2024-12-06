@@ -1,5 +1,4 @@
 import App from "@/components/App";
-import PlayerCountForm from "@/components/MexiForm";
 
 export default function Home() {
   return (
