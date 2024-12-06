@@ -1,22 +1,36 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { useForm } from "react-hook-form";
+import { useForm, SubmitHandler } from "react-hook-form";
 import { Button } from "./ui/button";
 
-export default function App() {
-  const [numberOfPlayers, setNumberOfPlayers] = useState(0);
-  /* eslint-disable @typescript-eslint/no-unused-vars */
-  const [names, setNames] = useState([]);
-  /* eslint-enable @typescript-eslint/no-unused-vars */
-  const [matches, setMatches] = useState([]);
-  const [scores, setScores] = useState({});
-  const [round, setRound] = useState(1);
-  const [tournamentName, setTournamentName] = useState("");
-  const [isTournamentNameSet, setIsTournamentNameSet] = useState(false);
-  const [arePlayerNamesSet, setArePlayerNamesSet] = useState(false); // Flag for player names
+// Define the types for the form data
+interface FormData {
+  tournamentName: string;
+  "Number of players": string;
+  [key: string]: string; // Handle dynamic player names
+}
 
-  const { register, handleSubmit, getValues } = useForm();
+interface Match {
+  team1: string[];
+  team2: string[];
+  team1Score: number;
+  team2Score: number;
+  isScoreSubmitted: boolean;
+}
+
+export default function App() {
+  const [numberOfPlayers, setNumberOfPlayers] = useState<number>(0);
+  const [names, setNames] = useState<string[]>([]);
+  const [matches, setMatches] = useState<Match[]>([]);
+  const [scores, setScores] = useState<{ [key: string]: number }>({});
+  const [round, setRound] = useState<number>(1);
+  const [tournamentName, setTournamentName] = useState<string>("");
+  const [isTournamentNameSet, setIsTournamentNameSet] =
+    useState<boolean>(false);
+  const [arePlayerNamesSet, setArePlayerNamesSet] = useState<boolean>(false); // Flag for player names
+
+  const { register, handleSubmit, getValues } = useForm<FormData>();
 
   useEffect(() => {
     // Check if there is saved tournament data in localStorage when the component mounts
@@ -32,7 +46,7 @@ export default function App() {
     }
   }, []);
 
-  const onNumberSubmit = (data) => {
+  const onNumberSubmit: SubmitHandler<FormData> = (data) => {
     const players = parseInt(data["Number of players"], 10);
     if (!isNaN(players) && players >= 4 && players % 4 === 0) {
       setNumberOfPlayers(players);
@@ -46,10 +60,11 @@ export default function App() {
     const playerNames = Object.keys(values)
       .filter((key) => key.startsWith("playerName"))
       .map((key) => values[key]);
+
     setNames(playerNames);
 
     // Initialize scores
-    const initialScores = {};
+    const initialScores: { [key: string]: number } = {};
     playerNames.forEach((name) => {
       initialScores[name] = 0;
     });
@@ -59,13 +74,13 @@ export default function App() {
     setArePlayerNamesSet(true); // Mark player names as set
   };
 
-  const generateMatches = (players) => {
+  const generateMatches = (players: string[]) => {
     const sortedPlayers =
       players.length > 0
         ? [...players].sort((a, b) => scores[b] - scores[a])
         : shuffle(players);
 
-    const newMatches = [];
+    const newMatches: Match[] = [];
     for (let i = 0; i < sortedPlayers.length; i += 4) {
       const team1 = [sortedPlayers[i], sortedPlayers[i + 2]];
       const team2 = [sortedPlayers[i + 1], sortedPlayers[i + 3]];
@@ -81,7 +96,7 @@ export default function App() {
     setMatches(newMatches);
   };
 
-  const shuffle = (players) => {
+  const shuffle = (players: string[]): string[] => {
     const shuffledPlayers = [...players];
     for (let i = shuffledPlayers.length - 1; i > 0; i--) {
       const j = Math.floor(Math.random() * (i + 1));
@@ -93,7 +108,11 @@ export default function App() {
     return shuffledPlayers;
   };
 
-  const handleScoreSubmit = (index, team1Score, team2Score) => {
+  const handleScoreSubmit = (
+    index: number,
+    team1Score: string,
+    team2Score: string
+  ) => {
     if (matches[index].isScoreSubmitted) {
       alert("Score for this match has already been submitted.");
       return;
@@ -124,25 +143,10 @@ export default function App() {
 
   const isNextRoundDisabled = matches.some((match) => !match.isScoreSubmitted);
 
-  const handleTournamentNameSubmit = (data) => {
+  const handleTournamentNameSubmit: SubmitHandler<FormData> = (data) => {
     setTournamentName(data.tournamentName);
     setIsTournamentNameSet(true);
   };
-  /* 
-  const handleReset = () => {
-    if (window.confirm("Are you sure you want to reset the tournament?")) {
-      setTournamentName("");
-      setNumberOfPlayers(0);
-      setNames([]);
-      setMatches([]);
-      setScores({});
-      setRound(1);
-      setIsTournamentNameSet(false);
-      setArePlayerNamesSet(false);
-      localStorage.removeItem("tournamentData");
-      reset(); // Clear form data
-    }
-  }; */
 
   return (
     <div className="m-4">
@@ -253,18 +257,15 @@ export default function App() {
                   name="team2Score"
                   disabled={match.isScoreSubmitted}
                 />
-                <Button
-                  className="w-12 text-xs sm:w-16 sm:text-sm"
-                  type="submit"
-                  disabled={match.isScoreSubmitted}
-                >
-                  Submit
-                </Button>
+                {!match.isScoreSubmitted && (
+                  <Button type="submit">Submit</Button>
+                )}
               </form>
             </div>
           ))}
           <Button
-            className="mx-auto block mt-4"
+            type="button"
+            className="mt-4 mx-auto block"
             onClick={nextRound}
             disabled={isNextRoundDisabled}
           >
@@ -272,7 +273,6 @@ export default function App() {
           </Button>
         </div>
       )}
-
       {Object.keys(scores).length > 0 && (
         <div className="mt-8 text-center">
           <h2 className="text-center text-lg font-bold">Player Scores:</h2>
