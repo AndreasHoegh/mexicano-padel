@@ -230,10 +230,18 @@ export default function App() {
                 className="flex gap-4 justify-center mt-2"
                 onSubmit={(e) => {
                   e.preventDefault();
-                  const team1Score = e.target.team1Score.value;
-                  const team2Score = e.target.team2Score.value;
+
+                  // Cast e.target to the correct type
+                  const form = e.target as HTMLFormElement & {
+                    team1Score: HTMLInputElement;
+                    team2Score: HTMLInputElement;
+                  };
+
+                  const team1Score = form.team1Score.value;
+                  const team2Score = form.team2Score.value;
+
                   handleScoreSubmit(index, team1Score, team2Score);
-                  e.target.reset();
+                  form.reset();
                 }}
               >
                 <input
