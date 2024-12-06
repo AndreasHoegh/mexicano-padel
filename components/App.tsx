@@ -21,7 +21,7 @@ interface Match {
 
 export default function App() {
   const [numberOfPlayers, setNumberOfPlayers] = useState<number>(0);
-  // eslint-disable-next-line no-unused-vars
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [names, setNames] = useState<string[]>([]);
   const [matches, setMatches] = useState<Match[]>([]);
   const [scores, setScores] = useState<{ [key: string]: number }>({});
