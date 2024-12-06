@@ -14,7 +14,7 @@ export default function App() {
   const [isTournamentNameSet, setIsTournamentNameSet] = useState(false);
   const [arePlayerNamesSet, setArePlayerNamesSet] = useState(false); // Flag for player names
 
-  const { register, handleSubmit, getValues, reset } = useForm();
+  const { register, handleSubmit, getValues } = useForm();
 
   useEffect(() => {
     // Check if there is saved tournament data in localStorage when the component mounts
