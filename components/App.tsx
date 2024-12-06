@@ -6,7 +6,9 @@ import { Button } from "./ui/button";
 
 export default function App() {
   const [numberOfPlayers, setNumberOfPlayers] = useState(0);
+  /* eslint-disable @typescript-eslint/no-unused-vars */
   const [names, setNames] = useState([]);
+  /* eslint-enable @typescript-eslint/no-unused-vars */
   const [matches, setMatches] = useState([]);
   const [scores, setScores] = useState({});
   const [round, setRound] = useState(1);
