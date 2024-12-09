@@ -150,7 +150,7 @@ export default function App() {
   };
 
   return (
-    <div className="m-4">
+    <div className="m-4 sm:max-w-screen-2xl max-w-screen-sm">
       {/* Sektion for turneringsnavn */}
       {!isTournamentNameSet && (
         <form
