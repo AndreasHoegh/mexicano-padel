@@ -150,11 +150,11 @@ export default function App() {
   };
 
   return (
-    <div className="m-4 sm:max-w-screen-2xl max-w-screen-sm">
+    <div className="m-4">
       {/* Sektion for turneringsnavn */}
       {!isTournamentNameSet && (
         <form
-          className="flex justify-center gap-2 mt-8"
+          className="flex flex-col sm:flex-row mx-8 justify-center gap-2 mt-8"
           onSubmit={handleSubmit(handleTournamentNameSubmit)}
         >
           <input
