@@ -217,17 +217,8 @@ export default function App() {
           </h2>
           {matches.map((match, index) => (
             <div key={index} className="mb-4">
-              <p className="text-center my-4">
-                <span className="border-b-4 border-red-600 font-semibold">
-                  {match.team1.join(" & ")}
-                </span>
-                <p className="">VS</p>
-                <span className="border-b-4 border-red-600 font-semibold">
-                  {match.team2.join(" & ")}
-                </span>{" "}
-              </p>
               <form
-                className="flex gap-4 justify-center mt-2"
+                className="grid grid-cols-[2fr_1fr_2fr] items-center gap-4 mt-2"
                 onSubmit={(e) => {
                   e.preventDefault();
 
@@ -244,34 +235,51 @@ export default function App() {
                   form.reset();
                 }}
               >
-                <input
-                  className="border-2 border-slate-500 p-1 sm:w-64 w-42 text-xs sm:text-sm"
-                  type="number"
-                  placeholder={
-                    match.isScoreSubmitted
-                      ? `${match.team1Score}` // Rettet til template literal
-                      : `Score for ${match.team1.join(" & ")}`
-                  }
-                  name="team1Score"
-                  disabled={match.isScoreSubmitted}
-                />
-                <input
-                  className="border-2 border-slate-500 p-1 sm:w-64 w-42 text-xs sm:text-sm"
-                  type="number"
-                  placeholder={
-                    match.isScoreSubmitted
-                      ? `${match.team2Score}` // Rettet til template literal
-                      : `Score for ${match.team2.join(" & ")}`
-                  }
-                  name="team2Score"
-                  disabled={match.isScoreSubmitted}
-                />
+                {/* Team 1 */}
+                <div className="flex items-center justify-end">
+                  <span className="mr-2 font-semibold">
+                    {match.team1.join(" & ")}
+                  </span>
+                  <input
+                    className="border-2 border-slate-500 p-1 w-20 sm:w-32 text-xs sm:text-sm"
+                    type="number"
+                    placeholder={
+                      match.isScoreSubmitted ? `${match.team1Score}` : `Score`
+                    }
+                    name="team1Score"
+                    disabled={match.isScoreSubmitted}
+                  />
+                </div>
+
+                {/* VS */}
+                <div className="text-center font-bold">VS</div>
+
+                {/* Team 2 */}
+                <div className="flex items-center justify-start mr-2">
+                  <input
+                    className="border-2 border-slate-500 p-1 w-20 sm:w-32 text-xs sm:text-sm"
+                    type="number"
+                    placeholder={
+                      match.isScoreSubmitted ? `${match.team2Score}` : `Score`
+                    }
+                    name="team2Score"
+                    disabled={match.isScoreSubmitted}
+                  />
+                  <span className="ml-2 font-semibold">
+                    {match.team2.join(" & ")}
+                  </span>
+                </div>
+
+                {/* Submit Button */}
                 {!match.isScoreSubmitted && (
-                  <Button type="submit">Submit</Button>
+                  <div className="col-span-3 flex justify-center mt-2">
+                    <Button type="submit">Submit</Button>
+                  </div>
                 )}
               </form>
             </div>
           ))}
+
           <Button
             type="button"
             className="mt-4 mx-auto block"
