@@ -218,7 +218,7 @@ export default function App() {
           {matches.map((match, index) => (
             <div key={index} className="mb-4">
               <form
-                className="grid grid-cols-[2fr_1fr_2fr] items-center gap-4 mt-2"
+                className="grid grid-cols-[4fr_1fr_4fr] items-center gap-4 mt-2"
                 onSubmit={(e) => {
                   e.preventDefault();
 
@@ -236,18 +236,17 @@ export default function App() {
                 }}
               >
                 {/* Team 1 */}
-                <div className="flex items-center justify-end">
-                  <span className="mr-2 font-semibold">
+                <div className="flex items-center gap-2 justify-end">
+                  <span className="font-semibold">
                     {match.team1.join(" & ")}
                   </span>
                   <input
-                    className="border-2 border-slate-500 p-1 w-20 sm:w-32 text-xs sm:text-sm"
+                    className="border-2 border-slate-500 p-1 w-16"
                     type="number"
-                    placeholder={
-                      match.isScoreSubmitted ? `${match.team1Score}` : `Score`
-                    }
+                    placeholder="Score"
                     name="team1Score"
                     disabled={match.isScoreSubmitted}
+                    required={true}
                   />
                 </div>
 
@@ -255,17 +254,16 @@ export default function App() {
                 <div className="text-center font-bold">VS</div>
 
                 {/* Team 2 */}
-                <div className="flex items-center justify-start mr-2">
+                <div className="flex items-center gap-2 justify-start">
                   <input
-                    className="border-2 border-slate-500 p-1 w-20 sm:w-32 text-xs sm:text-sm"
+                    className="border-2 border-slate-500 p-1 w-16"
                     type="number"
-                    placeholder={
-                      match.isScoreSubmitted ? `${match.team2Score}` : `Score`
-                    }
+                    placeholder="Score"
                     name="team2Score"
                     disabled={match.isScoreSubmitted}
+                    required={true}
                   />
-                  <span className="ml-2 font-semibold">
+                  <span className="font-semibold">
                     {match.team2.join(" & ")}
                   </span>
                 </div>
