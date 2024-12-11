@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import { useForm, SubmitHandler } from "react-hook-form";
 import { Button } from "./ui/button";
+import VSLogo from "./VSLogo";
 
 // Define the types for the form data
 interface FormData {
@@ -161,8 +162,12 @@ export default function App() {
             className="border-2 border-slate-500 p-1"
             type="text"
             placeholder="Enter Tournament Name"
+            defaultValue="Mock Tournament" // Default værdi
             {...register("tournamentName", { required: true })}
+            autoFocus
+            onFocus={(e) => e.target.select()} // Marker hele teksten når feltet får fokus
           />
+
           <Button type="submit">Set Tournament Name</Button>
         </form>
       )}
@@ -173,22 +178,31 @@ export default function App() {
 
       {/* Sektion for antal spillere */}
       {isTournamentNameSet && numberOfPlayers === 0 && (
-        <form
-          className="flex justify-center gap-2 mt-8"
-          onSubmit={handleSubmit(onNumberSubmit)}
-        >
-          <input
-            className="border-2 border-slate-500 p-1"
-            type="number"
-            placeholder="Number of players"
-            {...register("Number of players", {
-              required: true,
-              min: 4,
-              max: 999, // Rettet fra maxLength til max
-            })}
-          />
-          <Button type="submit">Confirm</Button>
-        </form>
+        <div>
+          <h2 className="flex justify-center mt-4 font-semibold">
+            Number of players
+          </h2>
+          <form
+            className="flex justify-center gap-2 mt-2"
+            onSubmit={handleSubmit(onNumberSubmit)}
+          >
+            <input
+              className="border-2 border-slate-500 p-1"
+              type="number"
+              placeholder="Number of players"
+              defaultValue={8} // Default værdi
+              {...register("Number of players", {
+                required: true,
+                min: 4,
+                max: 999,
+              })}
+              autoFocus
+              onFocus={(e) => e.target.select()} // Marker hele teksten når feltet får fokus
+            />
+
+            <Button type="submit">Confirm</Button>
+          </form>
+        </div>
       )}
 
       {/* Sektion for spillernavne */}
@@ -199,11 +213,14 @@ export default function App() {
               <input
                 className="border-2 border-slate-500 p-1"
                 type="text"
-                placeholder={`Player ${index + 1} Name`} // Rettet interpoleringen
-                {...register(`playerName${index}`, { required: true })} // Rettet til template literal
+                placeholder={`Player ${index + 1} Name`}
+                defaultValue={`Player ${index + 1}`} // Default værdi
+                {...register(`playerName${index}`, { required: true })}
+                onFocus={(e) => e.target.select()} // Marker hele teksten når feltet får fokus
               />
             </div>
           ))}
+
           <Button className="mx-auto block" onClick={onNameSubmit}>
             Generate Matches
           </Button>
@@ -212,17 +229,16 @@ export default function App() {
 
       {matches.length > 0 && (
         <div className="mt-8">
-          <h2 className="text-center text-lg font-bold">
+          <h2 className="text-center text-lg font-bold mb-20">
             Round {round} Matches:
           </h2>
           {matches.map((match, index) => (
-            <div key={index} className="mb-4">
+            <div key={index} className="mb-20">
               <form
-                className="grid grid-cols-[4fr_1fr_4fr] items-center gap-4 mt-2"
+                className="grid grid-cols-[2fr_1fr_2fr] items-center gap-4 mt-2"
+                onFocus={(e) => e.target.select()}
                 onSubmit={(e) => {
                   e.preventDefault();
-
-                  // Cast e.target to the correct type
                   const form = e.target as HTMLFormElement & {
                     team1Score: HTMLInputElement;
                     team2Score: HTMLInputElement;
@@ -235,52 +251,91 @@ export default function App() {
                   form.reset();
                 }}
               >
-                {/* Team 1 */}
-                <div className="flex items-center gap-2 justify-end">
-                  <span className="font-semibold">
-                    {match.team1.join(" & ")}
-                  </span>
+                {/* Team 1 + Score (First Column) */}
+                <div>
+                  <div className="flex justify-end">
+                    <span className="font-semibold text-lg">
+                      {match.team1.join(" & ")}
+                    </span>
+                  </div>
+                </div>
+
+                {/* VS Component (Second Column) */}
+                <div className="relative flex justify-center items-center">
+                  {/* Input Field positioned over VSLogo */}
                   <input
-                    className="border-2 border-slate-500 p-1 w-16"
+                    className="absolute top-[-55px] left-[-55px] border-4 border-blue-500 text-2xl font-mono p-3 w-20 text-center bg-transparent rounded-lg shadow-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                     type="number"
                     placeholder="Score"
                     name="team1Score"
+                    defaultValue={match.team1Score}
                     disabled={match.isScoreSubmitted}
                     required={true}
                   />
-                </div>
-
-                {/* VS */}
-                <div className="text-center font-bold">VS</div>
-
-                {/* Team 2 */}
-                <div className="flex items-center gap-2 justify-start">
+                  {/* VSLogo */}
+                  <VSLogo />
                   <input
-                    className="border-2 border-slate-500 p-1 w-16"
+                    className="absolute top-[-55px] right-[-55px] border-4 border-red-500 text-2xl font-mono p-3 w-20 text-center bg-transparent rounded-lg shadow-md focus:outline-none focus:ring-2 focus:ring-red-500"
                     type="number"
                     placeholder="Score"
                     name="team2Score"
+                    defaultValue={match.team2Score}
                     disabled={match.isScoreSubmitted}
                     required={true}
                   />
-                  <span className="font-semibold">
-                    {match.team2.join(" & ")}
-                  </span>
                 </div>
 
-                {/* Submit Button */}
-                {!match.isScoreSubmitted && (
-                  <div className="col-span-3 flex justify-center mt-2">
-                    <Button type="submit">Submit</Button>
+                {/* Team 2 + Score (Third Column) */}
+                <div className="flex justify-start items-center">
+                  <div>
+                    <span className="font-semibold text-lg">
+                      {match.team2.join(" & ")}
+                    </span>
                   </div>
-                )}
+                </div>
+
+                {/* Action buttons */}
+                <div className="col-span-3 flex justify-center mt-2">
+                  {match.isScoreSubmitted ? (
+                    <Button
+                      type="button"
+                      onClick={(e) => {
+                        e.preventDefault(); // Prevent default form submission
+                        // Reset scores and allow editing again
+                        const updatedScores = { ...scores };
+                        match.team1.forEach((player) => {
+                          updatedScores[player] -= match.team1Score;
+                        });
+                        match.team2.forEach((player) => {
+                          updatedScores[player] -= match.team2Score;
+                        });
+
+                        setScores(updatedScores);
+
+                        const updatedMatches = [...matches];
+                        updatedMatches[index].isScoreSubmitted = false;
+                        updatedMatches[index].team1Score = 0;
+                        updatedMatches[index].team2Score = 0;
+                        setMatches(updatedMatches);
+                      }}
+                    >
+                      Edit Score
+                    </Button>
+                  ) : (
+                    <Button type="submit">Submit</Button>
+                  )}
+                </div>
               </form>
             </div>
           ))}
 
           <Button
             type="button"
-            className="mt-4 mx-auto block"
+            className={`mt-4 mx-auto block ${
+              isNextRoundDisabled
+                ? "bg-gray-500 cursor-not-allowed"
+                : "bg-green-500"
+            }`}
             onClick={nextRound}
             disabled={isNextRoundDisabled}
           >
