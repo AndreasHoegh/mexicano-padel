@@ -266,7 +266,7 @@ export default function App() {
                 <div className="relative flex justify-center items-center">
                   {/* Input Field positioned over VSLogo */}
                   <input
-                    className={`absolute top-[-35px] left-[-1px] border-4 border-blue-500 text-xl font-mono p-2 w-12 text-center bg-transparent rounded-lg shadow-md focus:outline-none focus:ring-2 focus:ring-red-500 ${
+                    className={`absolute top-[-35px] left-[-1px] border-4 border-blue-500 text-xl font-mono p-2 w-14 text-center bg-transparent rounded-lg shadow-md focus:outline-none focus:ring-2 focus:ring-red-500 ${
                       match.isScoreSubmitted ? "bg-gray-300" : ""
                     }`}
                     type="number"
@@ -289,7 +289,7 @@ export default function App() {
                   {/* VSLogo */}
                   <VSLogo />
                   <input
-                    className={`absolute top-[-35px] right-[-1px] border-4 border-red-500 text-xl font-mono p-2 w-12 text-center bg-transparent rounded-lg shadow-md focus:outline-none focus:ring-2 focus:ring-red-500 ${
+                    className={`absolute top-[-35px] right-[-1px] border-4 border-red-500 text-xl font-mono p-2 w-14 text-center bg-transparent rounded-lg shadow-md focus:outline-none focus:ring-2 focus:ring-red-500 ${
                       match.isScoreSubmitted ? "bg-gray-300" : ""
                     }`}
                     type="number"
