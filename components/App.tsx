@@ -238,7 +238,7 @@ export default function App() {
           {matches.map((match, index) => (
             <div key={index} className="mb-12">
               <form
-                className="grid grid-cols-[2fr_1fr_2fr] items-center gap-4 mt-2"
+                className="grid grid-cols-[2fr_minmax(160px,_1fr)_2fr] items-center gap-4 mt-2"
                 onFocus={(e) => e.target.select()}
                 onSubmit={(e) => {
                   e.preventDefault();
