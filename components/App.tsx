@@ -110,11 +110,7 @@ export default function App() {
     return shuffledPlayers;
   };
 
-  const handleScoreSubmit = (
-    index: number,
-    team1Score: string,
-    team2Score: string
-  ) => {
+  const handleScoreSubmit = (index: number, team1Score: string) => {
     if (matches[index].isScoreSubmitted) {
       alert("Score for this match has already been submitted.");
       return;
@@ -252,9 +248,8 @@ export default function App() {
                   };
 
                   const team1Score = form.team1Score.value;
-                  const team2Score = form.team2Score.value;
 
-                  handleScoreSubmit(index, team1Score, team2Score);
+                  handleScoreSubmit(index, team1Score);
                   form.reset();
                 }}
               >
