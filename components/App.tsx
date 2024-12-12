@@ -119,12 +119,19 @@ export default function App() {
       alert("Score for this match has already been submitted.");
       return;
     }
+
     const updatedMatches = [...matches];
-    updatedMatches[index].team1Score = parseInt(team1Score, 10) || 0;
-    updatedMatches[index].team2Score = parseInt(team2Score, 10) || 0;
+    const team1ScoreInt = parseInt(team1Score, 10) || 0;
+
+    // Calculate the team2 score so that the total equals 21
+    const team2ScoreInt = 21 - team1ScoreInt;
+
+    updatedMatches[index].team1Score = team1ScoreInt;
+    updatedMatches[index].team2Score = team2ScoreInt;
     updatedMatches[index].isScoreSubmitted = true;
     setMatches(updatedMatches);
 
+    // Update player scores
     const updatedScores = { ...scores };
     updatedMatches[index].team1.forEach((player) => {
       updatedScores[player] += updatedMatches[index].team1Score;
@@ -233,7 +240,7 @@ export default function App() {
             Round {round} Matches:
           </h2>
           {matches.map((match, index) => (
-            <div key={index} className="mb-20">
+            <div key={index} className="mb-12">
               <form
                 className="grid grid-cols-[2fr_1fr_2fr] items-center gap-4 mt-2"
                 onFocus={(e) => e.target.select()}
@@ -264,24 +271,47 @@ export default function App() {
                 <div className="relative flex justify-center items-center">
                   {/* Input Field positioned over VSLogo */}
                   <input
-                    className="absolute top-[-55px] left-[-55px] border-4 border-blue-500 text-2xl font-mono p-3 w-20 text-center bg-transparent rounded-lg shadow-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    className={`absolute top-[-35px] left-[-1px] border-4 border-blue-500 text-xl font-mono p-2 w-12 text-center bg-transparent rounded-lg shadow-md focus:outline-none focus:ring-2 focus:ring-red-500 ${
+                      match.isScoreSubmitted ? "bg-gray-300" : ""
+                    }`}
                     type="number"
                     placeholder="Score"
                     name="team1Score"
-                    defaultValue={match.team1Score}
+                    value={match.team1Score || 0} // Use team1Score directly
                     disabled={match.isScoreSubmitted}
                     required={true}
+                    min="0"
+                    onChange={(e) => {
+                      const updatedMatches = [...matches];
+                      updatedMatches[index].team1Score =
+                        parseInt(e.target.value, 10) || 0;
+                      updatedMatches[index].team2Score =
+                        21 - updatedMatches[index].team1Score;
+                      setMatches(updatedMatches);
+                    }}
                   />
+
                   {/* VSLogo */}
                   <VSLogo />
                   <input
-                    className="absolute top-[-55px] right-[-55px] border-4 border-red-500 text-2xl font-mono p-3 w-20 text-center bg-transparent rounded-lg shadow-md focus:outline-none focus:ring-2 focus:ring-red-500"
+                    className={`absolute top-[-35px] right-[-1px] border-4 border-red-500 text-xl font-mono p-2 w-12 text-center bg-transparent rounded-lg shadow-md focus:outline-none focus:ring-2 focus:ring-red-500 ${
+                      match.isScoreSubmitted ? "bg-gray-300" : ""
+                    }`}
                     type="number"
                     placeholder="Score"
                     name="team2Score"
-                    defaultValue={match.team2Score}
+                    value={match.team2Score || 0} // Use team2Score directly
                     disabled={match.isScoreSubmitted}
                     required={true}
+                    min="0"
+                    onChange={(e) => {
+                      const updatedMatches = [...matches];
+                      updatedMatches[index].team2Score =
+                        parseInt(e.target.value, 10) || 0;
+                      updatedMatches[index].team1Score =
+                        21 - updatedMatches[index].team2Score;
+                      setMatches(updatedMatches);
+                    }}
                   />
                 </div>
 
