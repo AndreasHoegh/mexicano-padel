@@ -239,7 +239,7 @@ export default function App() {
             <div key={index} className="mb-12">
               <form
                 className="grid grid-cols-[2fr_minmax(160px,_1fr)_2fr] items-center gap-4 mt-2"
-                onFocus={(e) => e.target.select()}
+                //onFocus={(e) => e.target.select()}
                 onSubmit={(e) => {
                   e.preventDefault();
                   const form = e.target as HTMLFormElement & {
@@ -284,6 +284,7 @@ export default function App() {
                         21 - updatedMatches[index].team1Score;
                       setMatches(updatedMatches);
                     }}
+                    onFocus={(e) => e.target.select()}
                   />
 
                   {/* VSLogo */}
@@ -307,6 +308,7 @@ export default function App() {
                         21 - updatedMatches[index].team2Score;
                       setMatches(updatedMatches);
                     }}
+                    onFocus={(e) => e.target.select()}
                   />
                 </div>
 
