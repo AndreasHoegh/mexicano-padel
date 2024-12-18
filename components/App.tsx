@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { useForm, SubmitHandler } from "react-hook-form";
 import { Button } from "./ui/button";
 import VSLogo from "./VSLogo";
@@ -33,20 +33,6 @@ export default function App() {
   const [arePlayerNamesSet, setArePlayerNamesSet] = useState<boolean>(false); // Flag for player names
 
   const { register, handleSubmit, getValues } = useForm<FormData>();
-
-  useEffect(() => {
-    // Check if there is saved tournament data in localStorage when the component mounts
-    const savedTournament = localStorage.getItem("tournamentData");
-    if (savedTournament) {
-      const parsedTournament = JSON.parse(savedTournament);
-      setTournamentName(parsedTournament.tournamentName);
-      setNumberOfPlayers(parsedTournament.numberOfPlayers);
-      setNames(parsedTournament.names);
-      setMatches(parsedTournament.matches);
-      setScores(parsedTournament.scores);
-      setRound(parsedTournament.round);
-    }
-  }, []);
 
   const onNumberSubmit: SubmitHandler<FormData> = (data) => {
     const players = parseInt(data["Number of players"], 10);
@@ -148,9 +134,40 @@ export default function App() {
 
   const isNextRoundDisabled = matches.some((match) => !match.isScoreSubmitted);
 
-  const handleTournamentNameSubmit: SubmitHandler<FormData> = (data) => {
-    setTournamentName(data.tournamentName);
+  const handleTournamentNameSubmit: SubmitHandler<FormData> = async (data) => {
+    const tournamentName = data.tournamentName;
+    setTournamentName(tournamentName);
     setIsTournamentNameSet(true);
+    setNames([]); // Initialize names array
+
+    const backendUrl = "https://localhost:7094/api/Tournaments";
+
+    try {
+      const response = await fetch(backendUrl, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Accept: "application/json",
+        },
+        credentials: "include",
+        body: JSON.stringify({
+          name: tournamentName,
+          numberOfPlayers: numberOfPlayers || 0,
+          currentRound: 1,
+          players: [],
+          matches: [],
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! Status: ${response.status}`);
+      }
+
+      const result = await response.json();
+      console.log("Tournament saved:", result);
+    } catch (error) {
+      console.error("Error sending tournament name:", error);
+    }
   };
 
   return (
@@ -165,10 +182,10 @@ export default function App() {
             className="border-2 border-slate-500 p-1"
             type="text"
             placeholder="Enter Tournament Name"
-            defaultValue="Mock Tournament" // Default værdi
+            defaultValue="Mock Tournament"
             {...register("tournamentName", { required: true })}
             autoFocus
-            onFocus={(e) => e.target.select()} // Marker hele teksten når feltet får fokus
+            onFocus={(e) => e.target.select()}
           />
 
           <Button type="submit">Set Tournament Name</Button>
@@ -193,14 +210,14 @@ export default function App() {
               className="border-2 border-slate-500 p-1"
               type="number"
               placeholder="Number of players"
-              defaultValue={8} // Default værdi
+              defaultValue={8}
               {...register("Number of players", {
                 required: true,
                 min: 4,
                 max: 999,
               })}
               autoFocus
-              onFocus={(e) => e.target.select()} // Marker hele teksten når feltet får fokus
+              onFocus={(e) => e.target.select()}
             />
 
             <Button type="submit">Confirm</Button>
@@ -217,9 +234,9 @@ export default function App() {
                 className="border-2 border-slate-500 p-1"
                 type="text"
                 placeholder={`Player ${index + 1} Name`}
-                defaultValue={`Player ${index + 1}`} // Default værdi
+                defaultValue={`Player ${index + 1}`}
                 {...register(`playerName${index}`, { required: true })}
-                onFocus={(e) => e.target.select()} // Marker hele teksten når feltet får fokus
+                onFocus={(e) => e.target.select()}
               />
             </div>
           ))}
@@ -239,7 +256,6 @@ export default function App() {
             <div key={index} className="mb-12">
               <form
                 className="grid grid-cols-[2fr_minmax(160px,_1fr)_2fr] items-center gap-4 mt-2"
-                //onFocus={(e) => e.target.select()}
                 onSubmit={(e) => {
                   e.preventDefault();
                   const form = e.target as HTMLFormElement & {
@@ -253,7 +269,7 @@ export default function App() {
                   form.reset();
                 }}
               >
-                {/* Team 1 + Score (First Column) */}
+                {/* Team 1 + Score */}
                 <div>
                   <div className="flex justify-end">
                     <span className="font-semibold text-lg">
@@ -262,9 +278,8 @@ export default function App() {
                   </div>
                 </div>
 
-                {/* VS Component (Second Column) */}
+                {/* VS Component */}
                 <div className="relative flex justify-center items-center">
-                  {/* Input Field positioned over VSLogo */}
                   <input
                     className={`absolute top-[-35px] left-[-1px] border-4 border-blue-500 text-xl font-mono p-2 w-14 text-center bg-transparent rounded-lg shadow-md focus:outline-none focus:ring-2 focus:ring-red-500 ${
                       match.isScoreSubmitted ? "bg-gray-300" : ""
@@ -272,7 +287,7 @@ export default function App() {
                     type="number"
                     placeholder="Score"
                     name="team1Score"
-                    value={match.team1Score || 0} // Use team1Score directly
+                    value={match.team1Score || 0}
                     disabled={match.isScoreSubmitted}
                     required={true}
                     min="0"
@@ -287,7 +302,6 @@ export default function App() {
                     onFocus={(e) => e.target.select()}
                   />
 
-                  {/* VSLogo */}
                   <VSLogo />
                   <input
                     className={`absolute top-[-35px] right-[-1px] border-4 border-red-500 text-xl font-mono p-2 w-14 text-center bg-transparent rounded-lg shadow-md focus:outline-none focus:ring-2 focus:ring-red-500 ${
@@ -296,7 +310,7 @@ export default function App() {
                     type="number"
                     placeholder="Score"
                     name="team2Score"
-                    value={match.team2Score || 0} // Use team2Score directly
+                    value={match.team2Score || 0}
                     disabled={match.isScoreSubmitted}
                     required={true}
                     min="0"
@@ -312,7 +326,7 @@ export default function App() {
                   />
                 </div>
 
-                {/* Team 2 + Score (Third Column) */}
+                {/* Team 2 + Score */}
                 <div className="flex justify-start items-center">
                   <div>
                     <span className="font-semibold text-lg">
@@ -327,8 +341,7 @@ export default function App() {
                     <Button
                       type="button"
                       onClick={(e) => {
-                        e.preventDefault(); // Prevent default form submission
-                        // Reset scores and allow editing again
+                        e.preventDefault();
                         const updatedScores = { ...scores };
                         match.team1.forEach((player) => {
                           updatedScores[player] -= match.team1Score;
