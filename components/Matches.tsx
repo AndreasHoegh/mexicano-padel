@@ -97,6 +97,22 @@ export default function Matches({
     [matches, onUpdateMatches, onUpdateScores, scores, editingScores]
   );
 
+  const isScoreValid = useCallback(
+    (index: number) => {
+      const team1Score = editingScores[index]?.team1;
+      const team2Score = editingScores[index]?.team2;
+
+      return (
+        team1Score !== undefined &&
+        team2Score !== undefined &&
+        team1Score + team2Score === 21 &&
+        team1Score > 0 &&
+        team2Score > 0
+      );
+    },
+    [editingScores]
+  );
+
   return (
     <div className="mt-8">
       <h2 className="text-center text-lg font-bold mb-8">
@@ -142,6 +158,7 @@ export default function Matches({
                       value={editingScores[index]?.team1 ?? match.team1Score}
                       min="0"
                       max="21"
+                      onFocus={(e) => e.target.select()}
                       onChange={(e) =>
                         handleScoreChange(
                           index,
@@ -169,6 +186,7 @@ export default function Matches({
                       value={editingScores[index]?.team2 ?? match.team2Score}
                       min="0"
                       max="21"
+                      onFocus={(e) => e.target.select()}
                       onChange={(e) =>
                         handleScoreChange(
                           index,
@@ -222,7 +240,15 @@ export default function Matches({
                   Edit Score
                 </Button>
               ) : (
-                <Button type="submit" className="bg-green-500 text-white">
+                <Button
+                  type="submit"
+                  className={`${
+                    isScoreValid(index)
+                      ? "bg-green-500 text-white"
+                      : "bg-gray-400 text-gray-600 cursor-not-allowed"
+                  }`}
+                  disabled={!isScoreValid(index)}
+                >
                   Submit Score
                 </Button>
               )}
