@@ -137,7 +137,16 @@ export default function Matches({
               {/* Team 1 */}
               <div className="flex-1 text-right">
                 <h3 className="font-semibold text-lg">
-                  {match.team1.join(" & ")}
+                  {match.team1.map((name, i) => (
+                    <span key={i}>
+                      {name}
+                      {i < match.team1.length - 1 && (
+                        <>
+                          <br />&<br />
+                        </>
+                      )}
+                    </span>
+                  ))}
                 </h3>
               </div>
 
@@ -203,7 +212,16 @@ export default function Matches({
               {/* Team 2 */}
               <div className="flex-1 text-left">
                 <h3 className="font-semibold text-lg">
-                  {match.team2.join(" & ")}
+                  {match.team2.map((name, i) => (
+                    <span key={i}>
+                      {name}
+                      {i < match.team2.length - 1 && (
+                        <>
+                          <br />&<br />
+                        </>
+                      )}
+                    </span>
+                  ))}
                 </h3>
               </div>
             </div>
