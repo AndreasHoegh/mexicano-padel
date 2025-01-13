@@ -99,89 +99,112 @@ export default function Matches({
 
   return (
     <div className="mt-8">
-      <h2 className="text-center text-lg font-bold mb-20">
+      <h2 className="text-center text-lg font-bold mb-8">
         Round {round} Matches:
       </h2>
       {matches.map((match, index) => (
-        <div key={index} className="mb-12">
+        <div
+          key={index}
+          className={`rounded-lg p-6 shadow-md ${
+            match.isScoreSubmitted ? "bg-gray-100" : "bg-blue-50"
+          } mb-6`}
+        >
           <form
-            className="grid grid-cols-[2fr_minmax(160px,_1fr)_2fr] items-center gap-4 mt-2"
+            className="flex flex-col items-center gap-4"
             onSubmit={(e) => {
               e.preventDefault();
               handleScoreSubmit(index);
             }}
           >
-            <div className="flex justify-end">
-              <span className="font-semibold text-lg">
-                {match.team1.join(" & ")}
-              </span>
+            {/* Teams Section */}
+            <div className="flex items-center gap-8 w-full">
+              {/* Team 1 */}
+              <div className="flex-1 text-right">
+                <h3 className="font-semibold text-lg">
+                  {match.team1.join(" & ")}
+                </h3>
+              </div>
+
+              {/* VS Logo and Scores */}
+              <div className="flex flex-col items-center">
+                <VSLogo />
+                <div className="mt-2 flex gap-4">
+                  {/* Team 1 Score */}
+                  {match.isScoreSubmitted ? (
+                    <span className="w-16 text-center text-xl font-bold text-gray-500">
+                      {match.team1Score}
+                    </span>
+                  ) : (
+                    <input
+                      className="w-16 text-center rounded-lg border border-gray-300 bg-white text-xl"
+                      type="number"
+                      placeholder="0"
+                      value={editingScores[index]?.team1 ?? match.team1Score}
+                      min="0"
+                      max="21"
+                      onChange={(e) =>
+                        handleScoreChange(
+                          index,
+                          "team1",
+                          parseInt(e.target.value, 10) || 0
+                        )
+                      }
+                      disabled={match.isScoreSubmitted}
+                    />
+                  )}
+
+                  {/* Separator */}
+                  <span className="text-lg">-</span>
+
+                  {/* Team 2 Score */}
+                  {match.isScoreSubmitted ? (
+                    <span className="w-16 text-center text-xl font-bold text-gray-500">
+                      {match.team2Score}
+                    </span>
+                  ) : (
+                    <input
+                      className="w-16 text-center rounded-lg border border-gray-300 bg-white text-xl"
+                      type="number"
+                      placeholder="0"
+                      value={editingScores[index]?.team2 ?? match.team2Score}
+                      min="0"
+                      max="21"
+                      onChange={(e) =>
+                        handleScoreChange(
+                          index,
+                          "team2",
+                          parseInt(e.target.value, 10) || 0
+                        )
+                      }
+                      disabled={match.isScoreSubmitted}
+                    />
+                  )}
+                </div>
+              </div>
+
+              {/* Team 2 */}
+              <div className="flex-1 text-left">
+                <h3 className="font-semibold text-lg">
+                  {match.team2.join(" & ")}
+                </h3>
+              </div>
             </div>
 
-            <div className="relative flex justify-center items-center">
-              <input
-                className="text-white absolute top-[-35px] left-[-1px] border-2 h-14 border-gray-300 text-xl font-mono p-2 w-12 text-center bg-black rounded-lg shadow-md focus:outline-none focus:ring-2 hide-spinner"
-                type="number"
-                placeholder="Score"
-                name="team1Score"
-                value={editingScores[index]?.team1 ?? match.team1Score}
-                disabled={match.isScoreSubmitted}
-                required
-                min="0"
-                max="21"
-                onChange={(e) =>
-                  handleScoreChange(
-                    index,
-                    "team1",
-                    parseInt(e.target.value, 10) || 0
-                  )
-                }
-                onFocus={(e) => e.target.select()}
-              />
-              <VSLogo />
-              <input
-                className="text-white bg-black absolute top-[-35px] right-[-1px] border-2 h-14 border-gray-300 text-xl font-mono p-2 w-12 text-center rounded-lg shadow-md focus:outline-none focus:ring-2 hide-spinner"
-                type="number"
-                placeholder="Score"
-                name="team2Score"
-                value={editingScores[index]?.team2 ?? match.team2Score}
-                disabled={match.isScoreSubmitted}
-                required
-                min="0"
-                max="21"
-                onChange={(e) =>
-                  handleScoreChange(
-                    index,
-                    "team2",
-                    parseInt(e.target.value, 10) || 0
-                  )
-                }
-                onFocus={(e) => e.target.select()}
-              />
-            </div>
-
-            <div className="flex justify-start items-center">
-              <span className="font-semibold text-lg">
-                {match.team2.join(" & ")}
-              </span>
-            </div>
-
-            <div className="col-span-3 flex justify-center mt-2">
+            {/* Action Buttons */}
+            <div className="mt-4">
               {match.isScoreSubmitted ? (
                 <Button
                   type="button"
+                  className="bg-yellow-500 text-white"
                   onClick={(e) => {
                     e.preventDefault();
-
-                    // Create updated scores by subtracting the submitted scores
                     const updatedScores = { ...scores };
-                    match.team1.forEach((player) => {
-                      updatedScores[player] -= match.team1Score;
-                    });
-                    match.team2.forEach((player) => {
-                      updatedScores[player] -= match.team2Score;
-                    });
-
-                    // Create updated matches with score submission undone
+                    match.team1.forEach(
+                      (player) => (updatedScores[player] -= match.team1Score)
+                    );
+                    match.team2.forEach(
+                      (player) => (updatedScores[player] -= match.team2Score)
+                    );
                     const updatedMatches = matches.map((m, i) =>
                       i === index
                         ? {
@@ -192,8 +215,6 @@ export default function Matches({
                           }
                         : m
                     );
-
-                    // Call the update callbacks to update the state in App.tsx
                     onUpdateScores(updatedScores);
                     onUpdateMatches(updatedMatches);
                   }}
@@ -201,20 +222,21 @@ export default function Matches({
                   Edit Score
                 </Button>
               ) : (
-                <Button type="submit">Submit Score</Button>
+                <Button type="submit" className="bg-green-500 text-white">
+                  Submit Score
+                </Button>
               )}
             </div>
           </form>
         </div>
       ))}
 
+      {/* Next Round Button */}
       <Button
         type="button"
-        className={`mt-4 mx-auto block ${
-          isNextRoundDisabled
-            ? "bg-gray-500 cursor-not-allowed"
-            : "bg-green-500"
-        }`}
+        className={`mt-4 w-full ${
+          isNextRoundDisabled ? "bg-gray-500" : "bg-green-500"
+        } text-white`}
         onClick={onNextRound}
         disabled={isNextRoundDisabled}
       >
