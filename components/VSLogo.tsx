@@ -3,7 +3,7 @@ import { motion } from "framer-motion";
 export default function VSLogo() {
   return (
     <motion.div
-      className="flex justify-center items-center text-white bg-gradient-to-r from-blue-500 to-red-500 rounded-full w-16 h-16 shadow-lg"
+      className="flex justify-center items-center text-white"
       initial={{ scale: 0 }}
       animate={{ scale: 1 }}
       transition={{ type: "spring", stiffness: 200, damping: 10 }}

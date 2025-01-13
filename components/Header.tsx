@@ -2,9 +2,9 @@ import React from "react";
 
 function Header() {
   return (
-    <div className=" bg-orange-400">
-      <h1 className="mt-4 flex justify-center">Padel</h1>
-      <h1 className="font-bold flex justify-center">Mexicano</h1>
+    <div className="flex flex-col items-center text-white">
+      <h1 className="pt-4 text-6xl">Padel</h1>
+      <h1 className="text-4xl">Mexicano</h1>
     </div>
   );
 }
