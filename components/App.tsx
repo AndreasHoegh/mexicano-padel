@@ -114,7 +114,7 @@ export default function App() {
   );
 
   return (
-    <div className="m-4">
+    <div className="m-4 w-80 sm:w-auto mx-auto">
       {!isTournamentNameSet && (
         <TournamentNameForm onSubmit={handleTournamentNameSubmit} />
       )}
@@ -146,7 +146,7 @@ export default function App() {
       )}
 
       {matches.length > 0 && (
-        <div className="flex flex-col items-center relative">
+        <div className="flex flex-col items-center relative ">
           <Matches
             matches={matches}
             scores={scores}

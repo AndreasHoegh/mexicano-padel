@@ -232,16 +232,18 @@ export default function Matches({
       ))}
 
       {/* Next Round Button */}
-      <Button
-        type="button"
-        className={`mt-4 w-full ${
-          isNextRoundDisabled ? "bg-gray-500" : "bg-green-500"
-        } text-white`}
-        onClick={onNextRound}
-        disabled={isNextRoundDisabled}
-      >
-        Next Round
-      </Button>
+      <div className="flex justify-center w-full">
+        <Button
+          type="button"
+          className={`mt-4 ${
+            isNextRoundDisabled ? "bg-gray-500" : "bg-green-500"
+          } text-white`}
+          onClick={onNextRound}
+          disabled={isNextRoundDisabled}
+        >
+          Next Round
+        </Button>
+      </div>
     </div>
   );
 }
