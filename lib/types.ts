@@ -4,7 +4,14 @@ export interface FormData {
   [key: string]: string;
 }
 
+export interface Court {
+  id: number;
+  name: string;
+}
+
 export interface TournamentSettings {
   playerNames: string[];
   pointsPerMatch: number;
+  maxRounds: number | null;
+  courts: Court[];
 }

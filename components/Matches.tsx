@@ -26,6 +26,11 @@ interface EditingScores {
   };
 }
 
+interface Court {
+  id: number;
+  name: string;
+}
+
 interface MatchesProps {
   matches: Match[];
   scores: { [key: string]: number };
@@ -34,6 +39,8 @@ interface MatchesProps {
   round: number;
   onNextRound: () => void;
   pointsPerMatch: number;
+  isLastRound: boolean;
+  courts: Court[];
 }
 
 export default function Matches({
@@ -44,6 +51,8 @@ export default function Matches({
   round,
   onNextRound,
   pointsPerMatch,
+  isLastRound,
+  courts,
 }: MatchesProps) {
   const [editingScores, setEditingScores] = useState<EditingScores>({});
   const [openPopovers, setOpenPopovers] = useState<{ [key: string]: boolean }>(
@@ -152,7 +161,9 @@ export default function Matches({
         <CardHeader className="text-center">
           <CardTitle className="bg-transparent text-3xl rounded-lg font-extrabold text-gray-800 flex items-center justify-center gap-2">
             <Image src={padelIcon} alt="Padel Icon" width={32} height={32} />
-            <span className="px-4 py-2">Round {round} Matches</span>
+            <span className="px-4 py-2">
+              {isLastRound ? "Final Round" : `Round ${round}`}
+            </span>
           </CardTitle>
         </CardHeader>
         <CardContent className="space-y-6">
@@ -160,6 +171,9 @@ export default function Matches({
             <Card key={index} className="bg-slate-100">
               <CardContent className="p-6">
                 <div className="space-y-4">
+                  <div className="text-center font-semibold text-gray-600">
+                    {courts[index % courts.length]?.name || "Court 1"}
+                  </div>
                   <div className="flex flex-col sm:flex-row items-center gap-4 sm:gap-8 w-full">
                     <div className="w-full sm:flex-1 text-center">
                       <h3 className="font-semibold text-lg text-red-700">
