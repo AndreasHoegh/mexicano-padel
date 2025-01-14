@@ -74,6 +74,15 @@ export default function App() {
     [scores]
   );
 
+  useEffect(() => {
+    if (round > 1) {
+      const sortedPlayers = Object.keys(scores).sort(
+        (a, b) => scores[b] - scores[a]
+      );
+      generateMatches(sortedPlayers);
+    }
+  }, [scores, round, generateMatches]);
+
   const shuffle = (players: string[]): string[] => {
     const shuffledPlayers = [...players];
     for (let i = shuffledPlayers.length - 1; i > 0; i--) {
