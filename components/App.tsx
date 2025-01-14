@@ -10,6 +10,7 @@ import PlayerNamesForm from "./PlayerNamesForm";
 import Matches from "./Matches";
 import { Button } from "./ui/button";
 import Modal from "./Modal";
+import { Trophy } from "lucide-react";
 
 interface Match {
   team1: string[];
@@ -114,13 +115,15 @@ export default function App() {
   );
 
   return (
-    <div className="m-4 sm:w-auto mx-auto">
+    <div className="max-w-md mx-auto px-4 py-8 sm:px-6 md:max-w-2xl lg:max-w-4xl xl:max-w-6xl">
       {!isTournamentNameSet && (
         <TournamentNameForm onSubmit={handleTournamentNameSubmit} />
       )}
 
       {isTournamentNameSet && (
-        <h1 className="text-center text-2xl">{tournamentName}</h1>
+        <h1 className="text-center text-2xl font-bold mb-6">
+          {tournamentName}
+        </h1>
       )}
 
       {isTournamentNameSet && numberOfPlayers === 0 && (
@@ -146,7 +149,7 @@ export default function App() {
       )}
 
       {matches.length > 0 && (
-        <div className="flex flex-col items-center relative ">
+        <div className="flex flex-col items-center relative">
           <Matches
             matches={matches}
             scores={scores}
@@ -157,9 +160,9 @@ export default function App() {
           />
           <Button
             onClick={openModal}
-            className="bg-blue-600 text-white p-2 mt-4"
+            className="bg-yellow-600 text-white p-2 mt-4"
           >
-            View Scoreboard
+            View Scoreboard <Trophy className="ml-4" />
           </Button>
 
           <Modal isOpen={isModalOpen} onClose={closeModal} scores={scores} />

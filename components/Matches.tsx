@@ -1,8 +1,11 @@
 import { useState, useEffect, useCallback } from "react";
-import { Button } from "./ui/button";
-import VSLogo from "./VSLogo";
-import padelIcon from "../app/assets/padelIcon.png";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { ChevronRight } from "lucide-react";
 import Image from "next/image";
+import padelIcon from "../app/assets/padelIcon.png";
+import VSLogo from "./VSLogo";
 
 interface Match {
   team1: string[];
@@ -116,182 +119,160 @@ export default function Matches({
   );
 
   return (
-    <div className="mt-8">
-      <h2 className="text-center text-2xl font-extrabold mb-8 text-blue-700">
-        <span className=" bg-blue-100 px-4 py-2 rounded-lg shadow-md flex gap-2 justify-center">
-          <Image src={padelIcon} alt="Padel Icon" width={32} height={32} />
-          Round {round} Matches
-        </span>
-      </h2>
-
-      {matches.map((match, index) => (
-        <div
-          key={index}
-          className={`rounded-lg p-6 shadow-md ${
-            match.isScoreSubmitted ? "bg-gray-100" : "bg-blue-50"
-          } mb-6`}
-        >
-          <form
-            className="flex flex-col items-center gap-4"
-            onSubmit={(e) => {
-              e.preventDefault();
-              handleScoreSubmit(index);
-            }}
-          >
-            {/* Teams Section */}
-            <div className="flex items-center gap-8 w-full">
-              {/* Team 1 */}
-              <div className="flex-1 text-right">
-                <h3 className="font-semibold text-lg">
-                  {match.team1.map((name, i) => (
-                    <span key={i}>
-                      {name}
-                      {i < match.team1.length - 1 && (
-                        <>
-                          <br />&<br />
-                        </>
-                      )}
-                    </span>
-                  ))}
-                </h3>
-              </div>
-
-              {/* VS Logo and Scores */}
-              <div className="flex flex-col items-center">
-                <VSLogo />
-                <div className="mt-2 flex gap-4">
-                  {/* Team 1 Score */}
-                  {match.isScoreSubmitted ? (
-                    <span className="w-16 text-center text-xl font-bold text-gray-500">
-                      {match.team1Score}
-                    </span>
-                  ) : (
-                    <input
-                      className="w-16 text-center rounded-lg border border-gray-300 bg-white text-xl"
-                      type="number"
-                      placeholder="0"
-                      value={editingScores[index]?.team1 ?? match.team1Score}
-                      min="0"
-                      max="21"
-                      onFocus={(e) => e.target.select()}
-                      onChange={(e) =>
-                        handleScoreChange(
-                          index,
-                          "team1",
-                          parseInt(e.target.value, 10) || 0
-                        )
-                      }
-                      disabled={match.isScoreSubmitted}
-                    />
-                  )}
-
-                  {/* Separator */}
-                  <span className="text-lg">-</span>
-
-                  {/* Team 2 Score */}
-                  {match.isScoreSubmitted ? (
-                    <span className="w-16 text-center text-xl font-bold text-gray-500">
-                      {match.team2Score}
-                    </span>
-                  ) : (
-                    <input
-                      className="w-16 text-center rounded-lg border border-gray-300 bg-white text-xl"
-                      type="number"
-                      placeholder="0"
-                      value={editingScores[index]?.team2 ?? match.team2Score}
-                      min="0"
-                      max="21"
-                      onFocus={(e) => e.target.select()}
-                      onChange={(e) =>
-                        handleScoreChange(
-                          index,
-                          "team2",
-                          parseInt(e.target.value, 10) || 0
-                        )
-                      }
-                      disabled={match.isScoreSubmitted}
-                    />
-                  )}
-                </div>
-              </div>
-
-              {/* Team 2 */}
-              <div className="flex-1 text-left">
-                <h3 className="font-semibold text-lg">
-                  {match.team2.map((name, i) => (
-                    <span key={i}>
-                      {name}
-                      {i < match.team2.length - 1 && (
-                        <>
-                          <br />&<br />
-                        </>
-                      )}
-                    </span>
-                  ))}
-                </h3>
-              </div>
-            </div>
-
-            {/* Action Buttons */}
-            <div className="mt-4">
-              {match.isScoreSubmitted ? (
-                <Button
-                  type="button"
-                  className="bg-yellow-500 text-white"
-                  onClick={(e) => {
+    <div className="space-y-8 mt-8 px-4 max-w-4xl mx-auto">
+      <Card className="bg-transparent">
+        <CardHeader className="text-center">
+          <CardTitle className="bg-transparent text-3xl rounded-lg font-extrabold text-gray-800 flex items-center justify-center gap-2">
+            <Image src={padelIcon} alt="Padel Icon" width={32} height={32} />
+            <span className=" px-4 py-2  ">Round {round} Matches</span>
+          </CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-6">
+          {matches.map((match, index) => (
+            <Card
+              key={index}
+              className={match.isScoreSubmitted ? "bg-gray-50" : "bg-slate-100"}
+            >
+              <CardContent className="p-6">
+                <form
+                  className="space-y-4"
+                  onSubmit={(e) => {
                     e.preventDefault();
-                    const updatedScores = { ...scores };
-                    match.team1.forEach(
-                      (player) => (updatedScores[player] -= match.team1Score)
-                    );
-                    match.team2.forEach(
-                      (player) => (updatedScores[player] -= match.team2Score)
-                    );
-                    const updatedMatches = matches.map((m, i) =>
-                      i === index
-                        ? {
-                            ...m,
-                            team1Score: 0,
-                            team2Score: 0,
-                            isScoreSubmitted: false,
-                          }
-                        : m
-                    );
-                    onUpdateScores(updatedScores);
-                    onUpdateMatches(updatedMatches);
+                    handleScoreSubmit(index);
                   }}
                 >
-                  Edit Score
-                </Button>
-              ) : (
-                <Button
-                  type="submit"
-                  className={`${
-                    isScoreValid(index)
-                      ? "bg-green-500 text-white"
-                      : "bg-gray-400 text-gray-600 cursor-not-allowed"
-                  }`}
-                  disabled={!isScoreValid(index)}
-                >
-                  Submit Score
-                </Button>
-              )}
-            </div>
-          </form>
-        </div>
-      ))}
-
-      {/* Next Round Button */}
-      <div className="flex justify-center w-full">
+                  <div className="flex flex-col sm:flex-row items-center gap-4 sm:gap-8 w-full">
+                    <div className="w-full sm:flex-1 text-center">
+                      <h3 className="font-semibold text-lg  text-red-700">
+                        <div className="flex sm:flex-col items-center justify-center sm:items-end">
+                          {match.team1[0]}
+                          <span className="mx-2 sm:my-1 sm:mx-0">&</span>
+                          {match.team1[1]}
+                        </div>
+                      </h3>
+                    </div>
+                    <div className="flex flex-row items-center gap-4">
+                      {match.isScoreSubmitted ? (
+                        <span className="w-16 text-center text-xl font-bold text-gray-500">
+                          {match.team1Score}
+                        </span>
+                      ) : (
+                        <Input
+                          className="w-12 sm:w-16 text-center text-lg sm:text-xl border border-red-950 bg-red-700 text-white"
+                          type="number"
+                          placeholder="0"
+                          value={
+                            editingScores[index]?.team1 ?? match.team1Score
+                          }
+                          min="0"
+                          max="21"
+                          onChange={(e) =>
+                            handleScoreChange(
+                              index,
+                              "team1",
+                              parseInt(e.target.value, 10) || 0
+                            )
+                          }
+                          disabled={match.isScoreSubmitted}
+                        />
+                      )}
+                      <span className="text-2xl font-bold text-blue-700">
+                        <VSLogo />
+                      </span>
+                      {match.isScoreSubmitted ? (
+                        <span className="w-16 text-center text-xl font-bold text-gray-500">
+                          {match.team2Score}
+                        </span>
+                      ) : (
+                        <Input
+                          className="w-12 sm:w-16 text-center text-lg sm:text-xl border border-blue-900 bg-blue-800 text-white"
+                          type="number"
+                          placeholder="0"
+                          value={
+                            editingScores[index]?.team2 ?? match.team2Score
+                          }
+                          min="0"
+                          max="21"
+                          onChange={(e) =>
+                            handleScoreChange(
+                              index,
+                              "team2",
+                              parseInt(e.target.value, 10) || 0
+                            )
+                          }
+                          disabled={match.isScoreSubmitted}
+                        />
+                      )}
+                    </div>
+                    <div className="w-full sm:flex-1 text-center">
+                      <h3 className="font-semibold text-lg text-blue-900">
+                        <div className="flex sm:flex-col items-center justify-center sm:items-start">
+                          {match.team2[0]}
+                          <span className="mx-2 sm:my-1 sm:mx-0">&</span>
+                          {match.team2[1]}
+                        </div>
+                      </h3>
+                    </div>
+                  </div>
+                  <div className="flex justify-center">
+                    {match.isScoreSubmitted ? (
+                      <Button
+                        type="button"
+                        className="bg-yellow-500 text-white"
+                        onClick={(e) => {
+                          e.preventDefault();
+                          const updatedScores = { ...scores };
+                          match.team1.forEach(
+                            (player) =>
+                              (updatedScores[player] -= match.team1Score)
+                          );
+                          match.team2.forEach(
+                            (player) =>
+                              (updatedScores[player] -= match.team2Score)
+                          );
+                          const updatedMatches = matches.map((m, i) =>
+                            i === index
+                              ? {
+                                  ...m,
+                                  team1Score: 0,
+                                  team2Score: 0,
+                                  isScoreSubmitted: false,
+                                }
+                              : m
+                          );
+                          onUpdateScores(updatedScores);
+                          onUpdateMatches(updatedMatches);
+                        }}
+                      >
+                        Edit Score
+                      </Button>
+                    ) : (
+                      <Button
+                        type="submit"
+                        className={`${
+                          isScoreValid(index)
+                            ? "bg-green-500 text-white"
+                            : "bg-gray-400 text-gray-600 cursor-not-allowed"
+                        }`}
+                        disabled={!isScoreValid(index)}
+                      >
+                        Submit Score
+                      </Button>
+                    )}
+                  </div>
+                </form>
+              </CardContent>
+            </Card>
+          ))}
+        </CardContent>
+      </Card>
+      <div className="flex justify-center">
         <Button
-          type="button"
-          className={`mt-4 ${
-            isNextRoundDisabled ? "bg-gray-500" : "bg-green-500"
-          } text-white`}
           onClick={onNextRound}
           disabled={isNextRoundDisabled}
+          className="text-lg bg-green-500 disabled:bg-slate-500"
         >
-          Next Round
+          Next Round <ChevronRight className="ml-2" />
         </Button>
       </div>
     </div>
