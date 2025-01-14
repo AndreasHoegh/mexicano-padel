@@ -14,4 +14,17 @@ export interface TournamentSettings {
   pointsPerMatch: number;
   maxRounds: number | null;
   courts: Court[];
+  mode: "individual" | "team";
+  teamNames?: string[];
+}
+
+export interface PlayerScore {
+  points: number;
+  wins: number;
+  team?: string;
+  teamName?: string;
+}
+
+export interface Scores {
+  [key: string]: PlayerScore;
 }

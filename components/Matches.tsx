@@ -17,6 +17,8 @@ interface Match {
   team1Score: number;
   team2Score: number;
   isScoreSubmitted: boolean;
+  team1Name?: string;
+  team2Name?: string;
 }
 
 interface EditingScores {
@@ -41,6 +43,7 @@ interface MatchesProps {
   pointsPerMatch: number;
   isLastRound: boolean;
   courts: Court[];
+  mode: "individual" | "team";
 }
 
 export default function Matches({
@@ -53,6 +56,7 @@ export default function Matches({
   pointsPerMatch,
   isLastRound,
   courts,
+  mode,
 }: MatchesProps) {
   const [editingScores, setEditingScores] = useState<EditingScores>({});
   const [openPopovers, setOpenPopovers] = useState<{ [key: string]: boolean }>(
@@ -190,11 +194,15 @@ export default function Matches({
                   <div className="flex flex-col sm:flex-row items-center gap-4 sm:gap-8 w-full">
                     <div className="w-full sm:flex-1 text-center">
                       <h3 className="font-semibold text-lg text-red-700">
-                        <div className="flex sm:flex-col items-center justify-center sm:items-end">
-                          {match.team1[0]}
-                          <span className="mx-2 sm:my-1 sm:mx-0">&</span>
-                          {match.team1[1]}
-                        </div>
+                        {mode === "team" ? (
+                          match.team1[0]
+                        ) : (
+                          <div className="flex sm:flex-col items-center justify-center sm:items-end">
+                            {match.team1[0]}
+                            <span className="mx-2 sm:my-1 sm:mx-0">&</span>
+                            {match.team1[1]}
+                          </div>
+                        )}
                       </h3>
                     </div>
                     <div className="flex flex-row items-center gap-4">
@@ -286,11 +294,15 @@ export default function Matches({
                     </div>
                     <div className="w-full sm:flex-1 text-center">
                       <h3 className="font-semibold text-lg text-blue-900">
-                        <div className="flex sm:flex-col items-center justify-center sm:items-start">
-                          {match.team2[0]}
-                          <span className="mx-2 sm:my-1 sm:mx-0">&</span>
-                          {match.team2[1]}
-                        </div>
+                        {mode === "team" ? (
+                          match.team2[0]
+                        ) : (
+                          <div className="flex sm:flex-col items-center justify-center sm:items-start">
+                            {match.team2[0]}
+                            <span className="mx-2 sm:my-1 sm:mx-0">&</span>
+                            {match.team2[1]}
+                          </div>
+                        )}
                       </h3>
                     </div>
                   </div>

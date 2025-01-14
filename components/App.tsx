@@ -20,6 +20,8 @@ interface Match {
   team1Score: number;
   team2Score: number;
   isScoreSubmitted: boolean;
+  team1Name?: string;
+  team2Name?: string;
 }
 
 interface RoundInfo {
@@ -54,6 +56,7 @@ export default function App() {
   const [maxRounds, setMaxRounds] = useState<number | null>(null);
   const [isPaused, setIsPaused] = useState(false);
   const [courts, setCourts] = useState<Court[]>([]);
+  const [mode, setMode] = useState<"individual" | "team">("individual");
 
   useEffect(() => {
     window.scrollTo(0, 0);
@@ -77,10 +80,16 @@ export default function App() {
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
-  const onNumberSubmit: SubmitHandler<NumOfPlayersFormData> = (data) => {
-    const players = data["Number of players"];
-    if (players >= 4) {
-      setNumberOfPlayers(players);
+  const onNumberSubmit = ({
+    mode,
+    count,
+  }: {
+    mode: "individual" | "team";
+    count: number;
+  }) => {
+    if (count >= 4) {
+      setMode(mode);
+      setNumberOfPlayers(count);
     } else {
       alert("Minimum 4 players required.");
     }
@@ -91,55 +100,66 @@ export default function App() {
 
   const generateMatches = useCallback(
     (players: string[]) => {
-      const allPlayers = [...players];
-      const numPlayersNeeded = Math.floor(allPlayers.length / 4) * 4;
-      const numSittingOut = allPlayers.length - numPlayersNeeded;
+      const allUnits = [...players]; // In team mode, these are team names, in individual mode, player names
+      const unitsPerMatch = mode === "team" ? 2 : 4; // 2 teams or 4 players per match
+      const numUnitsNeeded =
+        Math.floor(allUnits.length / unitsPerMatch) * unitsPerMatch;
+      const numSittingOut = allUnits.length - numUnitsNeeded;
 
-      // Sort all players by score (or shuffle if first round)
-      const sortedPlayers =
+      // Sort by score or shuffle
+      const sortedUnits =
         round === 1
-          ? shuffle(allPlayers)
-          : allPlayers.sort((a, b) => scores[b].points - scores[a].points);
+          ? shuffle(allUnits)
+          : allUnits.sort((a, b) => scores[b].points - scores[a].points);
 
-      // Determine who sits out (take from middle of rankings)
-      let activePlayers = [...sortedPlayers];
+      // Handle sitting out
+      let activeUnits = [...sortedUnits];
       let sittingOut: string[] = [];
 
       if (numSittingOut > 0) {
-        const startIdx = Math.floor((sortedPlayers.length - numSittingOut) / 2);
-        sittingOut = sortedPlayers.slice(startIdx, startIdx + numSittingOut);
-        activePlayers = sortedPlayers.filter(
-          (player) => !sittingOut.includes(player)
-        );
+        const startIdx = Math.floor((sortedUnits.length - numSittingOut) / 2);
+        sittingOut = sortedUnits.slice(startIdx, startIdx + numSittingOut);
+        activeUnits = sortedUnits.filter((unit) => !sittingOut.includes(unit));
 
-        // Move this outside of generateMatches
         const newSittingOutCounts = { ...sittingOutCounts };
-        sittingOut.forEach((player) => {
-          newSittingOutCounts[player] = (newSittingOutCounts[player] || 0) + 1;
+        sittingOut.forEach((unit) => {
+          newSittingOutCounts[unit] = (newSittingOutCounts[unit] || 0) + 1;
         });
         setSittingOutCounts(newSittingOutCounts);
       }
 
       setSittingOutPlayers(sittingOut);
 
-      // Create matches by pairing players based on their ranking
+      // Create matches
       const newMatches: Match[] = [];
-      const numMatches = activePlayers.length / 4;
+      const numMatches = activeUnits.length / unitsPerMatch;
 
       for (let i = 0; i < numMatches; i++) {
-        const startIdx = i * 4;
-        newMatches.push({
-          team1: [activePlayers[startIdx], activePlayers[startIdx + 2]],
-          team2: [activePlayers[startIdx + 1], activePlayers[startIdx + 3]],
-          team1Score: 0,
-          team2Score: 0,
-          isScoreSubmitted: false,
-        });
+        const startIdx = i * unitsPerMatch;
+        if (mode === "team") {
+          // Team mode: 2 teams per match
+          newMatches.push({
+            team1: [activeUnits[startIdx]], // Each team is one unit
+            team2: [activeUnits[startIdx + 1]],
+            team1Score: 0,
+            team2Score: 0,
+            isScoreSubmitted: false,
+          });
+        } else {
+          // Individual mode: 4 players mixed into 2 teams
+          newMatches.push({
+            team1: [activeUnits[startIdx], activeUnits[startIdx + 2]],
+            team2: [activeUnits[startIdx + 1], activeUnits[startIdx + 3]],
+            team1Score: 0,
+            team2Score: 0,
+            isScoreSubmitted: false,
+          });
+        }
       }
 
       setMatches(newMatches);
     },
-    [round, scores] // Remove sittingOutCounts from dependencies
+    [round, scores, mode, sittingOutCounts]
   );
 
   const shuffle = (players: string[]): string[] => {
@@ -228,21 +248,47 @@ export default function App() {
       {numberOfPlayers > 0 && isTournamentNameSet && !arePlayerNamesSet && (
         <PlayerNamesForm
           numberOfPlayers={numberOfPlayers}
+          mode={mode}
           onSubmit={(settings) => {
+            // First create the initial scores with team names
+            const initialScores: Scores = {};
+            if (settings.mode === "team") {
+              // Process in pairs for team mode
+              for (let i = 0; i < settings.playerNames.length; i += 2) {
+                const teamIndex = Math.floor(i / 2);
+                const teamName =
+                  settings.teamNames?.[teamIndex] || `Team ${teamIndex + 1}`;
+
+                // Assign same team name to both players
+                settings.playerNames.slice(i, i + 2).forEach((name) => {
+                  initialScores[name] = {
+                    points: 0,
+                    wins: 0,
+                    team: `team${teamIndex + 1}`,
+                    teamName: teamName,
+                  };
+                });
+              }
+            } else {
+              // Individual mode
+              settings.playerNames.forEach((name) => {
+                initialScores[name] = {
+                  points: 0,
+                  wins: 0,
+                };
+              });
+            }
+
+            // Then set all the state
             setNames(settings.playerNames);
             setPointsPerMatch(settings.pointsPerMatch);
             setMaxRounds(settings.maxRounds);
             setCourts(settings.courts);
-
-            const initialScores: {
-              [key: string]: { points: number; wins: number };
-            } = {};
-            settings.playerNames.forEach((name) => {
-              initialScores[name] = { points: 0, wins: 0 };
-            });
+            setMode(settings.mode);
             setScores(initialScores);
             setSittingOutCounts({});
 
+            // Finally generate matches with the initialized scores
             generateMatches(settings.playerNames);
             setArePlayerNamesSet(true);
           }}
@@ -333,6 +379,7 @@ export default function App() {
                 pointsPerMatch={pointsPerMatch}
                 isLastRound={isLastRound()}
                 courts={courts}
+                mode={mode}
               />
 
               <div className="mt-8 flex flex-col sm:flex-row justify-center gap-3">
