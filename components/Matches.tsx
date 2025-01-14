@@ -126,15 +126,15 @@ export default function Matches({
   );
 
   return (
-    <div className="space-y-8 mt-8 px-4 max-w-4xl mx-auto">
-      <Card className="bg-transparent">
+    <div className="space-y-8 mt-8 px-4 max-w-4xl mx-auto ">
+      <Card className="bg-gradient-to-r from-red-500 to-yellow-500">
         <CardHeader className="text-center">
           <CardTitle className="bg-transparent text-3xl rounded-lg font-extrabold text-gray-800 flex items-center justify-center gap-2">
             <Image src={padelIcon} alt="Padel Icon" width={32} height={32} />
             <span className=" px-4 py-2  ">Round {round} Matches</span>
           </CardTitle>
         </CardHeader>
-        <CardContent className="space-y-6">
+        <CardContent className="space-y-6 ">
           {matches.map((match, index) => (
             <Card
               key={index}
