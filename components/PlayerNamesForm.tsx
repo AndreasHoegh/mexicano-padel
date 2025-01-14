@@ -12,6 +12,12 @@ interface PlayerNamesFormProps {
   mode: "individual" | "team";
 }
 
+interface FormValues {
+  [key: string]: string; // Allow any string key
+  pointsPerMatch: string;
+  maxRounds: string;
+}
+
 const getMaxCourts = (playerCount: number) => {
   return Math.floor(playerCount / 4);
 };
@@ -21,7 +27,7 @@ export default function PlayerNamesForm({
   onSubmit,
   mode,
 }: PlayerNamesFormProps) {
-  const { register, handleSubmit, setValue } = useForm({
+  const { register, handleSubmit, setValue } = useForm<FormValues>({
     defaultValues: {
       pointsPerMatch: "21",
       maxRounds: "5",
