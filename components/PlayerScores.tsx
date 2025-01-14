@@ -1,45 +1,68 @@
-import { Trophy, Medal, Award } from "lucide-react";
+import { useState } from "react";
+import { Button } from "./ui/button";
+import { Trophy, Target } from "lucide-react";
 
 interface PlayerScoresProps {
-  scores: { [key: string]: number };
+  scores: {
+    [key: string]: {
+      points: number;
+      wins: number;
+    };
+  };
 }
 
-const PlayerScores: React.FC<PlayerScoresProps> = ({ scores }) => {
-  const sortedPlayers = Object.entries(scores)
-    .sort(([, a], [, b]) => b - a)
-    .map(([name, score], index) => ({ name, score, rank: index + 1 }));
+export default function PlayerScores({ scores }: PlayerScoresProps) {
+  const [sortBy, setSortBy] = useState<"points" | "wins">("points");
 
-  const getRankIcon = (rank: number) => {
-    switch (rank) {
-      case 1:
-        return <Trophy className="h-6 w-6 text-yellow-500" />;
-      case 2:
-        return <Medal className="h-6 w-6 text-gray-400" />;
-      case 3:
-        return <Award className="h-6 w-6 text-amber-700" />;
-      default:
-        return <span className="w-6 text-center font-mono">{rank}</span>;
+  const sortedPlayers = Object.entries(scores).sort((a, b) => {
+    if (sortBy === "points") {
+      return b[1].points - a[1].points;
     }
-  };
+    if (b[1].wins === a[1].wins) {
+      return b[1].points - a[1].points;
+    }
+    return b[1].wins - a[1].wins;
+  });
 
   return (
     <div className="space-y-4">
-      {sortedPlayers.map(({ name, score, rank }) => (
-        <div
-          key={name}
-          className="flex items-center gap-4 p-3 bg-gradient-to-r from-white to-gray-50 rounded-lg shadow-sm border border-gray-100 hover:shadow-md transition-shadow"
+      <div className="flex justify-center gap-2">
+        <Button
+          onClick={() => setSortBy("points")}
+          variant={sortBy === "points" ? "default" : "outline"}
+          className="flex items-center gap-2"
         >
-          <div className="flex items-center justify-center w-8">
-            {getRankIcon(rank)}
+          <Trophy className="h-4 w-4" />
+          Sort by Points
+        </Button>
+        <Button
+          onClick={() => setSortBy("wins")}
+          variant={sortBy === "wins" ? "default" : "outline"}
+          className="flex items-center gap-2"
+        >
+          <Target className="h-4 w-4" />
+          Sort by Wins
+        </Button>
+      </div>
+
+      <div className="space-y-2">
+        {sortedPlayers.map(([name, stats], index) => (
+          <div
+            key={name}
+            className="flex justify-between items-center p-2 bg-white rounded-lg shadow"
+          >
+            <span className="font-medium">
+              {index + 1}. {name}
+            </span>
+            <div className="space-x-4">
+              <span className="text-yellow-600">
+                {stats.wins} {stats.wins === 1 ? "win" : "wins"}
+              </span>
+              <span className="text-blue-600">{stats.points} points</span>
+            </div>
           </div>
-          <div className="flex-1">
-            <h3 className="font-semibold text-gray-800">{name}</h3>
-          </div>
-          <div className="text-lg font-bold text-yellow-600">{score} pts</div>
-        </div>
-      ))}
+        ))}
+      </div>
     </div>
   );
-};
-
-export default PlayerScores;
+}

@@ -26,8 +26,19 @@ export default function PlayerNamesForm({
   });
 
   const nextIdRef = useRef(2);
+  const maxCourts = getMaxCourts(numberOfPlayers);
 
-  const [courts, setCourts] = useState<Court[]>([{ id: 1, name: "Court 1" }]);
+  const [courts, setCourts] = useState<Court[]>(() => {
+    const initialCourts = [];
+    for (let i = 1; i <= maxCourts; i++) {
+      initialCourts.push({
+        id: i,
+        name: `Court ${i}`,
+      });
+    }
+    nextIdRef.current = maxCourts + 1;
+    return initialCourts;
+  });
 
   const addCourt = () => {
     if (courts.length < getMaxCourts(numberOfPlayers)) {

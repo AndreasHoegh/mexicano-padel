@@ -125,7 +125,33 @@ export default function Matches({
       return;
     }
 
-    // Prepare updated matches and scores
+    // Update scores with points and wins
+    const newScores = { ...scores };
+    matches.forEach((match, index) => {
+      const team1Score = editingScores[index].team1;
+      const team2Score = editingScores[index].team2;
+
+      // Update points
+      match.team1.forEach((player) => {
+        newScores[player].points += team1Score;
+      });
+      match.team2.forEach((player) => {
+        newScores[player].points += team2Score;
+      });
+
+      // Update wins
+      if (team1Score > team2Score) {
+        match.team1.forEach((player) => {
+          newScores[player].wins += 1;
+        });
+      } else if (team2Score > team1Score) {
+        match.team2.forEach((player) => {
+          newScores[player].wins += 1;
+        });
+      }
+    });
+
+    // Update matches and move to next round
     const updatedMatches = matches.map((match, index) => ({
       ...match,
       team1Score: editingScores[index].team1,
@@ -133,22 +159,9 @@ export default function Matches({
       isScoreSubmitted: true,
     }));
 
-    const newScores = { ...scores };
-    updatedMatches.forEach((match, index) => {
-      match.team1.forEach((player) => {
-        newScores[player] =
-          (newScores[player] || 0) + editingScores[index].team1;
-      });
-      match.team2.forEach((player) => {
-        newScores[player] =
-          (newScores[player] || 0) + editingScores[index].team2;
-      });
-    });
-
-    // Update state sequentially
-    onUpdateScores(newScores); // First, update the scores
-    onUpdateMatches(updatedMatches); // Then, update the matches
-    onNextRound(); // Finally, move to next round
+    onUpdateScores(newScores);
+    onUpdateMatches(updatedMatches);
+    onNextRound();
   };
 
   const areAllScoresValid = () => {

@@ -33,7 +33,12 @@ export default function App() {
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [names, setNames] = useState<string[]>([]);
   const [matches, setMatches] = useState<Match[]>([]);
-  const [scores, setScores] = useState<{ [key: string]: number }>({});
+  const [scores, setScores] = useState<{
+    [key: string]: {
+      points: number;
+      wins: number;
+    };
+  }>({});
   const [round, setRound] = useState<number>(1);
   const [tournamentName, setTournamentName] = useState<string>("");
   const [isTournamentNameSet, setIsTournamentNameSet] =
@@ -94,7 +99,7 @@ export default function App() {
       const sortedPlayers =
         round === 1
           ? shuffle(allPlayers)
-          : allPlayers.sort((a, b) => scores[b] - scores[a]);
+          : allPlayers.sort((a, b) => scores[b].points - scores[a].points);
 
       // Determine who sits out (take from middle of rankings)
       let activePlayers = [...sortedPlayers];
@@ -155,9 +160,13 @@ export default function App() {
   }, []);
 
   const updateScores = useCallback(
-    (updatedScores: { [key: string]: number }) => {
-      console.log("Updating scores:", updatedScores);
-      setScores({ ...updatedScores });
+    (updatedScores: {
+      [key: string]: {
+        points: number;
+        wins: number;
+      };
+    }) => {
+      setScores(updatedScores);
     },
     []
   );
@@ -225,9 +234,11 @@ export default function App() {
             setMaxRounds(settings.maxRounds);
             setCourts(settings.courts);
 
-            const initialScores: { [key: string]: number } = {};
+            const initialScores: {
+              [key: string]: { points: number; wins: number };
+            } = {};
             settings.playerNames.forEach((name) => {
-              initialScores[name] = 0;
+              initialScores[name] = { points: 0, wins: 0 };
             });
             setScores(initialScores);
             setSittingOutCounts({});
@@ -248,7 +259,11 @@ export default function App() {
                     Tournament Complete!
                     <p className="text-lg mt-2 text-gray-600">
                       Congratulations to{" "}
-                      {Object.entries(scores).sort((a, b) => b[1] - a[1])[0][0]}
+                      {
+                        Object.entries(scores).sort(
+                          (a, b) => b[1].points - a[1].points
+                        )[0][0]
+                      }
                       !
                     </p>
                   </>

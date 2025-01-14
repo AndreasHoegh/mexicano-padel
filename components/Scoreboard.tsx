@@ -5,7 +5,12 @@ import { X } from "lucide-react";
 interface ScoreboardProps {
   isOpen: boolean;
   onClose: () => void;
-  scores: { [key: string]: number };
+  scores: {
+    [key: string]: {
+      points: number;
+      wins: number;
+    };
+  };
 }
 
 const Scoreboard: React.FC<ScoreboardProps> = ({ isOpen, onClose, scores }) => {
