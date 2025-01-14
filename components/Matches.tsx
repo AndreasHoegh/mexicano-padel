@@ -121,9 +121,10 @@ export default function Matches({
     },
     [editingScores]
   );
-  const [openPopovers, setOpenPopovers] = useState<{ [key: number]: boolean }>(
+  const [openPopovers, setOpenPopovers] = useState<{ [key: string]: boolean }>(
     {}
   );
+
   return (
     <div className="space-y-8 mt-8 px-4 max-w-4xl mx-auto">
       <Card className="bg-transparent">
