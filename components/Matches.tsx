@@ -161,6 +161,7 @@ export default function Matches({
                           className="w-12 sm:w-16 text-center text-lg sm:text-xl border border-red-950 bg-red-700 text-white"
                           type="number"
                           placeholder="0"
+                          onFocus={(e) => e.target.select()}
                           value={
                             editingScores[index]?.team1 ?? match.team1Score
                           }
@@ -188,6 +189,7 @@ export default function Matches({
                           className="w-12 sm:w-16 text-center text-lg sm:text-xl border border-blue-900 bg-blue-800 text-white"
                           type="number"
                           placeholder="0"
+                          onFocus={(e) => e.target.select()}
                           value={
                             editingScores[index]?.team2 ?? match.team2Score
                           }
