@@ -21,9 +21,10 @@ export default function PlayerNamesForm({
   onSubmit,
   mode,
 }: PlayerNamesFormProps) {
-  const { register, handleSubmit, setValue } = useForm<FieldValues>({
+  const { register, handleSubmit, setValue } = useForm({
     defaultValues: {
       pointsPerMatch: "21",
+      maxRounds: "5",
     },
   });
 

@@ -5,7 +5,7 @@ import { SubmitHandler } from "react-hook-form";
 import TournamentNameForm, {
   TournamentNameFormData,
 } from "./TournamentNameForm";
-import NumOfPlayersForm, { NumOfPlayersFormData } from "./NumOfPlayersForm";
+import NumOfPlayersForm from "./NumOfPlayersForm";
 import PlayerNamesForm from "./PlayerNamesForm";
 import Matches from "./Matches";
 import Scoreboard from "./Scoreboard";
@@ -24,9 +24,13 @@ interface Match {
   team2Name?: string;
 }
 
-interface RoundInfo {
-  matches: Match[];
-  sittingOut: string[];
+interface Scores {
+  [key: string]: {
+    points: number;
+    wins: number;
+    team?: string;
+    teamName?: string;
+  };
 }
 
 export default function App() {
@@ -50,7 +54,6 @@ export default function App() {
   const [sittingOutCounts, setSittingOutCounts] = useState<{
     [key: string]: number;
   }>({});
-  const [showButtons, setShowButtons] = useState(false);
   const [pointsPerMatch, setPointsPerMatch] = useState<number>(21);
   const [isFinished, setIsFinished] = useState<boolean>(false);
   const [maxRounds, setMaxRounds] = useState<number | null>(null);
@@ -61,24 +64,6 @@ export default function App() {
   useEffect(() => {
     window.scrollTo(0, 0);
   }, [isTournamentNameSet, numberOfPlayers, arePlayerNamesSet]);
-
-  // Add scroll listener
-  useEffect(() => {
-    const handleScroll = () => {
-      const scrollPosition = window.scrollY;
-      const windowHeight = window.innerHeight;
-      const documentHeight = document.documentElement.scrollHeight;
-
-      // Show buttons when scrolled down 100px or near bottom
-      setShowButtons(
-        scrollPosition > 100 ||
-          scrollPosition + windowHeight >= documentHeight - 100
-      );
-    };
-
-    window.addEventListener("scroll", handleScroll);
-    return () => window.removeEventListener("scroll", handleScroll);
-  }, []);
 
   const onNumberSubmit = ({
     mode,
@@ -217,12 +202,6 @@ export default function App() {
   ) => {
     setTournamentName(data.tournamentName);
     setIsTournamentNameSet(true);
-  };
-
-  const handleTournamentPause = () => {
-    if (window.confirm("Are you sure you want to end the tournament early?")) {
-      setIsPaused(true);
-    }
   };
 
   const isLastRound = useCallback(() => {

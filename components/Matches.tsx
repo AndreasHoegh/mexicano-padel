@@ -35,9 +35,19 @@ interface Court {
 
 interface MatchesProps {
   matches: Match[];
-  scores: { [key: string]: number };
+  scores: {
+    [key: string]: {
+      points: number;
+      wins: number;
+    };
+  };
   onUpdateMatches: (updatedMatches: Match[]) => void;
-  onUpdateScores: (updatedScores: { [key: string]: number }) => void;
+  onUpdateScores: (updatedScores: {
+    [key: string]: {
+      points: number;
+      wins: number;
+    };
+  }) => void;
   round: number;
   onNextRound: () => void;
   pointsPerMatch: number;
@@ -62,35 +72,18 @@ export default function Matches({
   const [openPopovers, setOpenPopovers] = useState<{ [key: string]: boolean }>(
     {}
   );
-  const [showButtons, setShowButtons] = useState(false);
 
   useEffect(() => {
-    // Simply initialize editing scores whenever matches change
+    // Initialize editing scores to 0 whenever matches change
     const initialEditingScores: EditingScores = {};
-    matches.forEach((match, index) => {
+    matches.forEach((_, index) => {
       initialEditingScores[index] = {
-        team1: match.team1Score || 0,
-        team2: match.team2Score || 0,
+        team1: 0,
+        team2: 0,
       };
     });
     setEditingScores(initialEditingScores);
   }, [matches]); // Only depend on matches
-
-  useEffect(() => {
-    const handleScroll = () => {
-      const scrollPosition = window.scrollY;
-      const windowHeight = window.innerHeight;
-      const documentHeight = document.documentElement.scrollHeight;
-
-      setShowButtons(
-        scrollPosition > 100 ||
-          scrollPosition + windowHeight >= documentHeight - 100
-      );
-    };
-
-    window.addEventListener("scroll", handleScroll);
-    return () => window.removeEventListener("scroll", handleScroll);
-  }, []);
 
   const handleScoreChange = (
     index: number,

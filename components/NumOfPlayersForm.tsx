@@ -8,13 +8,16 @@ interface NumOfPlayersFormProps {
   onSubmit: (data: { mode: "individual" | "team"; count: number }) => void;
 }
 
+interface FormData {
+  "Number of players": string;
+}
+
 export default function NumOfPlayersForm({ onSubmit }: NumOfPlayersFormProps) {
   const [mode, setMode] = useState<"individual" | "team">("individual");
-  const { register, handleSubmit } = useForm();
+  const { register, handleSubmit } = useForm<FormData>();
 
-  const onFormSubmit = (data: any) => {
+  const onFormSubmit = (data: FormData) => {
     const count = parseInt(data["Number of players"]);
-    // If team mode, multiply teams by 2 to get player count
     onSubmit({
       mode,
       count: mode === "team" ? count * 2 : count,
