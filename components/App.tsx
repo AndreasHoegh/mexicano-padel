@@ -34,8 +34,8 @@ export default function App() {
   const [arePlayerNamesSet, setArePlayerNamesSet] = useState<boolean>(false);
 
   useEffect(() => {
-    console.log("Matches updated:", matches);
-  }, [matches]);
+    window.scrollTo(0, 0);
+  }, [isTournamentNameSet, numberOfPlayers, arePlayerNamesSet]);
 
   const onNumberSubmit: SubmitHandler<NumOfPlayersFormData> = (data) => {
     const players = data["Number of players"];
