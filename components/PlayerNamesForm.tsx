@@ -28,8 +28,7 @@ export default function PlayerNamesForm({
             <input
               className="border-2 border-slate-500 p-1"
               type="text"
-              placeholder={`Player ${index + 1} Name`}
-              defaultValue={`Player ${index + 1}`}
+              defaultValue={`Player${index + 1}`}
               {...register(`playerName${index}`, { required: true })}
               onFocus={(e) => e.target.select()}
             />
