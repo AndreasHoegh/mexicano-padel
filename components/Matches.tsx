@@ -33,6 +33,7 @@ interface MatchesProps {
   onUpdateScores: (updatedScores: { [key: string]: number }) => void;
   round: number;
   onNextRound: () => void;
+  pointsPerMatch: number;
 }
 
 export default function Matches({
@@ -42,6 +43,7 @@ export default function Matches({
   onUpdateScores,
   round,
   onNextRound,
+  pointsPerMatch,
 }: MatchesProps) {
   const [editingScores, setEditingScores] = useState<EditingScores>({});
   const [openPopovers, setOpenPopovers] = useState<{ [key: string]: boolean }>(
@@ -87,7 +89,7 @@ export default function Matches({
       [index]: {
         ...prev[index],
         [team]: value,
-        [team === "team1" ? "team2" : "team1"]: 21 - value,
+        [team === "team1" ? "team2" : "team1"]: pointsPerMatch - value,
       },
     }));
   };
@@ -99,7 +101,7 @@ export default function Matches({
     return (
       team1Score !== undefined &&
       team2Score !== undefined &&
-      team1Score + team2Score === 21
+      team1Score + team2Score === pointsPerMatch
     );
   };
 
@@ -188,22 +190,25 @@ export default function Matches({
                         </PopoverTrigger>
                         <PopoverContent className="w-48 p-2">
                           <div className="grid grid-cols-4 gap-2">
-                            {Array.from({ length: 22 }, (_, i) => (
-                              <Button
-                                key={i}
-                                variant="outline"
-                                className="h-8 w-8"
-                                onClick={() => {
-                                  handleScoreChange(index, "team1", i);
-                                  setOpenPopovers((prev) => ({
-                                    ...prev,
-                                    [index]: false,
-                                  }));
-                                }}
-                              >
-                                {i}
-                              </Button>
-                            ))}
+                            {Array.from(
+                              { length: pointsPerMatch + 1 },
+                              (_, i) => (
+                                <Button
+                                  key={i}
+                                  variant="outline"
+                                  className="h-8 w-8"
+                                  onClick={() => {
+                                    handleScoreChange(index, "team1", i);
+                                    setOpenPopovers((prev) => ({
+                                      ...prev,
+                                      [index]: false,
+                                    }));
+                                  }}
+                                >
+                                  {i}
+                                </Button>
+                              )
+                            )}
                           </div>
                         </PopoverContent>
                       </Popover>
@@ -229,22 +234,25 @@ export default function Matches({
                         </PopoverTrigger>
                         <PopoverContent className="w-48 p-2">
                           <div className="grid grid-cols-4 gap-2">
-                            {Array.from({ length: 22 }, (_, i) => (
-                              <Button
-                                key={i}
-                                variant="outline"
-                                className="h-8 w-8"
-                                onClick={() => {
-                                  handleScoreChange(index, "team2", i);
-                                  setOpenPopovers((prev) => ({
-                                    ...prev,
-                                    [`${index}-team2`]: false,
-                                  }));
-                                }}
-                              >
-                                {i}
-                              </Button>
-                            ))}
+                            {Array.from(
+                              { length: pointsPerMatch + 1 },
+                              (_, i) => (
+                                <Button
+                                  key={i}
+                                  variant="outline"
+                                  className="h-8 w-8"
+                                  onClick={() => {
+                                    handleScoreChange(index, "team2", i);
+                                    setOpenPopovers((prev) => ({
+                                      ...prev,
+                                      [`${index}-team2`]: false,
+                                    }));
+                                  }}
+                                >
+                                  {i}
+                                </Button>
+                              )
+                            )}
                           </div>
                         </PopoverContent>
                       </Popover>

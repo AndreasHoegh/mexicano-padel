@@ -41,6 +41,7 @@ export default function App() {
     [key: string]: number;
   }>({});
   const [showButtons, setShowButtons] = useState(false);
+  const [pointsPerMatch, setPointsPerMatch] = useState<number>(21);
 
   useEffect(() => {
     window.scrollTo(0, 0);
@@ -190,17 +191,18 @@ export default function App() {
       {numberOfPlayers > 0 && isTournamentNameSet && !arePlayerNamesSet && (
         <PlayerNamesForm
           numberOfPlayers={numberOfPlayers}
-          onSubmit={(playerNames) => {
-            setNames(playerNames);
+          onSubmit={(settings) => {
+            setNames(settings.playerNames);
+            setPointsPerMatch(settings.pointsPerMatch);
 
             const initialScores: { [key: string]: number } = {};
-            playerNames.forEach((name) => {
+            settings.playerNames.forEach((name) => {
               initialScores[name] = 0;
             });
             setScores(initialScores);
-            setSittingOutCounts({}); // Initialize sitting out counts
+            setSittingOutCounts({});
 
-            generateMatches(playerNames);
+            generateMatches(settings.playerNames);
             setArePlayerNamesSet(true);
           }}
         />
@@ -224,6 +226,7 @@ export default function App() {
             onUpdateMatches={updateMatches}
             onUpdateScores={updateScores}
             onNextRound={nextRound}
+            pointsPerMatch={pointsPerMatch}
           />
 
           <div className="w-full flex justify-center px-4">
