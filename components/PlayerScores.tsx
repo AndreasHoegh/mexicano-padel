@@ -1,41 +1,45 @@
+import { Trophy, Medal, Award } from "lucide-react";
+
 interface PlayerScoresProps {
   scores: { [key: string]: number };
 }
 
-export default function PlayerScores({ scores }: PlayerScoresProps) {
-  const sortedScores = Object.entries(scores).sort((a, b) => b[1] - a[1]);
+const PlayerScores: React.FC<PlayerScoresProps> = ({ scores }) => {
+  const sortedPlayers = Object.entries(scores)
+    .sort(([, a], [, b]) => b - a)
+    .map(([name, score], index) => ({ name, score, rank: index + 1 }));
+
+  const getRankIcon = (rank: number) => {
+    switch (rank) {
+      case 1:
+        return <Trophy className="h-6 w-6 text-yellow-500" />;
+      case 2:
+        return <Medal className="h-6 w-6 text-gray-400" />;
+      case 3:
+        return <Award className="h-6 w-6 text-amber-700" />;
+      default:
+        return <span className="w-6 text-center font-mono">{rank}</span>;
+    }
+  };
 
   return (
-    <div className="mt-8 mx-auto max-w-md bg-white shadow-lg rounded-lg p-6">
-      <h2 className="text-center text-2xl font-bold text-gray-800 mb-4">
-        Player Scores
-      </h2>
-      <ul className="divide-y divide-gray-200">
-        {sortedScores.map(([player, score], index) => (
-          <li
-            key={player}
-            className="flex justify-between items-center py-3 px-4 rounded-lg bg-gray-50 hover:bg-gray-100 transition"
-          >
-            <div className="flex items-center">
-              <span
-                className={`inline-flex items-center justify-center w-8 h-8 text-center text-white font-bold rounded-full mr-3 ${
-                  index === 0
-                    ? "bg-yellow-500"
-                    : index === 1
-                    ? "bg-gray-400"
-                    : index === 2
-                    ? "bg-orange-500"
-                    : "bg-blue-500"
-                }`}
-              >
-                {index + 1}
-              </span>
-              <span className="text-gray-700 font-medium">{player}</span>
-            </div>
-            <span className="text-gray-600 font-semibold">{score} pts</span>
-          </li>
-        ))}
-      </ul>
+    <div className="space-y-4">
+      {sortedPlayers.map(({ name, score, rank }) => (
+        <div
+          key={name}
+          className="flex items-center gap-4 p-3 bg-gradient-to-r from-white to-gray-50 rounded-lg shadow-sm border border-gray-100 hover:shadow-md transition-shadow"
+        >
+          <div className="flex items-center justify-center w-8">
+            {getRankIcon(rank)}
+          </div>
+          <div className="flex-1">
+            <h3 className="font-semibold text-gray-800">{name}</h3>
+          </div>
+          <div className="text-lg font-bold text-yellow-600">{score} pts</div>
+        </div>
+      ))}
     </div>
   );
-}
+};
+
+export default PlayerScores;

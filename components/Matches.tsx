@@ -47,18 +47,35 @@ export default function Matches({
   const [openPopovers, setOpenPopovers] = useState<{ [key: string]: boolean }>(
     {}
   );
+  const [showButtons, setShowButtons] = useState(false);
 
   useEffect(() => {
-    // Initialize editingScores with current match scores
+    // Simply initialize editing scores whenever matches change
     const initialEditingScores: EditingScores = {};
     matches.forEach((match, index) => {
       initialEditingScores[index] = {
-        team1: match.team1Score,
-        team2: match.team2Score,
+        team1: match.team1Score || 0,
+        team2: match.team2Score || 0,
       };
     });
     setEditingScores(initialEditingScores);
-  }, [matches]);
+  }, [matches]); // Only depend on matches
+
+  useEffect(() => {
+    const handleScroll = () => {
+      const scrollPosition = window.scrollY;
+      const windowHeight = window.innerHeight;
+      const documentHeight = document.documentElement.scrollHeight;
+
+      setShowButtons(
+        scrollPosition > 100 ||
+          scrollPosition + windowHeight >= documentHeight - 100
+      );
+    };
+
+    window.addEventListener("scroll", handleScroll);
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
 
   const handleScoreChange = (
     index: number,
@@ -120,13 +137,15 @@ export default function Matches({
     // Update state sequentially
     onUpdateScores(newScores); // First, update the scores
     onUpdateMatches(updatedMatches); // Then, update the matches
+    onNextRound(); // Finally, move to next round
+  };
 
-    // Ensure the next round only occurs after updates
-    onNextRound();
+  const areAllScoresValid = () => {
+    return matches.every((_, index) => isScoreValid(index));
   };
 
   return (
-    <div className="space-y-8 mt-8 px-4 max-w-4xl mx-auto ">
+    <div className="space-y-8 mt-8 px-4 max-w-4xl mx-auto">
       <Card className="bg-gradient-to-r from-red-500 to-yellow-500">
         <CardHeader className="text-center">
           <CardTitle className="bg-transparent text-3xl rounded-lg font-extrabold text-gray-800 flex items-center justify-center gap-2">
@@ -246,10 +265,12 @@ export default function Matches({
           ))}
         </CardContent>
       </Card>
+
       <div className="flex justify-center">
         <Button
           onClick={handleNextRound}
-          className="text-lg bg-green-500 hover:bg-green-600"
+          className="text-lg bg-green-500 hover:bg-green-600 disabled:opacity-50 disabled:cursor-not-allowed disabled:bg-gray-500 w-full"
+          disabled={!areAllScoresValid()}
         >
           Submit Scores & Next Round <ChevronRight className="ml-2" />
         </Button>

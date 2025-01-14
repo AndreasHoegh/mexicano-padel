@@ -36,6 +36,10 @@ export default function NumOfPlayersForm({ onSubmit }: NumOfPlayersFormProps) {
 
         <Button type="submit">Confirm</Button>
       </form>
+      <p className="text-center text-sm text-gray-600 mt-2">
+        Minimum 4 players required. Players will rotate sitting out if the total
+        is not a multiple of 4.
+      </p>
     </div>
   );
 }
