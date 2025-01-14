@@ -114,7 +114,7 @@ export default function App() {
   );
 
   return (
-    <div className="m-4 w-72 sm:w-auto mx-auto">
+    <div className="m-4 sm:w-auto mx-auto">
       {!isTournamentNameSet && (
         <TournamentNameForm onSubmit={handleTournamentNameSubmit} />
       )}

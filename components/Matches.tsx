@@ -1,6 +1,8 @@
 import { useState, useEffect, useCallback } from "react";
 import { Button } from "./ui/button";
 import VSLogo from "./VSLogo";
+import padelIcon from "../app/assets/padelIcon.png";
+import Image from "next/image";
 
 interface Match {
   team1: string[];
@@ -115,9 +117,13 @@ export default function Matches({
 
   return (
     <div className="mt-8">
-      <h2 className="text-center text-lg font-bold mb-8">
-        Round {round} Matches:
+      <h2 className="text-center text-2xl font-extrabold mb-8 text-blue-700">
+        <span className=" bg-blue-100 px-4 py-2 rounded-lg shadow-md flex gap-2 justify-center">
+          <Image src={padelIcon} alt="Padel Icon" width={32} height={32} />
+          Round {round} Matches
+        </span>
       </h2>
+
       {matches.map((match, index) => (
         <div
           key={index}
