@@ -1,11 +1,15 @@
 import { useState, useEffect, useCallback } from "react";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ChevronRight } from "lucide-react";
 import Image from "next/image";
 import padelIcon from "../app/assets/padelIcon.png";
 import VSLogo from "./VSLogo";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
 
 interface Match {
   team1: string[];
@@ -117,7 +121,9 @@ export default function Matches({
     },
     [editingScores]
   );
-
+  const [openPopovers, setOpenPopovers] = useState<{ [key: number]: boolean }>(
+    {}
+  );
   return (
     <div className="space-y-8 mt-8 px-4 max-w-4xl mx-auto">
       <Card className="bg-transparent">
@@ -157,25 +163,48 @@ export default function Matches({
                           {match.team1Score}
                         </span>
                       ) : (
-                        <Input
-                          className="w-12 sm:w-16 text-center text-lg sm:text-xl border border-red-950 bg-red-700 text-white"
-                          type="number"
-                          placeholder="0"
-                          onFocus={(e) => e.target.select()}
-                          value={
-                            editingScores[index]?.team1 ?? match.team1Score
-                          }
-                          min="0"
-                          max="21"
-                          onChange={(e) =>
-                            handleScoreChange(
-                              index,
-                              "team1",
-                              parseInt(e.target.value, 10) || 0
-                            )
-                          }
-                          disabled={match.isScoreSubmitted}
-                        />
+                        // Replace the Input component with this:
+                        // Replace the Popover component with this:
+                        <Popover
+                          open={openPopovers[index]}
+                          onOpenChange={(open) => {
+                            setOpenPopovers((prev) => ({
+                              ...prev,
+                              [index]: open,
+                            }));
+                          }}
+                        >
+                          <PopoverTrigger asChild>
+                            <Button
+                              variant="outline"
+                              className="w-12 sm:w-16 text-center text-lg sm:text-xl border border-red-950 bg-red-700 text-white"
+                              disabled={match.isScoreSubmitted}
+                            >
+                              {editingScores[index]?.team1 ?? match.team1Score}
+                            </Button>
+                          </PopoverTrigger>
+                          <PopoverContent className="w-48 p-2">
+                            <div className="grid grid-cols-4 gap-2">
+                              {Array.from({ length: 22 }, (_, i) => (
+                                <Button
+                                  key={i}
+                                  variant="outline"
+                                  className="h-8 w-8"
+                                  onClick={() => {
+                                    handleScoreChange(index, "team1", i);
+                                    // Close this specific popover
+                                    setOpenPopovers((prev) => ({
+                                      ...prev,
+                                      [index]: false,
+                                    }));
+                                  }}
+                                >
+                                  {i}
+                                </Button>
+                              ))}
+                            </div>
+                          </PopoverContent>
+                        </Popover>
                       )}
                       <span className="text-2xl font-bold text-blue-700">
                         <VSLogo />
@@ -185,25 +214,45 @@ export default function Matches({
                           {match.team2Score}
                         </span>
                       ) : (
-                        <Input
-                          className="w-12 sm:w-16 text-center text-lg sm:text-xl border border-blue-900 bg-blue-800 text-white"
-                          type="number"
-                          placeholder="0"
-                          onFocus={(e) => e.target.select()}
-                          value={
-                            editingScores[index]?.team2 ?? match.team2Score
-                          }
-                          min="0"
-                          max="21"
-                          onChange={(e) =>
-                            handleScoreChange(
-                              index,
-                              "team2",
-                              parseInt(e.target.value, 10) || 0
-                            )
-                          }
-                          disabled={match.isScoreSubmitted}
-                        />
+                        <Popover
+                          open={openPopovers[`${index}-team2`]}
+                          onOpenChange={(open) => {
+                            setOpenPopovers((prev) => ({
+                              ...prev,
+                              [`${index}-team2`]: open,
+                            }));
+                          }}
+                        >
+                          <PopoverTrigger asChild>
+                            <Button
+                              variant="outline"
+                              className="w-12 sm:w-16 text-center text-lg sm:text-xl border border-blue-900 bg-blue-800 text-white"
+                              disabled={match.isScoreSubmitted}
+                            >
+                              {editingScores[index]?.team2 ?? match.team2Score}
+                            </Button>
+                          </PopoverTrigger>
+                          <PopoverContent className="w-48 p-2">
+                            <div className="grid grid-cols-4 gap-2">
+                              {Array.from({ length: 22 }, (_, i) => (
+                                <Button
+                                  key={i}
+                                  variant="outline"
+                                  className="h-8 w-8"
+                                  onClick={() => {
+                                    handleScoreChange(index, "team2", i);
+                                    setOpenPopovers((prev) => ({
+                                      ...prev,
+                                      [`${index}-team2`]: false,
+                                    }));
+                                  }}
+                                >
+                                  {i}
+                                </Button>
+                              ))}
+                            </div>
+                          </PopoverContent>
+                        </Popover>
                       )}
                     </div>
                     <div className="w-full sm:flex-1 text-center">
@@ -220,7 +269,7 @@ export default function Matches({
                     {match.isScoreSubmitted ? (
                       <Button
                         type="button"
-                        className="bg-yellow-500 text-white"
+                        className=" text-white"
                         onClick={(e) => {
                           e.preventDefault();
                           const updatedScores = { ...scores };
