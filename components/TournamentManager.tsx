@@ -33,13 +33,6 @@ interface TournamentManagerProps {
   mode: "individual" | "team";
 }
 
-interface EditingScores {
-  [key: number]: {
-    team1: number;
-    team2: number;
-  };
-}
-
 export default function TournamentManager({
   initialPlayers,
   initialCourts,
@@ -57,7 +50,6 @@ export default function TournamentManager({
   const [sittingOutCounts, setSittingOutCounts] = useState<{
     [key: string]: number;
   }>({});
-  const [editingScores, setEditingScores] = useState<EditingScores>({});
 
   const generateMatchesForNextRound = useCallback(
     (currentScores: Scores): Match[] => {
@@ -175,8 +167,6 @@ export default function TournamentManager({
         /* Implement if needed */
       }}
       canGoBack={round > 1}
-      editingScores={editingScores}
-      setEditingScores={setEditingScores}
     />
   );
 }

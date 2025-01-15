@@ -75,10 +75,8 @@ export default function App() {
       scores: Scores;
       round: number;
       sittingOutPlayers: string[];
-      editingScores: EditingScores;
     }>
   >([]);
-  const [editingScores, setEditingScores] = useState<EditingScores>({});
 
   const STORAGE_KEY = "tournament_state";
 
@@ -329,42 +327,51 @@ export default function App() {
 
   const nextRound = useCallback(() => {
     if (!checkTournamentEnd()) {
+      // Save current state to history BEFORE clearing matches
       setTournamentHistory((prevHistory) => {
         const newState = {
           matches: matches.map((match) => ({ ...match })),
           scores: JSON.parse(JSON.stringify(scores)),
           round,
           sittingOutPlayers: [...sittingOutPlayers],
-          editingScores: JSON.parse(JSON.stringify(editingScores)),
         };
         return [...prevHistory, newState];
       });
 
+      // Then clear matches and increment round
       setMatches([]);
       setRound((prevRound) => prevRound + 1);
     }
-  }, [
-    checkTournamentEnd,
-    matches,
-    scores,
-    round,
-    sittingOutPlayers,
-    editingScores,
-  ]);
+  }, [checkTournamentEnd, matches, scores, round, sittingOutPlayers]);
+
+  const handleNextRound = () => {
+    // First save current state
+    nextRound();
+
+    // Then update scores and matches for the new round
+    const newScores = { ...scores };
+    // ... rest of score updating logic
+  };
 
   const previousRound = useCallback(() => {
     if (tournamentHistory.length > 0) {
       const previousState = tournamentHistory[tournamentHistory.length - 1];
+      console.log("PREVIOUS ROUND - State we're restoring to:", previousState);
+      console.log("PREVIOUS ROUND - Current scores before restore:", scores);
 
       setMatches([...previousState.matches]);
       setScores(JSON.parse(JSON.stringify(previousState.scores)));
       setRound(previousState.round);
       setSittingOutPlayers([...previousState.sittingOutPlayers]);
-      setEditingScores(JSON.parse(JSON.stringify(previousState.editingScores)));
+
+      console.log(
+        "PREVIOUS ROUND - Scores after restore:",
+        previousState.scores
+      );
 
       setTournamentHistory((prevHistory) => prevHistory.slice(0, -1));
     }
-  }, [tournamentHistory]);
+  }, [tournamentHistory, scores]);
   const handleTournamentNameSubmit: SubmitHandler<TournamentNameFormData> = (
     data
   ) => {
@@ -605,8 +612,6 @@ export default function App() {
                 onStartFinalRound={startFinalRound}
                 onPreviousRound={previousRound}
                 canGoBack={tournamentHistory.length > 0}
-                editingScores={editingScores}
-                setEditingScores={setEditingScores}
               />
 
               <div className="mt-8 flex flex-col justify-center gap-3">

@@ -62,8 +62,6 @@ interface MatchesProps {
   sittingOutPlayers: string[];
   onStartFinalRound: (editingScores: EditingScores) => void;
   canGoBack: boolean;
-  editingScores: EditingScores;
-  setEditingScores: React.Dispatch<React.SetStateAction<EditingScores>>;
 }
 
 export default function Matches({
@@ -81,36 +79,31 @@ export default function Matches({
   sittingOutPlayers,
   onStartFinalRound,
   canGoBack,
-  editingScores,
-  setEditingScores,
 }: MatchesProps) {
   console.log("Rendering Matches Component");
   console.log("Matches:", matches);
 
+  const [editingScores, setEditingScores] = useState<EditingScores>({});
   const [openPopovers, setOpenPopovers] = useState<{ [key: string]: boolean }>(
     {}
   );
 
   useEffect(() => {
-    // Only reset scores if matches change and we're not restoring previous state
-    if (matches.length > 0 && Object.keys(editingScores).length === 0) {
-      const initialEditingScores: EditingScores = {};
-      matches.forEach((match, index) => {
-        initialEditingScores[index] = {
-          team1: 0,
-          team2: 0,
-        };
-      });
-      setEditingScores(initialEditingScores);
-    }
-  }, [matches, editingScores, setEditingScores]);
+    const initialEditingScores: EditingScores = {};
+    matches.forEach((match, index) => {
+      initialEditingScores[index] = {
+        team1: 0,
+        team2: 0,
+      };
+    });
+    setEditingScores(initialEditingScores);
+  }, [matches]); // Only run when matches change
 
   const handleScoreChange = (
     index: number,
     team: "team1" | "team2",
     value: number
   ) => {
-    // Update the score
     setEditingScores((prev) => ({
       ...prev,
       [index]: {
@@ -118,13 +111,6 @@ export default function Matches({
         [team]: value,
         [team === "team1" ? "team2" : "team1"]: pointsPerMatch - value,
       },
-    }));
-
-    // Close the specific popover immediately
-    setOpenPopovers((prev) => ({
-      ...prev,
-      [index]: false,
-      [`${index}-team2`]: false,
     }));
   };
 
@@ -147,7 +133,10 @@ export default function Matches({
       return;
     }
 
-    // Update scores and matches
+    // First save the current state by calling nextRound
+    onNextRound();
+
+    // Then update scores and matches
     const newScores = { ...scores };
 
     // Mark sitting out players for this round
@@ -192,19 +181,23 @@ export default function Matches({
       isScoreSubmitted: true,
     }));
 
-    // Update the scores and matches
+    // Update the scores and matches last
     onUpdateScores(newScores);
     onUpdateMatches(updatedMatches);
-
-    // Reset editing scores to empty object before moving to next round
-    setEditingScores({});
-
-    // Move to next round
-    onNextRound();
   };
 
   const areAllScoresValid = () => {
     return matches.every((_, index) => isScoreValid(index));
+  };
+
+  const handlePreviousRound = () => {
+    const confirmed = window.confirm(
+      "Warning: Going back will delete the scores from the current and previous round. Are you sure you want to go back?"
+    );
+
+    if (confirmed) {
+      onPreviousRound();
+    }
   };
 
   return (
@@ -278,6 +271,10 @@ export default function Matches({
                                   className="h-8 w-8"
                                   onClick={() => {
                                     handleScoreChange(index, "team1", i);
+                                    setOpenPopovers((prev) => ({
+                                      ...prev,
+                                      [index]: false,
+                                    }));
                                   }}
                                 >
                                   {i}
@@ -318,6 +315,10 @@ export default function Matches({
                                   className="h-8 w-8"
                                   onClick={() => {
                                     handleScoreChange(index, "team2", i);
+                                    setOpenPopovers((prev) => ({
+                                      ...prev,
+                                      [`${index}-team2`]: false,
+                                    }));
                                   }}
                                 >
                                   {i}
@@ -352,24 +353,22 @@ export default function Matches({
       <div className="flex flex-col items-center gap-4">
         {!isLastRound ? (
           <>
-            <div className="flex justify-center w-full max-w-[200px]">
-              <div className="flex gap-4 w-full justify-center">
-                {canGoBack && (
-                  <Button
-                    onClick={onPreviousRound}
-                    className="text-lg bg-gray-500 hover:bg-gray-600"
-                  >
-                    <ChevronLeft /> Previous
-                  </Button>
-                )}
+            <div className="flex gap-4">
+              {canGoBack && (
                 <Button
-                  onClick={handleNextRound}
-                  className="text-lg bg-green-500 hover:bg-green-600 disabled:opacity-50 disabled:cursor-not-allowed disabled:bg-gray-500 flex-1"
-                  disabled={!areAllScoresValid()}
+                  onClick={handlePreviousRound}
+                  className="text-lg bg-gray-500 hover:bg-gray-600"
                 >
-                  Next <ChevronRight className="ml-2" />
+                  <ChevronLeft /> Previous
                 </Button>
-              </div>
+              )}
+              <Button
+                onClick={handleNextRound}
+                className="text-lg bg-green-500 hover:bg-green-600 disabled:opacity-50 disabled:cursor-not-allowed disabled:bg-gray-500"
+                disabled={!areAllScoresValid()}
+              >
+                Next <ChevronRight />
+              </Button>
             </div>
             {mode === "individual" && (
               <Button
@@ -385,7 +384,7 @@ export default function Matches({
                 className="text-lg bg-purple-500 hover:bg-purple-600 disabled:opacity-50 disabled:cursor-not-allowed"
                 disabled={!areAllScoresValid()}
               >
-                Play Final Round
+                Final Round
               </Button>
             )}
           </>
