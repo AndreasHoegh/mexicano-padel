@@ -49,14 +49,7 @@ export default function App() {
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [names, setNames] = useState<string[]>([]);
   const [matches, setMatches] = useState<Match[]>([]);
-  const [scores, setScores] = useState<{
-    [key: string]: {
-      pointsPerRound: (number | "sitout")[];
-      points: number;
-      wins: number;
-      matchesPlayed: number;
-    };
-  }>({});
+  const [scores, setScores] = useState<Scores>({});
   const [round, setRound] = useState<number>(1);
   const [tournamentName, setTournamentName] = useState<string>("");
   const [isTournamentNameSet, setIsTournamentNameSet] =
@@ -76,6 +69,16 @@ export default function App() {
   const [finalPairingPattern, setFinalPairingPattern] = useState<number[]>([
     0, 1, 2, 3,
   ]);
+  const [tournamentHistory, setTournamentHistory] = useState<
+    Array<{
+      matches: Match[];
+      scores: Scores;
+      round: number;
+      sittingOutPlayers: string[];
+      editingScores: EditingScores;
+    }>
+  >([]);
+  const [editingScores, setEditingScores] = useState<EditingScores>({});
 
   const STORAGE_KEY = "tournament_state";
 
@@ -97,6 +100,7 @@ export default function App() {
       numberOfPlayers,
       isTournamentNameSet,
       arePlayerNamesSet,
+      tournamentHistory,
     };
     localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
   };
@@ -121,6 +125,7 @@ export default function App() {
       setNumberOfPlayers(state.numberOfPlayers);
       setIsTournamentNameSet(state.isTournamentNameSet);
       setArePlayerNamesSet(state.arePlayerNamesSet);
+      setTournamentHistory(state.tournamentHistory || []);
       return true;
     }
     return false;
@@ -151,6 +156,7 @@ export default function App() {
     numberOfPlayers,
     isTournamentNameSet,
     arePlayerNamesSet,
+    tournamentHistory,
   ]);
 
   useEffect(() => {
@@ -301,19 +307,9 @@ export default function App() {
     setMatches([...updatedMatches]);
   }, []);
 
-  const updateScores = useCallback(
-    (updatedScores: {
-      [key: string]: {
-        points: number;
-        wins: number;
-        matchesPlayed: number;
-        pointsPerRound: (number | "sitout")[];
-      };
-    }) => {
-      setScores(updatedScores);
-    },
-    []
-  );
+  const updateScores = useCallback((updatedScores: Scores) => {
+    setScores(updatedScores);
+  }, []);
 
   useEffect(() => {
     if (round > 1 && names.length > 0 && matches.length === 0) {
@@ -333,11 +329,42 @@ export default function App() {
 
   const nextRound = useCallback(() => {
     if (!checkTournamentEnd()) {
-      setMatches([]); // Clear matches before incrementing round
+      setTournamentHistory((prevHistory) => {
+        const newState = {
+          matches: matches.map((match) => ({ ...match })),
+          scores: JSON.parse(JSON.stringify(scores)),
+          round,
+          sittingOutPlayers: [...sittingOutPlayers],
+          editingScores: JSON.parse(JSON.stringify(editingScores)),
+        };
+        return [...prevHistory, newState];
+      });
+
+      setMatches([]);
       setRound((prevRound) => prevRound + 1);
     }
-  }, [checkTournamentEnd]);
+  }, [
+    checkTournamentEnd,
+    matches,
+    scores,
+    round,
+    sittingOutPlayers,
+    editingScores,
+  ]);
 
+  const previousRound = useCallback(() => {
+    if (tournamentHistory.length > 0) {
+      const previousState = tournamentHistory[tournamentHistory.length - 1];
+
+      setMatches([...previousState.matches]);
+      setScores(JSON.parse(JSON.stringify(previousState.scores)));
+      setRound(previousState.round);
+      setSittingOutPlayers([...previousState.sittingOutPlayers]);
+      setEditingScores(JSON.parse(JSON.stringify(previousState.editingScores)));
+
+      setTournamentHistory((prevHistory) => prevHistory.slice(0, -1));
+    }
+  }, [tournamentHistory]);
   const handleTournamentNameSubmit: SubmitHandler<TournamentNameFormData> = (
     data
   ) => {
@@ -576,9 +603,13 @@ export default function App() {
                 mode={mode}
                 sittingOutPlayers={sittingOutPlayers}
                 onStartFinalRound={startFinalRound}
+                onPreviousRound={previousRound}
+                canGoBack={tournamentHistory.length > 0}
+                editingScores={editingScores}
+                setEditingScores={setEditingScores}
               />
 
-              <div className="mt-8 flex flex-col sm:flex-row justify-center gap-3">
+              <div className="mt-8 flex flex-col justify-center gap-3">
                 <button
                   onClick={openModal}
                   className="bg-yellow-600 hover:bg-yellow-700 text-white px-6 py-3 rounded-lg shadow-lg flex items-center justify-center gap-2"

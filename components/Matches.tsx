@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { ChevronRight } from "lucide-react";
+import { ChevronRight, ChevronLeft } from "lucide-react";
 import Image from "next/image";
 import padelIcon from "../app/assets/padelIcon.png";
 import VSLogo from "./VSLogo";
@@ -54,12 +54,16 @@ interface MatchesProps {
   }) => void;
   round: number;
   onNextRound: () => void;
+  onPreviousRound: () => void;
   pointsPerMatch: number;
   isLastRound: boolean;
   courts: Court[];
   mode: "individual" | "team";
   sittingOutPlayers: string[];
   onStartFinalRound: (editingScores: EditingScores) => void;
+  canGoBack: boolean;
+  editingScores: EditingScores;
+  setEditingScores: React.Dispatch<React.SetStateAction<EditingScores>>;
 }
 
 export default function Matches({
@@ -69,37 +73,44 @@ export default function Matches({
   onUpdateScores,
   round,
   onNextRound,
+  onPreviousRound,
   pointsPerMatch,
   isLastRound,
   courts,
   mode,
   sittingOutPlayers,
   onStartFinalRound,
+  canGoBack,
+  editingScores,
+  setEditingScores,
 }: MatchesProps) {
   console.log("Rendering Matches Component");
   console.log("Matches:", matches);
 
-  const [editingScores, setEditingScores] = useState<EditingScores>({});
   const [openPopovers, setOpenPopovers] = useState<{ [key: string]: boolean }>(
     {}
   );
 
   useEffect(() => {
-    const initialEditingScores: EditingScores = {};
-    matches.forEach((match, index) => {
-      initialEditingScores[index] = {
-        team1: match.team1Score || 0,
-        team2: match.team2Score || 0,
-      };
-    });
-    setEditingScores(initialEditingScores);
-  }, [matches]); // Only run when matches change
+    // Only reset scores if matches change and we're not restoring previous state
+    if (matches.length > 0 && Object.keys(editingScores).length === 0) {
+      const initialEditingScores: EditingScores = {};
+      matches.forEach((match, index) => {
+        initialEditingScores[index] = {
+          team1: 0,
+          team2: 0,
+        };
+      });
+      setEditingScores(initialEditingScores);
+    }
+  }, [matches, editingScores, setEditingScores]);
 
   const handleScoreChange = (
     index: number,
     team: "team1" | "team2",
     value: number
   ) => {
+    // Update the score
     setEditingScores((prev) => ({
       ...prev,
       [index]: {
@@ -107,6 +118,13 @@ export default function Matches({
         [team]: value,
         [team === "team1" ? "team2" : "team1"]: pointsPerMatch - value,
       },
+    }));
+
+    // Close the specific popover immediately
+    setOpenPopovers((prev) => ({
+      ...prev,
+      [index]: false,
+      [`${index}-team2`]: false,
     }));
   };
 
@@ -122,35 +140,30 @@ export default function Matches({
   };
 
   const handleNextRound = () => {
-    // Validate all scores
-    const allScoresValid = matches.every((_, index) => isScoreValid(index));
-
-    if (!allScoresValid) {
+    if (!areAllScoresValid()) {
       alert(
         "Please ensure all match scores are valid before proceeding to the next round."
       );
       return;
     }
 
-    // Update scores with points, wins, and matches played
+    // Update scores and matches
     const newScores = { ...scores };
 
-    // First, mark sitting out players for this round
+    // Mark sitting out players for this round
     sittingOutPlayers.forEach((player) => {
       newScores[player].pointsPerRound[round - 1] = "sitout";
     });
 
-    // Then update active players' scores
+    // Update active players' scores
     matches.forEach((match, index) => {
-      // Increment matches played for all players in this match
+      const team1Score = editingScores[index].team1;
+      const team2Score = editingScores[index].team2;
+
       [...match.team1, ...match.team2].forEach((player) => {
         newScores[player].matchesPlayed += 1;
       });
 
-      const team1Score = editingScores[index].team1;
-      const team2Score = editingScores[index].team2;
-
-      // Update points and points per round
       match.team1.forEach((player) => {
         newScores[player].points += team1Score;
         newScores[player].pointsPerRound[round - 1] = team1Score;
@@ -160,7 +173,6 @@ export default function Matches({
         newScores[player].pointsPerRound[round - 1] = team2Score;
       });
 
-      // Update wins
       if (team1Score > team2Score) {
         match.team1.forEach((player) => {
           newScores[player].wins += 1;
@@ -172,7 +184,7 @@ export default function Matches({
       }
     });
 
-    // Update matches and move to next round
+    // Update matches
     const updatedMatches = matches.map((match, index) => ({
       ...match,
       team1Score: editingScores[index].team1,
@@ -180,8 +192,14 @@ export default function Matches({
       isScoreSubmitted: true,
     }));
 
+    // Update the scores and matches
     onUpdateScores(newScores);
     onUpdateMatches(updatedMatches);
+
+    // Reset editing scores to empty object before moving to next round
+    setEditingScores({});
+
+    // Move to next round
     onNextRound();
   };
 
@@ -194,7 +212,12 @@ export default function Matches({
       <Card className="bg-gradient-to-r from-red-500 to-yellow-500">
         <CardHeader className="text-center">
           <CardTitle className="bg-transparent text-3xl rounded-lg font-extrabold text-gray-800 flex items-center justify-center gap-2">
-            <Image src={padelIcon} alt="Padel Icon" width={32} height={32} />
+            <Image
+              src={padelIcon || "/placeholder.svg"}
+              alt="Padel Icon"
+              width={32}
+              height={32}
+            />
             <span className="px-4 py-2">
               {isLastRound ? "Final Round" : `Round ${round}`}
             </span>
@@ -255,10 +278,6 @@ export default function Matches({
                                   className="h-8 w-8"
                                   onClick={() => {
                                     handleScoreChange(index, "team1", i);
-                                    setOpenPopovers((prev) => ({
-                                      ...prev,
-                                      [index]: false,
-                                    }));
                                   }}
                                 >
                                   {i}
@@ -299,10 +318,6 @@ export default function Matches({
                                   className="h-8 w-8"
                                   onClick={() => {
                                     handleScoreChange(index, "team2", i);
-                                    setOpenPopovers((prev) => ({
-                                      ...prev,
-                                      [`${index}-team2`]: false,
-                                    }));
                                   }}
                                 >
                                   {i}
@@ -334,17 +349,28 @@ export default function Matches({
         </CardContent>
       </Card>
 
-      <div className="flex justify-center gap-4 flex-wrap">
+      <div className="flex flex-col items-center gap-4">
         {!isLastRound ? (
           <>
-            <Button
-              onClick={handleNextRound}
-              className="text-lg bg-green-500 hover:bg-green-600 disabled:opacity-50 disabled:cursor-not-allowed disabled:bg-gray-500"
-              disabled={!areAllScoresValid()}
-            >
-              Submit Scores & Next Round <ChevronRight className="ml-2" />
-            </Button>
-
+            <div className="flex justify-center w-full max-w-[200px]">
+              <div className="flex gap-4 w-full justify-center">
+                {canGoBack && (
+                  <Button
+                    onClick={onPreviousRound}
+                    className="text-lg bg-gray-500 hover:bg-gray-600"
+                  >
+                    <ChevronLeft /> Previous
+                  </Button>
+                )}
+                <Button
+                  onClick={handleNextRound}
+                  className="text-lg bg-green-500 hover:bg-green-600 disabled:opacity-50 disabled:cursor-not-allowed disabled:bg-gray-500 flex-1"
+                  disabled={!areAllScoresValid()}
+                >
+                  Next <ChevronRight className="ml-2" />
+                </Button>
+              </div>
+            </div>
             {mode === "individual" && (
               <Button
                 onClick={() => {
@@ -359,7 +385,7 @@ export default function Matches({
                 className="text-lg bg-purple-500 hover:bg-purple-600 disabled:opacity-50 disabled:cursor-not-allowed"
                 disabled={!areAllScoresValid()}
               >
-                Submit Scores & Final Round
+                Play Final Round
               </Button>
             )}
           </>
