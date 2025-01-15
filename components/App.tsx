@@ -344,15 +344,6 @@ export default function App() {
     }
   }, [checkTournamentEnd, matches, scores, round, sittingOutPlayers]);
 
-  const handleNextRound = () => {
-    // First save current state
-    nextRound();
-
-    // Then update scores and matches for the new round
-    const newScores = { ...scores };
-    // ... rest of score updating logic
-  };
-
   const previousRound = useCallback(() => {
     if (tournamentHistory.length > 0) {
       const previousState = tournamentHistory[tournamentHistory.length - 1];
