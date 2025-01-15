@@ -32,7 +32,9 @@ interface MatchCardProps {
   editingScores: EditingScores;
   pointsPerMatch: number;
   openPopovers: { [key: string]: boolean };
-  setOpenPopovers: (value: { [key: string]: boolean }) => void;
+  setOpenPopovers: React.Dispatch<
+    React.SetStateAction<{ [key: string]: boolean }>
+  >;
   handleScoreChange: (
     index: number,
     team: "team1" | "team2",
@@ -81,7 +83,20 @@ function ScoreControls({
   openPopovers,
   setOpenPopovers,
   handleScoreChange,
-}: any) {
+}: {
+  index: number;
+  editingScores: EditingScores;
+  pointsPerMatch: number;
+  openPopovers: { [key: string]: boolean };
+  setOpenPopovers: React.Dispatch<
+    React.SetStateAction<{ [key: string]: boolean }>
+  >;
+  handleScoreChange: (
+    index: number,
+    team: "team1" | "team2",
+    value: number
+  ) => void;
+}) {
   return (
     <div className="flex flex-row items-center gap-4">
       {/* Team 1 Score */}

@@ -124,7 +124,7 @@ export default function DetailsModal({
                 </tr>
               </thead>
               <tbody>
-                {sortedPlayers.map(([name, stats], index) => {
+                {sortedPlayers.map(([name], index) => {
                   const localStats = localScores[name];
                   return (
                     <tr key={name} className={`${getRowColor(index)}`}>

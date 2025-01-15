@@ -66,7 +66,7 @@ const BackButton = ({
 export default function App() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [numberOfPlayers, setNumberOfPlayers] = useState<number>(0);
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+
   const [names, setNames] = useState<string[]>([]);
   const [matches, setMatches] = useState<Match[]>([]);
   const [scores, setScores] = useState<Scores>({});
@@ -102,7 +102,7 @@ export default function App() {
     []
   );
   const [getRowColor, setGetRowColor] = useState<(index: number) => string>(
-    () => (index: number) => ""
+    () => () => ""
   );
 
   const STORAGE_KEY = "tournament_state";
@@ -371,25 +371,6 @@ export default function App() {
     }
   }, [checkTournamentEnd, matches, scores, round, sittingOutPlayers]);
 
-  const previousRound = useCallback(() => {
-    if (tournamentHistory.length > 0) {
-      const previousState = tournamentHistory[tournamentHistory.length - 1];
-      console.log("PREVIOUS ROUND - State we're restoring to:", previousState);
-      console.log("PREVIOUS ROUND - Current scores before restore:", scores);
-
-      setMatches([...previousState.matches]);
-      setScores(JSON.parse(JSON.stringify(previousState.scores)));
-      setRound(previousState.round);
-      setSittingOutPlayers([...previousState.sittingOutPlayers]);
-
-      console.log(
-        "PREVIOUS ROUND - Scores after restore:",
-        previousState.scores
-      );
-
-      setTournamentHistory((prevHistory) => prevHistory.slice(0, -1));
-    }
-  }, [tournamentHistory, scores]);
   const handleTournamentNameSubmit: SubmitHandler<TournamentNameFormData> = (
     data
   ) => {
@@ -476,6 +457,22 @@ export default function App() {
     setSittingOutPlayers([]);
     setSittingOutCounts({});
   };
+
+  useEffect(() => {
+    const sorted = Object.entries(scores).sort(
+      ([, a], [, b]) => b.points - a.points
+    );
+    setSortedPlayers(sorted);
+  }, [scores]);
+
+  useEffect(() => {
+    setGetRowColor(() => (index: number) => {
+      if (index === 0) return "bg-yellow-100";
+      if (index === 1) return "bg-gray-100";
+      if (index === 2) return "bg-orange-100";
+      return index % 2 === 0 ? "bg-white" : "bg-gray-50";
+    });
+  }, [sortedPlayers]);
 
   return (
     <div className="container mx-auto px-4 py-8 relative">
