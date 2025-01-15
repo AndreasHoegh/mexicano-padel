@@ -39,6 +39,7 @@ interface MatchesProps {
     [key: string]: {
       points: number;
       wins: number;
+      matchesPlayed: number;
     };
   };
   onUpdateMatches: (updatedMatches: Match[]) => void;
@@ -46,6 +47,7 @@ interface MatchesProps {
     [key: string]: {
       points: number;
       wins: number;
+      matchesPlayed: number;
     };
   }) => void;
   round: number;
@@ -68,22 +70,24 @@ export default function Matches({
   courts,
   mode,
 }: MatchesProps) {
+  console.log("Rendering Matches Component");
+  console.log("Matches:", matches);
+
   const [editingScores, setEditingScores] = useState<EditingScores>({});
   const [openPopovers, setOpenPopovers] = useState<{ [key: string]: boolean }>(
     {}
   );
 
   useEffect(() => {
-    // Initialize editing scores to 0 whenever matches change
     const initialEditingScores: EditingScores = {};
-    matches.forEach((_, index) => {
+    matches.forEach((match, index) => {
       initialEditingScores[index] = {
-        team1: 0,
-        team2: 0,
+        team1: match.team1Score || 0,
+        team2: match.team2Score || 0,
       };
     });
     setEditingScores(initialEditingScores);
-  }, [matches]); // Only depend on matches
+  }, [matches]); // Only run when matches change
 
   const handleScoreChange = (
     index: number,
@@ -122,9 +126,14 @@ export default function Matches({
       return;
     }
 
-    // Update scores with points and wins
+    // Update scores with points, wins, and matches played
     const newScores = { ...scores };
     matches.forEach((match, index) => {
+      // Increment matches played for all players in this match
+      [...match.team1, ...match.team2].forEach((player) => {
+        newScores[player].matchesPlayed += 1;
+      });
+
       const team1Score = editingScores[index].team1;
       const team2Score = editingScores[index].team2;
 

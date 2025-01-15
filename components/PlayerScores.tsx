@@ -7,6 +7,7 @@ interface PlayerScoresProps {
     [key: string]: {
       points: number;
       wins: number;
+      matchesPlayed: number;
     };
   };
 }
@@ -54,11 +55,12 @@ export default function PlayerScores({ scores }: PlayerScoresProps) {
             <span className="font-medium">
               {index + 1}. {name}
             </span>
-            <div className="space-x-4">
-              <span className="text-yellow-600">
-                {stats.wins} {stats.wins === 1 ? "win" : "wins"}
+            <div className="flex gap-4">
+              <span className="text-blue-600">
+                {stats.matchesPlayed} matches
               </span>
-              <span className="text-blue-600">{stats.points} points</span>
+              <span className="text-green-600">{stats.wins} wins</span>
+              <span className="text-purple-600">{stats.points} points</span>
             </div>
           </div>
         ))}

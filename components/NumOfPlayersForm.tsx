@@ -18,6 +18,7 @@ export default function NumOfPlayersForm({ onSubmit }: NumOfPlayersFormProps) {
 
   const onFormSubmit = (data: FormData) => {
     const count = parseInt(data["Number of players"]);
+    console.log("Form Submitted with Count:", count);
     onSubmit({
       mode,
       count: mode === "team" ? count * 2 : count,
@@ -71,6 +72,7 @@ export default function NumOfPlayersForm({ onSubmit }: NumOfPlayersFormProps) {
         </h2>
         <div className="flex justify-center">
           <input
+            defaultValue={8}
             type="number"
             min={mode === "team" ? 2 : 4}
             step={1}

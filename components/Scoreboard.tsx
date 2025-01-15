@@ -9,6 +9,7 @@ interface ScoreboardProps {
     [key: string]: {
       points: number;
       wins: number;
+      matchesPlayed: number;
     };
   };
 }
