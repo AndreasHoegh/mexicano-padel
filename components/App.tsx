@@ -13,6 +13,7 @@ import { Trophy } from "lucide-react";
 import { Button } from "./ui/button";
 import PlayerScores from "./PlayerScores";
 import { Court } from "../lib/types";
+import RestoreDialog from "./RestoreDialog";
 
 interface Match {
   team1: string[];
@@ -29,6 +30,7 @@ interface Scores {
     points: number;
     wins: number;
     matchesPlayed: number;
+    pointsPerRound: (number | "sitout")[];
     team?: string;
     teamName?: string;
   };
@@ -62,10 +64,99 @@ export default function App() {
   const [isPaused, setIsPaused] = useState(false);
   const [courts, setCourts] = useState<Court[]>([]);
   const [mode, setMode] = useState<"individual" | "team">("individual");
+  const [showRestoreDialog, setShowRestoreDialog] = useState(false);
+  const [finalPairingPattern, setFinalPairingPattern] = useState<number[]>([
+    0, 1, 2, 3,
+  ]);
+  const [finalRoundPattern, setFinalRoundPattern] = useState<number[]>([
+    0, 1, 2, 3,
+  ]);
+
+  const STORAGE_KEY = "tournament_state";
+
+  const saveTournamentState = () => {
+    const state = {
+      names,
+      matches,
+      scores,
+      round,
+      tournamentName,
+      sittingOutPlayers,
+      sittingOutCounts,
+      pointsPerMatch,
+      isFinished,
+      maxRounds,
+      isPaused,
+      courts,
+      mode,
+      numberOfPlayers,
+      isTournamentNameSet,
+      arePlayerNamesSet,
+    };
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+  };
+
+  const loadTournamentState = () => {
+    const savedState = localStorage.getItem(STORAGE_KEY);
+    if (savedState) {
+      const state = JSON.parse(savedState);
+      setNames(state.names);
+      setMatches(state.matches);
+      setScores(state.scores);
+      setRound(state.round);
+      setTournamentName(state.tournamentName);
+      setSittingOutPlayers(state.sittingOutPlayers);
+      setSittingOutCounts(state.sittingOutCounts);
+      setPointsPerMatch(state.pointsPerMatch);
+      setIsFinished(state.isFinished);
+      setMaxRounds(state.maxRounds);
+      setIsPaused(state.isPaused);
+      setCourts(state.courts);
+      setMode(state.mode);
+      setNumberOfPlayers(state.numberOfPlayers);
+      setIsTournamentNameSet(state.isTournamentNameSet);
+      setArePlayerNamesSet(state.arePlayerNamesSet);
+      return true;
+    }
+    return false;
+  };
+
+  useEffect(() => {
+    loadTournamentState();
+  }, []);
+
+  useEffect(() => {
+    if (isTournamentNameSet) {
+      saveTournamentState();
+    }
+  }, [
+    names,
+    matches,
+    scores,
+    round,
+    tournamentName,
+    sittingOutPlayers,
+    sittingOutCounts,
+    pointsPerMatch,
+    isFinished,
+    maxRounds,
+    isPaused,
+    courts,
+    mode,
+    numberOfPlayers,
+    isTournamentNameSet,
+    arePlayerNamesSet,
+  ]);
 
   useEffect(() => {
     window.scrollTo(0, 0);
   }, [isTournamentNameSet, numberOfPlayers, arePlayerNamesSet]);
+
+  useEffect(() => {
+    if (localStorage.getItem(STORAGE_KEY)) {
+      setShowRestoreDialog(true);
+    }
+  }, []);
 
   const onNumberSubmit = ({
     mode,
@@ -86,12 +177,16 @@ export default function App() {
   const openModal = () => setIsModalOpen(true);
   const closeModal = () => setIsModalOpen(false);
 
+  const isLastRound = useCallback(() => {
+    return maxRounds !== null && round === maxRounds;
+  }, [maxRounds, round]);
+
   const generateMatches = useCallback(
     (players: string[], courtsToUse = courts) => {
       const allUnits = [...players];
       const unitsPerMatch = mode === "team" ? 2 : 4;
 
-      // Sort by score for matchmaking
+      // Sort by score for matchmaking (except first round)
       const sortedUnits =
         round === 1
           ? shuffle(allUnits)
@@ -134,30 +229,55 @@ export default function App() {
       // Create matches using the active (ranked) units
       const newMatches: Match[] = [];
       for (let i = 0; i < numMatches; i++) {
-        const startIdx = i * unitsPerMatch;
         if (mode === "team") {
+          // Team mode logic remains the same
           newMatches.push({
-            team1: [activeUnits[startIdx]],
-            team2: [activeUnits[startIdx + 1]],
+            team1: [activeUnits[i * 2]],
+            team2: [activeUnits[i * 2 + 1]],
             team1Score: 0,
             team2Score: 0,
             isScoreSubmitted: false,
           });
         } else {
+          // Get the pattern for the current round
+          const pattern =
+            maxRounds !== null && round === maxRounds
+              ? finalPairingPattern
+              : getMatchPattern((round - 1) % 3);
+          const startIdx = i * 4;
+          const players = activeUnits.slice(startIdx, startIdx + 4);
+
           newMatches.push({
-            team1: [activeUnits[startIdx], activeUnits[startIdx + 2]],
-            team2: [activeUnits[startIdx + 1], activeUnits[startIdx + 3]],
+            team1: [players[pattern[0]], players[pattern[1]]],
+            team2: [players[pattern[2]], players[pattern[3]]],
             team1Score: 0,
             team2Score: 0,
             isScoreSubmitted: false,
           });
         }
       }
-
       setMatches(newMatches);
     },
-    [round, scores, mode, sittingOutCounts, courts]
+    [
+      round,
+      scores,
+      mode,
+      sittingOutCounts,
+      courts,
+      finalPairingPattern,
+      maxRounds,
+    ]
   );
+
+  // Add this function to get the pattern for each round
+  const getMatchPattern = (roundIndex: number): number[] => {
+    const patterns = [
+      [0, 1, 2, 3], // Round 1: 1&2 vs 3&4
+      [0, 2, 1, 3], // Round 2: 1&3 vs 2&4
+      [0, 3, 1, 2], // Round 3: 1&4 vs 2&3
+    ];
+    return patterns[roundIndex];
+  };
 
   const shuffle = (players: string[]): string[] => {
     const shuffledPlayers = [...players];
@@ -182,6 +302,7 @@ export default function App() {
         points: number;
         wins: number;
         matchesPlayed: number;
+        pointsPerRound: (number | "sitout")[];
       };
     }) => {
       setScores(updatedScores);
@@ -219,12 +340,68 @@ export default function App() {
     setIsTournamentNameSet(true);
   };
 
-  const isLastRound = useCallback(() => {
-    return maxRounds !== null && round === maxRounds;
-  }, [maxRounds, round]);
+  const startFinalRound = useCallback(
+    (editingScores: any) => {
+      // First update scores
+      const newScores = { ...scores };
+
+      // Mark sitting out players for this round
+      sittingOutPlayers.forEach((player) => {
+        newScores[player].pointsPerRound[round - 1] = "sitout";
+      });
+
+      // Update active players' scores
+      matches.forEach((match, index) => {
+        const team1Score = editingScores[index].team1;
+        const team2Score = editingScores[index].team2;
+
+        // Update matches played
+        [...match.team1, ...match.team2].forEach((player) => {
+          newScores[player].matchesPlayed += 1;
+        });
+
+        // Update points and points per round
+        match.team1.forEach((player) => {
+          newScores[player].points += team1Score;
+          newScores[player].pointsPerRound[round - 1] = team1Score;
+        });
+        match.team2.forEach((player) => {
+          newScores[player].points += team2Score;
+          newScores[player].pointsPerRound[round - 1] = team2Score;
+        });
+
+        // Update wins
+        if (team1Score > team2Score) {
+          match.team1.forEach((player) => {
+            newScores[player].wins += 1;
+          });
+        } else if (team2Score > team1Score) {
+          match.team2.forEach((player) => {
+            newScores[player].wins += 1;
+          });
+        }
+      });
+
+      // Update matches
+      const updatedMatches = matches.map((match, index) => ({
+        ...match,
+        team1Score: editingScores[index].team1,
+        team2Score: editingScores[index].team2,
+        isScoreSubmitted: true,
+      }));
+
+      // Update state
+      updateMatches(updatedMatches);
+      setScores(newScores);
+      setMatches([]);
+      setRound((prevRound) => prevRound + 1);
+      setMaxRounds(round + 1);
+    },
+    [matches, round, updateMatches, scores, sittingOutPlayers]
+  );
 
   return (
-    <div className="max-w-md mx-auto px-4 py-8 sm:px-6 md:max-w-2xl lg:max-w-4xl xl:max-w-6xl">
+    <div className="container mx-auto px-4 py-8">
       {!isTournamentNameSet && (
         <TournamentNameForm onSubmit={handleTournamentNameSubmit} />
       )}
@@ -267,6 +444,7 @@ export default function App() {
                     points: 0,
                     wins: 0,
                     matchesPlayed: 0,
+                    pointsPerRound: [],
                     team: `team${teamIndex + 1}`,
                     teamName: teamName,
                   };
@@ -279,6 +457,7 @@ export default function App() {
                   points: 0,
                   wins: 0,
                   matchesPlayed: 0,
+                  pointsPerRound: [],
                 };
               });
             }
@@ -295,6 +474,9 @@ export default function App() {
             // Just call generateMatches directly
             generateMatches(settings.playerNames, initialCourts);
             setArePlayerNamesSet(true);
+
+            // Update the final round pattern
+            setFinalPairingPattern(settings.finalRoundPattern);
           }}
         />
       )}
@@ -345,7 +527,10 @@ export default function App() {
               )}
               {isFinished && (
                 <Button
-                  onClick={() => window.location.reload()}
+                  onClick={() => {
+                    localStorage.removeItem(STORAGE_KEY);
+                    window.location.reload();
+                  }}
                   className="bg-blue-500 hover:bg-blue-600"
                 >
                   Start New Tournament
@@ -384,6 +569,8 @@ export default function App() {
                 isLastRound={isLastRound()}
                 courts={courts}
                 mode={mode}
+                sittingOutPlayers={sittingOutPlayers}
+                onStartFinalRound={startFinalRound}
               />
 
               <div className="mt-8 flex flex-col sm:flex-row justify-center gap-3">
@@ -411,6 +598,19 @@ export default function App() {
             </>
           )}
         </div>
+      )}
+
+      {showRestoreDialog && (
+        <RestoreDialog
+          onRestore={() => {
+            loadTournamentState();
+            setShowRestoreDialog(false);
+          }}
+          onNew={() => {
+            localStorage.removeItem(STORAGE_KEY);
+            setShowRestoreDialog(false);
+          }}
+        />
       )}
     </div>
   );

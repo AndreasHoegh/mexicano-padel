@@ -56,6 +56,8 @@ interface MatchesProps {
   isLastRound: boolean;
   courts: Court[];
   mode: "individual" | "team";
+  sittingOutPlayers: string[];
+  onStartFinalRound: (editingScores: EditingScores) => void;
 }
 
 export default function Matches({
@@ -69,6 +71,8 @@ export default function Matches({
   isLastRound,
   courts,
   mode,
+  sittingOutPlayers,
+  onStartFinalRound,
 }: MatchesProps) {
   console.log("Rendering Matches Component");
   console.log("Matches:", matches);
@@ -128,6 +132,13 @@ export default function Matches({
 
     // Update scores with points, wins, and matches played
     const newScores = { ...scores };
+
+    // First, mark sitting out players for this round
+    sittingOutPlayers.forEach((player) => {
+      newScores[player].pointsPerRound[round - 1] = "sitout";
+    });
+
+    // Then update active players' scores
     matches.forEach((match, index) => {
       // Increment matches played for all players in this match
       [...match.team1, ...match.team2].forEach((player) => {
@@ -137,12 +148,14 @@ export default function Matches({
       const team1Score = editingScores[index].team1;
       const team2Score = editingScores[index].team2;
 
-      // Update points
+      // Update points and points per round
       match.team1.forEach((player) => {
         newScores[player].points += team1Score;
+        newScores[player].pointsPerRound[round - 1] = team1Score;
       });
       match.team2.forEach((player) => {
         newScores[player].points += team2Score;
+        newScores[player].pointsPerRound[round - 1] = team2Score;
       });
 
       // Update wins
@@ -195,14 +208,18 @@ export default function Matches({
                   </div>
                   <div className="flex flex-col sm:flex-row items-center gap-4 sm:gap-8 w-full">
                     <div className="w-full sm:flex-1 text-center">
-                      <h3 className="font-semibold text-lg text-red-700">
+                      <h3 className="font-semibold text-lg text-red-700 truncate px-2">
                         {mode === "team" ? (
                           match.team1[0]
                         ) : (
                           <div className="flex sm:flex-col items-center justify-center sm:items-end">
-                            {match.team1[0]}
+                            <span className="truncate max-w-[120px]">
+                              {match.team1[0]}
+                            </span>
                             <span className="mx-2 sm:my-1 sm:mx-0">&</span>
-                            {match.team1[1]}
+                            <span className="truncate max-w-[120px]">
+                              {match.team1[1]}
+                            </span>
                           </div>
                         )}
                       </h3>
@@ -315,14 +332,44 @@ export default function Matches({
         </CardContent>
       </Card>
 
-      <div className="flex justify-center">
-        <Button
-          onClick={handleNextRound}
-          className="text-lg bg-green-500 hover:bg-green-600 disabled:opacity-50 disabled:cursor-not-allowed disabled:bg-gray-500 w-full"
-          disabled={!areAllScoresValid()}
-        >
-          Submit Scores & Next Round <ChevronRight className="ml-2" />
-        </Button>
+      <div className="flex justify-center gap-4 flex-wrap">
+        {!isLastRound ? (
+          <>
+            <Button
+              onClick={handleNextRound}
+              className="text-lg bg-green-500 hover:bg-green-600 disabled:opacity-50 disabled:cursor-not-allowed disabled:bg-gray-500"
+              disabled={!areAllScoresValid()}
+            >
+              Submit Scores & Next Round <ChevronRight className="ml-2" />
+            </Button>
+
+            {mode === "individual" && (
+              <Button
+                onClick={() => {
+                  if (areAllScoresValid()) {
+                    onStartFinalRound(editingScores);
+                  } else {
+                    alert(
+                      "Please ensure all match scores are valid before proceeding to the final round."
+                    );
+                  }
+                }}
+                className="text-lg bg-purple-500 hover:bg-purple-600 disabled:opacity-50 disabled:cursor-not-allowed"
+                disabled={!areAllScoresValid()}
+              >
+                Submit Scores & Final Round
+              </Button>
+            )}
+          </>
+        ) : (
+          <Button
+            onClick={handleNextRound}
+            className="text-lg bg-green-500 hover:bg-green-600 disabled:opacity-50 disabled:cursor-not-allowed disabled:bg-gray-500"
+            disabled={!areAllScoresValid()}
+          >
+            Submit Scores & End Tournament
+          </Button>
+        )}
       </div>
     </div>
   );

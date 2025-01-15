@@ -73,6 +73,7 @@ export default function NumOfPlayersForm({ onSubmit }: NumOfPlayersFormProps) {
         <div className="flex justify-center">
           <input
             defaultValue={8}
+            onFocus={(e) => e.target.select()}
             type="number"
             min={mode === "team" ? 2 : 4}
             step={1}
