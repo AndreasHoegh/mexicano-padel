@@ -251,7 +251,7 @@ export default function Matches({
             className="text-lg bg-green-500 hover:bg-green-600 disabled:opacity-50 disabled:cursor-not-allowed disabled:bg-gray-500"
             disabled={!areAllScoresValid()}
           >
-            Submit Scores & End Tournament
+            Finish Tournament
           </Button>
         )}
       </div>
