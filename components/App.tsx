@@ -618,7 +618,7 @@ export default function App() {
                   onClick={() => setIsPaused(true)}
                   className="bg-red-500 hover:bg-red-600 text-white px-6 py-3 flex items-center justify-center gap-2"
                 >
-                  Stop Tournament
+                  Pause Tournament
                 </Button>
               </div>
 
