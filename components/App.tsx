@@ -12,8 +12,9 @@ import Scoreboard from "./Scoreboard";
 import { Trophy } from "lucide-react";
 import { Button } from "./ui/button";
 import PlayerScores from "./PlayerScores";
-import { Court } from "../lib/types";
+import { Court, PlayerScore } from "../lib/types";
 import RestoreDialog from "./RestoreDialog";
+import DetailsModal from "./DetailsModal";
 
 interface Match {
   team1: string[];
@@ -42,6 +43,25 @@ interface EditingScores {
     team2: number;
   };
 }
+
+const BackButton = ({
+  onClick,
+  visible,
+}: {
+  onClick: () => void;
+  visible?: boolean;
+}) => (
+  <Button
+    onClick={onClick}
+    variant="ghost"
+    className={`absolute top-4 left-4 flex items-center gap-2 text-gray-600 hover:text-gray-900 transition-colors ${
+      !visible ? "hidden" : ""
+    }`}
+  >
+    <span className="text-lg">←</span>
+    <span className="font-medium">Back</span>
+  </Button>
+);
 
 export default function App() {
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -77,6 +97,13 @@ export default function App() {
       sittingOutPlayers: string[];
     }>
   >([]);
+  const [isDetailsOpen, setIsDetailsOpen] = useState(false);
+  const [sortedPlayers, setSortedPlayers] = useState<[string, PlayerScore][]>(
+    []
+  );
+  const [getRowColor, setGetRowColor] = useState<(index: number) => string>(
+    () => (index: number) => ""
+  );
 
   const STORAGE_KEY = "tournament_state";
 
@@ -281,11 +308,11 @@ export default function App() {
   // Add this function to get the pattern for each round
   const getMatchPattern = (roundIndex: number): number[] => {
     const patterns = [
-      [0, 1, 2, 3], // Round 1: 1&2 vs 3&4
-      [0, 2, 1, 3], // Round 2: 1&3 vs 2&4
-      [0, 3, 1, 2], // Round 3: 1&4 vs 2&3
+      [0, 2, 1, 3], // Round 1: 1&3 vs 2&4
+      [0, 3, 1, 2], // Round 2: 1&4 vs 2&3
+      [0, 1, 2, 3], // Round 3: 1&2 vs 3&4
     ];
-    return patterns[roundIndex];
+    return patterns[roundIndex % 3]; // Use modulo to loop through patterns
   };
 
   const shuffle = (players: string[]): string[] => {
@@ -430,8 +457,39 @@ export default function App() {
     [matches, round, updateMatches, scores, sittingOutPlayers]
   );
 
+  const goBackToTournamentName = () => {
+    setIsTournamentNameSet(false);
+    setNumberOfPlayers(0);
+    setArePlayerNamesSet(false);
+  };
+
+  const goBackToPlayerCount = () => {
+    setNumberOfPlayers(0);
+    setArePlayerNamesSet(false);
+  };
+
+  const goBackToPlayerNames = () => {
+    setArePlayerNamesSet(false);
+    setMatches([]);
+    setScores({});
+    setRound(1);
+    setSittingOutPlayers([]);
+    setSittingOutCounts({});
+  };
+
   return (
-    <div className="container mx-auto px-4 py-8">
+    <div className="container mx-auto px-4 py-8 relative">
+      {(isTournamentNameSet || numberOfPlayers > 0) &&
+        !arePlayerNamesSet &&
+        matches.length === 0 && (
+          <BackButton
+            visible={matches.length === 0}
+            onClick={
+              numberOfPlayers > 0 ? goBackToPlayerCount : goBackToTournamentName
+            }
+          />
+        )}
+
       {!isTournamentNameSet && (
         <TournamentNameForm onSubmit={handleTournamentNameSubmit} />
       )}
@@ -447,68 +505,75 @@ export default function App() {
       )}
 
       {numberOfPlayers > 0 && isTournamentNameSet && !arePlayerNamesSet && (
-        <PlayerNamesForm
-          numberOfPlayers={numberOfPlayers}
-          mode={mode}
-          onSubmit={(settings) => {
-            console.log("Player Names Submitted:", settings.playerNames);
+        <>
+          <BackButton onClick={goBackToPlayerCount} />
+          <PlayerNamesForm
+            numberOfPlayers={numberOfPlayers}
+            mode={mode}
+            onSubmit={(settings) => {
+              console.log("Player Names Submitted:", settings.playerNames);
 
-            // Ensure we have at least one court if none were selected
-            const initialCourts =
-              settings.courts.length > 0
-                ? settings.courts
-                : [{ id: 1, name: "Court 1" }];
+              // Ensure we have at least one court if none were selected
+              const initialCourts =
+                settings.courts.length > 0
+                  ? settings.courts
+                  : [{ id: 1, name: "Court 1" }];
 
-            // First create the initial scores with team names
-            const initialScores: Scores = {};
-            if (settings.mode === "team") {
-              // Process in pairs for team mode
-              for (let i = 0; i < settings.playerNames.length; i += 2) {
-                const teamIndex = Math.floor(i / 2);
-                const teamName =
-                  settings.teamNames?.[teamIndex] || `Team ${teamIndex + 1}`;
+              // First create the initial scores with team names
+              const initialScores: Scores = {};
+              if (settings.mode === "team") {
+                // Process in pairs for team mode
+                for (let i = 0; i < settings.playerNames.length; i += 2) {
+                  const teamIndex = Math.floor(i / 2);
+                  const teamName =
+                    settings.teamNames?.[teamIndex] || `Team ${teamIndex + 1}`;
 
-                // Assign same team name to both players
-                settings.playerNames.slice(i, i + 2).forEach((name) => {
+                  // Assign same team name to both players
+                  settings.playerNames.slice(i, i + 2).forEach((name) => {
+                    initialScores[name] = {
+                      points: 0,
+                      wins: 0,
+                      matchesPlayed: 0,
+                      pointsPerRound: [],
+                      team: `team${teamIndex + 1}`,
+                      teamName: teamName,
+                    };
+                  });
+                }
+              } else {
+                // Individual mode
+                settings.playerNames.forEach((name) => {
                   initialScores[name] = {
                     points: 0,
                     wins: 0,
                     matchesPlayed: 0,
                     pointsPerRound: [],
-                    team: `team${teamIndex + 1}`,
-                    teamName: teamName,
                   };
                 });
               }
-            } else {
-              // Individual mode
-              settings.playerNames.forEach((name) => {
-                initialScores[name] = {
-                  points: 0,
-                  wins: 0,
-                  matchesPlayed: 0,
-                  pointsPerRound: [],
-                };
-              });
-            }
 
-            // Then set all the state
-            setNames(settings.playerNames);
-            setPointsPerMatch(settings.pointsPerMatch);
-            setMaxRounds(settings.maxRounds);
-            setCourts(initialCourts);
-            setMode(settings.mode);
-            setScores(initialScores);
-            setSittingOutCounts({});
+              // Then set all the state
+              setNames(settings.playerNames);
+              setPointsPerMatch(settings.pointsPerMatch);
+              setMaxRounds(settings.maxRounds);
+              setCourts(initialCourts);
+              setMode(settings.mode);
+              setScores(initialScores);
+              setSittingOutCounts({});
 
-            // Just call generateMatches directly
-            generateMatches(settings.playerNames, initialCourts);
-            setArePlayerNamesSet(true);
+              // Just call generateMatches directly
+              generateMatches(settings.playerNames, initialCourts);
+              setArePlayerNamesSet(true);
 
-            // Update the final round pattern
-            setFinalPairingPattern(settings.finalRoundPattern);
-          }}
-        />
+              // Update the final round pattern
+              setFinalPairingPattern(settings.finalRoundPattern);
+            }}
+          />
+        </>
+      )}
+
+      {matches.length > 0 && !isFinished && !isPaused && (
+        <BackButton onClick={goBackToPlayerNames} />
       )}
 
       {matches.length > 0 && (
@@ -601,8 +666,6 @@ export default function App() {
                 mode={mode}
                 sittingOutPlayers={sittingOutPlayers}
                 onStartFinalRound={startFinalRound}
-                onPreviousRound={previousRound}
-                canGoBack={tournamentHistory.length > 0}
               />
 
               <div className="mt-8 flex flex-col justify-center gap-3">
@@ -626,6 +689,18 @@ export default function App() {
                 isOpen={isModalOpen}
                 onClose={closeModal}
                 scores={scores}
+                sortedPlayers={sortedPlayers}
+                getRowColor={getRowColor}
+                onUpdateScores={updateScores}
+              />
+
+              <DetailsModal
+                isOpen={isDetailsOpen}
+                onClose={() => setIsDetailsOpen(false)}
+                scores={scores}
+                sortedPlayers={sortedPlayers}
+                getRowColor={getRowColor}
+                onUpdateScores={updateScores}
               />
             </>
           )}

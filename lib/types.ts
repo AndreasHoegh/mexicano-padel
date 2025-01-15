@@ -22,8 +22,8 @@ export interface TournamentSettings {
 export interface PlayerScore {
   points: number;
   wins: number;
-  team?: string;
-  teamName?: string;
+  matchesPlayed: number;
+  pointsPerRound: (number | "sitout")[];
 }
 
 export interface Scores {

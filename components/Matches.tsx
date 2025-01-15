@@ -1,15 +1,10 @@
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { ChevronRight, ChevronLeft } from "lucide-react";
+import { ChevronRight } from "lucide-react";
 import Image from "next/image";
 import padelIcon from "../app/assets/padelIcon.png";
-import VSLogo from "./VSLogo";
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/components/ui/popover";
+import { MatchCard } from "./MatchCard";
 
 interface Match {
   team1: string[];
@@ -54,14 +49,12 @@ interface MatchesProps {
   }) => void;
   round: number;
   onNextRound: () => void;
-  onPreviousRound: () => void;
   pointsPerMatch: number;
   isLastRound: boolean;
   courts: Court[];
   mode: "individual" | "team";
   sittingOutPlayers: string[];
   onStartFinalRound: (editingScores: EditingScores) => void;
-  canGoBack: boolean;
 }
 
 export default function Matches({
@@ -71,14 +64,12 @@ export default function Matches({
   onUpdateScores,
   round,
   onNextRound,
-  onPreviousRound,
   pointsPerMatch,
   isLastRound,
   courts,
   mode,
   sittingOutPlayers,
   onStartFinalRound,
-  canGoBack,
 }: MatchesProps) {
   console.log("Rendering Matches Component");
   console.log("Matches:", matches);
@@ -133,10 +124,7 @@ export default function Matches({
       return;
     }
 
-    // First save the current state by calling nextRound
-    onNextRound();
-
-    // Then update scores and matches
+    // First update scores and matches
     const newScores = { ...scores };
 
     // Mark sitting out players for this round
@@ -181,23 +169,16 @@ export default function Matches({
       isScoreSubmitted: true,
     }));
 
-    // Update the scores and matches last
+    // Update the scores and matches first
     onUpdateScores(newScores);
     onUpdateMatches(updatedMatches);
+
+    // Then move to next round
+    onNextRound();
   };
 
   const areAllScoresValid = () => {
     return matches.every((_, index) => isScoreValid(index));
-  };
-
-  const handlePreviousRound = () => {
-    const confirmed = window.confirm(
-      "Warning: Going back will delete the scores from the current and previous round. Are you sure you want to go back?"
-    );
-
-    if (confirmed) {
-      onPreviousRound();
-    }
   };
 
   return (
@@ -218,134 +199,18 @@ export default function Matches({
         </CardHeader>
         <CardContent className="space-y-6">
           {matches.map((match, index) => (
-            <Card key={index} className="bg-slate-100">
-              <CardContent className="p-6">
-                <div className="space-y-4">
-                  <div className="text-center font-semibold text-gray-600">
-                    {courts[index % courts.length]?.name || "Court 1"}
-                  </div>
-                  <div className="flex flex-col sm:flex-row items-center gap-4 sm:gap-8 w-full">
-                    <div className="w-full sm:flex-1 text-center">
-                      <h3 className="font-semibold text-lg text-red-700 truncate px-2">
-                        {mode === "team" ? (
-                          match.team1[0]
-                        ) : (
-                          <div className="flex sm:flex-col items-center justify-center sm:items-end">
-                            <span className="truncate max-w-[120px]">
-                              {match.team1[0]}
-                            </span>
-                            <span className="mx-2 sm:my-1 sm:mx-0">&</span>
-                            <span className="truncate max-w-[120px]">
-                              {match.team1[1]}
-                            </span>
-                          </div>
-                        )}
-                      </h3>
-                    </div>
-                    <div className="flex flex-row items-center gap-4">
-                      <Popover
-                        open={openPopovers[index]}
-                        onOpenChange={(open) => {
-                          setOpenPopovers((prev) => ({
-                            ...prev,
-                            [index]: open,
-                          }));
-                        }}
-                      >
-                        <PopoverTrigger asChild>
-                          <Button
-                            variant="outline"
-                            className="w-12 sm:w-16 text-center text-lg sm:text-xl border border-red-950 bg-red-700 text-white"
-                          >
-                            {editingScores[index]?.team1 ?? 0}
-                          </Button>
-                        </PopoverTrigger>
-                        <PopoverContent className="w-48 p-2">
-                          <div className="grid grid-cols-4 gap-2">
-                            {Array.from(
-                              { length: pointsPerMatch + 1 },
-                              (_, i) => (
-                                <Button
-                                  key={i}
-                                  variant="outline"
-                                  className="h-8 w-8"
-                                  onClick={() => {
-                                    handleScoreChange(index, "team1", i);
-                                    setOpenPopovers((prev) => ({
-                                      ...prev,
-                                      [index]: false,
-                                    }));
-                                  }}
-                                >
-                                  {i}
-                                </Button>
-                              )
-                            )}
-                          </div>
-                        </PopoverContent>
-                      </Popover>
-                      <span className="text-2xl font-bold text-blue-700">
-                        <VSLogo />
-                      </span>
-                      <Popover
-                        open={openPopovers[`${index}-team2`]}
-                        onOpenChange={(open) => {
-                          setOpenPopovers((prev) => ({
-                            ...prev,
-                            [`${index}-team2`]: open,
-                          }));
-                        }}
-                      >
-                        <PopoverTrigger asChild>
-                          <Button
-                            variant="outline"
-                            className="w-12 sm:w-16 text-center text-lg sm:text-xl border border-blue-900 bg-blue-800 text-white"
-                          >
-                            {editingScores[index]?.team2 ?? 0}
-                          </Button>
-                        </PopoverTrigger>
-                        <PopoverContent className="w-48 p-2">
-                          <div className="grid grid-cols-4 gap-2">
-                            {Array.from(
-                              { length: pointsPerMatch + 1 },
-                              (_, i) => (
-                                <Button
-                                  key={i}
-                                  variant="outline"
-                                  className="h-8 w-8"
-                                  onClick={() => {
-                                    handleScoreChange(index, "team2", i);
-                                    setOpenPopovers((prev) => ({
-                                      ...prev,
-                                      [`${index}-team2`]: false,
-                                    }));
-                                  }}
-                                >
-                                  {i}
-                                </Button>
-                              )
-                            )}
-                          </div>
-                        </PopoverContent>
-                      </Popover>
-                    </div>
-                    <div className="w-full sm:flex-1 text-center">
-                      <h3 className="font-semibold text-lg text-blue-900">
-                        {mode === "team" ? (
-                          match.team2[0]
-                        ) : (
-                          <div className="flex sm:flex-col items-center justify-center sm:items-start">
-                            {match.team2[0]}
-                            <span className="mx-2 sm:my-1 sm:mx-0">&</span>
-                            {match.team2[1]}
-                          </div>
-                        )}
-                      </h3>
-                    </div>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
+            <MatchCard
+              key={index}
+              match={match}
+              index={index}
+              courtName={courts[index % courts.length]?.name || "Court 1"}
+              mode={mode}
+              editingScores={editingScores}
+              pointsPerMatch={pointsPerMatch}
+              openPopovers={openPopovers}
+              setOpenPopovers={setOpenPopovers}
+              handleScoreChange={handleScoreChange}
+            />
           ))}
         </CardContent>
       </Card>
@@ -354,14 +219,6 @@ export default function Matches({
         {!isLastRound ? (
           <>
             <div className="flex gap-4">
-              {canGoBack && (
-                <Button
-                  onClick={handlePreviousRound}
-                  className="text-lg bg-gray-500 hover:bg-gray-600"
-                >
-                  <ChevronLeft /> Previous
-                </Button>
-              )}
               <Button
                 onClick={handleNextRound}
                 className="text-lg bg-green-500 hover:bg-green-600 disabled:opacity-50 disabled:cursor-not-allowed disabled:bg-gray-500"
