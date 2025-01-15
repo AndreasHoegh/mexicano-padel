@@ -40,6 +40,7 @@ interface MatchesProps {
       points: number;
       wins: number;
       matchesPlayed: number;
+      pointsPerRound: (number | "sitout")[];
     };
   };
   onUpdateMatches: (updatedMatches: Match[]) => void;
@@ -48,6 +49,7 @@ interface MatchesProps {
       points: number;
       wins: number;
       matchesPlayed: number;
+      pointsPerRound: (number | "sitout")[];
     };
   }) => void;
   round: number;

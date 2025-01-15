@@ -10,6 +10,7 @@ interface ScoreboardProps {
       points: number;
       wins: number;
       matchesPlayed: number;
+      pointsPerRound: (number | "sitout")[];
     };
   };
 }

@@ -12,7 +12,7 @@ interface PlayerScoresProps {
       points: number;
       wins: number;
       matchesPlayed: number;
-      pointsPerRound: number[];
+      pointsPerRound: (number | "sitout")[];
     };
   };
 }

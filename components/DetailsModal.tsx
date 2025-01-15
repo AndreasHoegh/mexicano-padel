@@ -10,10 +10,18 @@ interface DetailsModalProps {
       points: number;
       wins: number;
       matchesPlayed: number;
-      pointsPerRound: number[];
+      pointsPerRound: (number | "sitout")[];
     };
   };
-  sortedPlayers: [string, any][];
+  sortedPlayers: [
+    string,
+    {
+      points: number;
+      wins: number;
+      matchesPlayed: number;
+      pointsPerRound: (number | "sitout")[];
+    }
+  ][];
   getRowColor: (index: number) => string;
 }
 
@@ -71,8 +79,10 @@ export default function DetailsModal({
                       <td key={i} className="px-2 py-2 text-center">
                         {points === "sitout" ? (
                           <span className="text-gray-500">sitout</span>
+                        ) : points !== undefined ? (
+                          points.toString()
                         ) : (
-                          points || "—"
+                          "—"
                         )}
                       </td>
                     ))}

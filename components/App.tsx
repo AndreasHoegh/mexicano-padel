@@ -36,6 +36,13 @@ interface Scores {
   };
 }
 
+interface EditingScores {
+  [key: number]: {
+    team1: number;
+    team2: number;
+  };
+}
+
 export default function App() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [numberOfPlayers, setNumberOfPlayers] = useState<number>(0);
@@ -44,6 +51,7 @@ export default function App() {
   const [matches, setMatches] = useState<Match[]>([]);
   const [scores, setScores] = useState<{
     [key: string]: {
+      pointsPerRound: (number | "sitout")[];
       points: number;
       wins: number;
       matchesPlayed: number;
@@ -66,9 +74,6 @@ export default function App() {
   const [mode, setMode] = useState<"individual" | "team">("individual");
   const [showRestoreDialog, setShowRestoreDialog] = useState(false);
   const [finalPairingPattern, setFinalPairingPattern] = useState<number[]>([
-    0, 1, 2, 3,
-  ]);
-  const [finalRoundPattern, setFinalRoundPattern] = useState<number[]>([
     0, 1, 2, 3,
   ]);
 
@@ -341,7 +346,7 @@ export default function App() {
   };
 
   const startFinalRound = useCallback(
-    (editingScores: any) => {
+    (editingScores: EditingScores) => {
       // First update scores
       const newScores = { ...scores };
 

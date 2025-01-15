@@ -10,6 +10,7 @@ export interface Court {
 }
 
 export interface TournamentSettings {
+  finalRoundPattern: number[];
   playerNames: string[];
   pointsPerMatch: number;
   maxRounds: number | null;
