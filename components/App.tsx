@@ -15,6 +15,7 @@ import PlayerScores from "./PlayerScores";
 import { Court, PlayerScore } from "../lib/types";
 import RestoreDialog from "./RestoreDialog";
 import DetailsModal from "./DetailsModal";
+import generateAmericanoMatches from "@/lib/generateAmericanoMatches";
 
 interface Match {
   team1: string[];
@@ -41,6 +42,21 @@ interface EditingScores {
   [key: number]: {
     team1: number;
     team2: number;
+  };
+}
+
+interface PlayerPartnerships {
+  [key: string]: {
+    [key: string]: number; // Number of times played together
+  };
+}
+
+interface PlayerHistory {
+  [key: string]: {
+    partneredWith: { [key: string]: number };
+    playedAgainst: { [key: string]: number };
+    gamesPlayed: number;
+    lastSatOutRound: number;
   };
 }
 
@@ -104,6 +120,9 @@ export default function App() {
   const [getRowColor, setGetRowColor] = useState<(index: number) => string>(
     () => () => ""
   );
+  const [format, setFormat] = useState<"mexicano" | "americano">("mexicano");
+  const [partnerships, setPartnerships] = useState<PlayerPartnerships>({});
+  const [playerHistory, setPlayerHistory] = useState<PlayerHistory>({});
 
   const STORAGE_KEY = "tournament_state";
 
@@ -196,14 +215,16 @@ export default function App() {
 
   const onNumberSubmit = ({
     mode,
+    format,
     count,
   }: {
     mode: "individual" | "team";
+    format: "mexicano" | "americano";
     count: number;
   }) => {
-    console.log("Number Submit with Count:", count);
     if (count >= 4) {
       setMode(mode);
+      setFormat(format);
       setNumberOfPlayers(count);
     } else {
       alert("Minimum 4 players required.");
@@ -219,82 +240,95 @@ export default function App() {
 
   const generateMatches = useCallback(
     (players: string[], courtsToUse = courts) => {
-      const allUnits = [...players];
-      const unitsPerMatch = mode === "team" ? 2 : 4;
-
-      // Sort by score for matchmaking (except first round)
-      const sortedUnits =
-        round === 1
-          ? shuffle(allUnits)
-          : allUnits.sort((a, b) => scores[b].points - scores[a].points);
-
-      // Calculate matches based on available players and courts
-      const maxMatchesByPlayers = Math.floor(
-        sortedUnits.length / unitsPerMatch
-      );
-      const numMatches = Math.min(maxMatchesByPlayers, courtsToUse.length);
-      const numPlayersNeeded = numMatches * unitsPerMatch;
-      const numSittingOut = sortedUnits.length - numPlayersNeeded;
-
-      // Handle sitting out - Select players who have sat out the least
-      let sittingOut: string[] = [];
-      if (numSittingOut > 0) {
-        // Sort players by number of times they've sat out
-        const playersBySitouts = [...allUnits].sort(
-          (a, b) => (sittingOutCounts[a] || 0) - (sittingOutCounts[b] || 0)
+      if (format === "americano") {
+        const result = generateAmericanoMatches(
+          players,
+          courtsToUse.length,
+          round,
+          playerHistory,
+          sittingOutCounts
         );
 
-        // Take the first N players who have sat out the least
-        sittingOut = playersBySitouts.slice(0, numSittingOut);
+        setPlayerHistory(result.playerHistory);
+        setMatches(result.matches);
+        setSittingOutPlayers(result.sittingOut);
 
-        // Update sitting out counts
+        // Update sitout counts
         const newSittingOutCounts = { ...sittingOutCounts };
-        sittingOut.forEach((unit) => {
-          newSittingOutCounts[unit] = (newSittingOutCounts[unit] || 0) + 1;
+        result.sittingOut.forEach((player) => {
+          newSittingOutCounts[player] = (newSittingOutCounts[player] || 0) + 1;
         });
         setSittingOutCounts(newSittingOutCounts);
-      }
+      } else {
+        // Other formats (non-Americano) remain unchanged
+        const allUnits = [...players];
+        const unitsPerMatch = mode === "team" ? 2 : 4;
 
-      setSittingOutPlayers(sittingOut);
+        const sortedUnits =
+          round === 1
+            ? shuffle(allUnits)
+            : allUnits.sort((a, b) => scores[b].points - scores[a].points);
 
-      // Remove sitting out players from the sorted units
-      const activeUnits = sortedUnits.filter(
-        (unit) => !sittingOut.includes(unit)
-      );
+        const maxMatchesByPlayers = Math.floor(
+          sortedUnits.length / unitsPerMatch
+        );
+        const numMatches = Math.min(maxMatchesByPlayers, courtsToUse.length);
+        const numPlayersNeeded = numMatches * unitsPerMatch;
+        const numSittingOut = sortedUnits.length - numPlayersNeeded;
 
-      // Create matches using the active (ranked) units
-      const newMatches: Match[] = [];
-      for (let i = 0; i < numMatches; i++) {
-        if (mode === "team") {
-          // Team mode logic remains the same
-          newMatches.push({
-            team1: [activeUnits[i * 2]],
-            team2: [activeUnits[i * 2 + 1]],
-            team1Score: 0,
-            team2Score: 0,
-            isScoreSubmitted: false,
+        let sittingOut: string[] = [];
+        if (numSittingOut > 0) {
+          const playersBySitouts = [...allUnits].sort(
+            (a, b) => (sittingOutCounts[a] || 0) - (sittingOutCounts[b] || 0)
+          );
+
+          sittingOut = playersBySitouts.slice(0, numSittingOut);
+
+          const newSittingOutCounts = { ...sittingOutCounts };
+          sittingOut.forEach((unit) => {
+            newSittingOutCounts[unit] = (newSittingOutCounts[unit] || 0) + 1;
           });
-        } else {
-          // Get the pattern for the current round
-          const pattern =
-            maxRounds !== null && round === maxRounds
-              ? finalPairingPattern
-              : getMatchPattern((round - 1) % 3);
-          const startIdx = i * 4;
-          const players = activeUnits.slice(startIdx, startIdx + 4);
-
-          newMatches.push({
-            team1: [players[pattern[0]], players[pattern[1]]],
-            team2: [players[pattern[2]], players[pattern[3]]],
-            team1Score: 0,
-            team2Score: 0,
-            isScoreSubmitted: false,
-          });
+          setSittingOutCounts(newSittingOutCounts);
         }
+
+        setSittingOutPlayers(sittingOut);
+
+        const activeUnits = sortedUnits.filter(
+          (unit) => !sittingOut.includes(unit)
+        );
+
+        const newMatches: Match[] = [];
+        for (let i = 0; i < numMatches; i++) {
+          if (mode === "team") {
+            newMatches.push({
+              team1: [activeUnits[i * 2]],
+              team2: [activeUnits[i * 2 + 1]],
+              team1Score: 0,
+              team2Score: 0,
+              isScoreSubmitted: false,
+            });
+          } else {
+            const pattern =
+              maxRounds !== null && round === maxRounds
+                ? finalPairingPattern
+                : getMatchPattern((round - 1) % 3);
+            const startIdx = i * 4;
+            const players = activeUnits.slice(startIdx, startIdx + 4);
+
+            newMatches.push({
+              team1: [players[pattern[0]], players[pattern[1]]],
+              team2: [players[pattern[2]], players[pattern[3]]],
+              team1Score: 0,
+              team2Score: 0,
+              isScoreSubmitted: false,
+            });
+          }
+        }
+        setMatches(newMatches);
       }
-      setMatches(newMatches);
     },
     [
+      format,
       round,
       scores,
       mode,
@@ -302,6 +336,7 @@ export default function App() {
       courts,
       finalPairingPattern,
       maxRounds,
+      partnerships,
     ]
   );
 
@@ -473,6 +508,35 @@ export default function App() {
       return index % 2 === 0 ? "bg-white" : "bg-gray-50";
     });
   }, [sortedPlayers]);
+
+  // Helper function to generate all possible combinations
+  function getAllCombinations<T>(arr: T[], n: number): T[][] {
+    const array = Array.from(arr);
+    if (n === 1) return array.map((item) => [item]);
+
+    const combinations: T[][] = [];
+
+    for (let i = 0; i < array.length - n + 1; i++) {
+      const current = array[i];
+      const subCombinations = getAllCombinations(array.slice(i + 1), n - 1);
+
+      for (const subComb of subCombinations) {
+        combinations.push([current, ...subComb]);
+      }
+    }
+
+    return combinations;
+  }
+
+  // Add this function near your other utility functions
+  function shuffleCombinations<T>(combinations: T[][]): T[][] {
+    const shuffled = [...combinations];
+    for (let i = shuffled.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+    }
+    return shuffled;
+  }
 
   return (
     <div className="container mx-auto px-4 py-8 relative">
@@ -678,7 +742,7 @@ export default function App() {
                   onClick={() => setIsPaused(true)}
                   className="bg-red-500 hover:bg-red-600 text-white px-6 py-3 flex items-center justify-center gap-2"
                 >
-                  Pause Tournament
+                  End Tournament
                 </Button>
               </div>
 
