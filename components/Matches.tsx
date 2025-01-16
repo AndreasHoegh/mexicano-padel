@@ -71,9 +71,6 @@ export default function Matches({
   sittingOutPlayers,
   onStartFinalRound,
 }: MatchesProps) {
-  console.log("Rendering Matches Component");
-  console.log("Matches:", matches);
-
   const [editingScores, setEditingScores] = useState<EditingScores>({});
   const [openPopovers, setOpenPopovers] = useState<{ [key: string]: boolean }>(
     {}
