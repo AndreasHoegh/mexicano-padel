@@ -1,6 +1,6 @@
 export const translations = {
   en: {
-    welcome: "Welcome to Mexicano Padel!",
+    welcome: "Welcome to Padel Tournament Generator!",
     createTournaments: "Create exciting tournaments with just a few clicks",
     whatIsMexicanoPadel: "What is Mexicano Padel?",
     aboutMexicanoPadel:

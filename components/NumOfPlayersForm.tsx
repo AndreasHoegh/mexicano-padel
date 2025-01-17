@@ -32,33 +32,47 @@ export default function NumOfPlayersForm({ onSubmit }: NumOfPlayersFormProps) {
   };
 
   return (
-    <form onSubmit={handleSubmit(onFormSubmit)} className="space-y-8">
+    <form
+      onSubmit={handleSubmit(onFormSubmit)}
+      className="space-y-8 text-gray-200"
+    >
       <div className="space-y-4">
         <h2 className="text-xl font-semibold text-center">Tournament Format</h2>
-        <div className="grid grid-cols-2 gap-4">
-          <Button
-            type="button"
-            onClick={() => setFormat("mexicano")}
-            className={`${
-              format === "mexicano"
-                ? "bg-green-500 hover:bg-green-600"
-                : "bg-gray-200 hover:bg-gray-300 text-gray-700"
-            }`}
-          >
-            Mexicano
-          </Button>
-          <Button
-            type="button"
-            onClick={() => setFormat("americano")}
-            className={`${
-              format === "americano"
-                ? "bg-green-500 hover:bg-green-600"
-                : "bg-gray-200 hover:bg-gray-300 text-gray-700"
-            }`}
-          >
-            Americano
-          </Button>
-        </div>
+        <RadioGroup
+          defaultValue="mexicano"
+          className="grid grid-cols-2 gap-4 "
+          onValueChange={(value: "mexicano" | "americano") => setFormat(value)}
+        >
+          {[
+            {
+              value: "mexicano",
+              label: "Mexicano",
+              description: "Rotating partners each round",
+            },
+            {
+              value: "americano",
+              label: "Americano",
+              description: "Fixed partners for tournament",
+            },
+          ].map((option) => (
+            <div key={option.value}>
+              <RadioGroupItem
+                value={option.value}
+                id={`format-${option.value}`}
+                className="peer sr-only"
+              />
+              <Label
+                htmlFor={`format-${option.value}`}
+                className="text-black flex flex-col items-center justify-between rounded-md border-2 bg-popover p-4 peer-data-[state=checked]:border-black peer-data-[state=checked]:border-4 [&:has([data-state=checked])]:scale-105 cursor-pointer transition-transform"
+              >
+                <span className="text-xl font-semibold">{option.label}</span>
+                <span className="text-sm text-muted-foreground text-center">
+                  {option.description}
+                </span>
+              </Label>
+            </div>
+          ))}
+        </RadioGroup>
 
         <div className="space-y-3">
           <h2 className="text-lg font-semibold text-center">Tournament Mode</h2>
@@ -83,11 +97,11 @@ export default function NumOfPlayersForm({ onSubmit }: NumOfPlayersFormProps) {
                 <RadioGroupItem
                   value={option.value}
                   id={`mode-${option.value}`}
-                  className="peer sr-only"
+                  className="peer sr-only ?"
                 />
                 <Label
                   htmlFor={`mode-${option.value}`}
-                  className="flex flex-col items-center justify-between rounded-md border-2 border-muted bg-popover p-4 hover:bg-accent hover:text-accent-foreground peer-data-[state=checked]:border-primary [&:has([data-state=checked])]:border-primary cursor-pointer"
+                  className="text-black flex flex-col items-center justify-between rounded-md border-2 bg-popover p-4 peer-data-[state=checked]:border-black peer-data-[state=checked]:border-4 [&:has([data-state=checked])]:scale-105 cursor-pointer transition-transform"
                 >
                   <span className="text-xl font-semibold">{option.label}</span>
                   <span className="text-sm text-muted-foreground text-center">
@@ -110,7 +124,7 @@ export default function NumOfPlayersForm({ onSubmit }: NumOfPlayersFormProps) {
               type="number"
               min={mode === "team" ? 2 : 4}
               step={1}
-              className="border-2 border-slate-500 p-1 rounded"
+              className="text-black text-center text-xl font-semibold w-20 h-12 rounded-md border-2 focus:border-black focus:outline-none transition-all p-2 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
               {...register("Number of players", { required: true })}
             />
           </div>

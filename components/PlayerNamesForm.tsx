@@ -112,6 +112,19 @@ export default function PlayerNamesForm({
     const newCount = playerCount + (mode === "team" ? 2 : 1);
     setPlayerCount(newCount);
     onPlayerCountChange(newCount);
+
+    // Add a court if we have enough players for an additional court
+    const newMaxCourts = getMaxCourts(newCount);
+    if (courts.length < newMaxCourts) {
+      setCourts((prev) => [
+        ...prev,
+        {
+          id: nextIdRef.current,
+          name: `Court ${nextIdRef.current}`,
+        },
+      ]);
+      nextIdRef.current += 1;
+    }
   };
 
   const handlePlayerNamesSubmit = (data: FieldValues) => {
@@ -133,16 +146,18 @@ export default function PlayerNamesForm({
     <div className="flex flex-col items-center mt-4">
       <form
         onSubmit={handleSubmit(handlePlayerNamesSubmit)}
-        className="space-y-8"
+        className="space-y-8 w-full max-w-2xl px-4"
       >
         {mode === "team" ? (
           <div className="space-y-4">
-            <h2 className="text-lg font-semibold text-center">Team Names</h2>
+            <h2 className="text-2xl font-semibold text-center text-gray-200">
+              Team Names
+            </h2>
             {[...Array(playerCount / 2)].map((_, index) => (
               <div key={index} className="space-y-2">
                 <div className="flex justify-center gap-2">
                   <input
-                    className="border-2 border-slate-500 p-1 rounded"
+                    className="text-black text-center text-lg w-64 h-12 rounded-md border-2 bg-white focus:border-black focus:outline-none transition-all p-2"
                     type="text"
                     defaultValue={`Team ${index + 1}`}
                     {...register(`playerName${index * 2}`, { required: true })}
@@ -153,7 +168,7 @@ export default function PlayerNamesForm({
                     variant="outline"
                     onClick={() => removePlayer(index * 2)}
                     disabled={playerCount <= 4}
-                    className="text-red-500"
+                    className="h-12 border-2 hover:bg-red-50 hover:text-red-600 disabled:opacity-50"
                   >
                     Remove
                   </Button>
@@ -163,11 +178,13 @@ export default function PlayerNamesForm({
           </div>
         ) : (
           <div className="space-y-4">
-            <h2 className="text-lg font-semibold text-center">Player Names</h2>
+            <h2 className="text-2xl font-semibold text-center text-gray-200">
+              Player Names
+            </h2>
             {[...Array(playerCount)].map((_, index) => (
               <div key={index} className="flex justify-center gap-2">
                 <input
-                  className="border-2 border-slate-500 p-1 rounded"
+                  className="text-black text-center text-lg w-64 h-12 rounded-md border-2 bg-white focus:border-black focus:outline-none transition-all p-2"
                   type="text"
                   defaultValue={`Player${index + 1}`}
                   {...register(`playerName${index}`, { required: true })}
@@ -178,7 +195,7 @@ export default function PlayerNamesForm({
                   variant="outline"
                   onClick={() => removePlayer(index)}
                   disabled={playerCount <= 4}
-                  className="text-red-500"
+                  className="h-12 border-2 hover:bg-red-50 hover:text-red-600 disabled:opacity-50"
                 >
                   Remove
                 </Button>
@@ -192,22 +209,22 @@ export default function PlayerNamesForm({
             type="button"
             variant="outline"
             onClick={addPlayer}
-            className="w-48"
+            className="w-64 h-12 border-2 hover:border-black"
           >
             Add {mode === "team" ? "Team" : "Player"}
           </Button>
         </div>
 
         <div className="space-y-3">
-          <h2 className="text-lg font-semibold text-center">
+          <h2 className="text-2xl font-semibold text-center text-gray-200">
             Points per Match
           </h2>
           <RadioGroup
             defaultValue="21"
-            className="grid grid-cols-2 sm:grid-cols-3 gap-4"
+            className="grid grid-cols-2 sm:grid-cols-4 gap-4"
             onValueChange={(value) => setValue("pointsPerMatch", value)}
           >
-            {[11, 15, 21, 24, 32].map((points) => (
+            {[15, 21, 24, 32].map((points) => (
               <div key={points}>
                 <RadioGroupItem
                   value={points.toString()}
@@ -217,7 +234,7 @@ export default function PlayerNamesForm({
                 />
                 <Label
                   htmlFor={`points-${points}`}
-                  className="flex flex-col items-center justify-between rounded-md border-2 border-muted bg-popover p-4 hover:bg-accent hover:text-accent-foreground peer-data-[state=checked]:border-primary [&:has([data-state=checked])]:border-primary cursor-pointer"
+                  className="text-black flex flex-col items-center justify-between rounded-md border-2 bg-white p-4 peer-data-[state=checked]:border-black peer-data-[state=checked]:border-4 [&:has([data-state=checked])]:scale-105 cursor-pointer transition-transform"
                 >
                   <span className="text-xl font-semibold">{points}</span>
                   <span className="text-sm text-muted-foreground">points</span>
@@ -228,7 +245,7 @@ export default function PlayerNamesForm({
         </div>
 
         <div className="space-y-3">
-          <h2 className="text-lg font-semibold text-center">
+          <h2 className="text-2xl font-semibold text-center text-gray-200">
             Number of Rounds
           </h2>
           <RadioGroup
@@ -236,7 +253,7 @@ export default function PlayerNamesForm({
             className="grid grid-cols-2 sm:grid-cols-3 gap-4"
             onValueChange={(value) => setValue("maxRounds", value)}
           >
-            {[3, 5, 7, 10, "∞"].map((rounds) => (
+            {[3, 5, 7, 10, 15, "∞"].map((rounds) => (
               <div key={rounds}>
                 <RadioGroupItem
                   value={rounds.toString()}
@@ -246,7 +263,7 @@ export default function PlayerNamesForm({
                 />
                 <Label
                   htmlFor={`rounds-${rounds}`}
-                  className="flex flex-col items-center justify-between rounded-md border-2 border-muted bg-popover p-4 hover:bg-accent hover:text-accent-foreground peer-data-[state=checked]:border-primary [&:has([data-state=checked])]:border-primary cursor-pointer"
+                  className="text-black flex flex-col items-center justify-between rounded-md border-2 bg-white p-4 peer-data-[state=checked]:border-black peer-data-[state=checked]:border-4 [&:has([data-state=checked])]:scale-105 cursor-pointer transition-transform"
                 >
                   <span className="text-xl font-semibold">{rounds}</span>
                   <span className="text-sm text-muted-foreground">rounds</span>
@@ -312,7 +329,9 @@ export default function PlayerNamesForm({
         )}
 
         <div className="space-y-3">
-          <h2 className="text-lg font-semibold text-center">Courts</h2>
+          <h2 className="text-2xl font-semibold text-center text-gray-200">
+            Courts
+          </h2>
           <div className="space-y-2">
             {courts.map((court) => (
               <div key={court.id} className="flex items-center gap-2">
@@ -320,14 +339,14 @@ export default function PlayerNamesForm({
                   value={court.name}
                   onFocus={(e) => e.target.select()}
                   onChange={(e) => updateCourtName(court.id, e.target.value)}
-                  className="flex-1"
+                  className="flex-1 h-12 text-black text-center text-lg border-2 bg-white focus:border-black focus:outline-none transition-all"
                   placeholder="Court name"
                 />
                 {courts.length > 1 && (
                   <Button
                     type="button"
                     variant="outline"
-                    className="text-red-500"
+                    className="h-12 border-2 hover:bg-red-50 hover:text-red-600 disabled:opacity-50"
                     onClick={() => removeCourt(court.id)}
                   >
                     Remove
@@ -339,7 +358,7 @@ export default function PlayerNamesForm({
               type="button"
               variant="outline"
               onClick={addCourt}
-              className="w-full"
+              className="w-full h-12 border-2 hover:border-black"
               disabled={courts.length >= getMaxCourts(playerCount)}
             >
               Add Court{" "}
@@ -349,7 +368,7 @@ export default function PlayerNamesForm({
           </div>
         </div>
 
-        <Button className="mx-auto block" type="submit">
+        <Button className="mx-auto block w-64 h-12" type="submit">
           Generate Matches
         </Button>
       </form>

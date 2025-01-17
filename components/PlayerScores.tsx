@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Trophy, Target, Search } from "lucide-react";
+import { Trophy, Target } from "lucide-react";
 import DetailsModal from "./DetailsModal";
 
 interface PlayerScoresProps {
@@ -42,7 +42,7 @@ export default function PlayerScores({ scores }: PlayerScoresProps) {
         }
       });
     setSortedPlayers(sorted);
-  }, [scores, searchTerm, sortBy]);
+  }, [scores, sortBy]);
 
   const getRankIcon = (rank: number) => {
     switch (rank) {
@@ -69,16 +69,6 @@ export default function PlayerScores({ scores }: PlayerScoresProps) {
   return (
     <div className="space-y-6 p-4">
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-4">
-        <div className="relative w-full sm:w-64">
-          <Search className="absolute left-2 top-1/2 transform -translate-y-1/2 text-muted-foreground" />
-          <Input
-            type="text"
-            placeholder="Search players..."
-            className="pl-8 w-full"
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-          />
-        </div>
         <div className="flex gap-2 w-full sm:w-auto">
           <Button
             onClick={() => setSortBy("points")}

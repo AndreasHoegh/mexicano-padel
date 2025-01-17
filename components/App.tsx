@@ -69,7 +69,7 @@ const BackButton = ({
   <Button
     onClick={onClick}
     variant="ghost"
-    className={`absolute top-4 left-4 flex items-center gap-2 text-gray-600 hover:text-gray-900 transition-colors ${
+    className={`absolute top-4 left-4 flex items-center gap-2 text-white hover:text-gray-900 transition-colors ${
       !visible ? "hidden" : ""
     }`}
   >
@@ -954,7 +954,7 @@ export default function App() {
       )}
 
       {isTournamentNameSet && (
-        <h1 className="text-center text-2xl font-bold my-6">
+        <h1 className="text-center text-2xl font-bold my-6 text-gray-500">
           {tournamentName}
         </h1>
       )}
@@ -1049,11 +1049,11 @@ export default function App() {
         <div className="flex flex-col items-center relative space-y-4">
           {isFinished || isPaused ? (
             <div className="text-center space-y-4">
-              <h2 className="text-2xl font-bold text-green-600">
+              <h2 className="text-2xl font-bold text-white">
                 {isFinished ? (
                   <>
                     Tournament Complete!
-                    <p className="text-lg mt-2 text-gray-600">
+                    <p className="text-lg mt-2 text-white">
                       Congratulations to{" "}
                       {
                         Object.entries(scores).sort(

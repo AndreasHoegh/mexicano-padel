@@ -180,21 +180,22 @@ export default function Matches({
 
   return (
     <div className="space-y-8 mt-8 px-4 max-w-4xl mx-auto">
-      <Card className="bg-gradient-to-r from-red-500 to-yellow-500">
-        <CardHeader className="text-center">
-          <CardTitle className="bg-transparent text-3xl rounded-lg font-extrabold text-gray-800 flex items-center justify-center gap-2">
+      <Card className="bg-gradient-to-br from-gray-700 to-gray-900 shadow-xl border border-gray-600">
+        <CardHeader className="text-center pb-2">
+          <CardTitle className="text-3xl font-extrabold text-gray-200 flex items-center justify-center gap-3">
             <Image
               src={padelIcon || "/placeholder.svg"}
               alt="Padel Icon"
-              width={32}
-              height={32}
+              width={36}
+              height={36}
+              className="opacity-90"
             />
-            <span className="px-4 py-2">
+            <span className="px-4 py-2 rounded-lg bg-gray-800/50 border border-gray-600">
               {isLastRound ? "Final Round" : `Round ${round}`}
             </span>
           </CardTitle>
         </CardHeader>
-        <CardContent className="space-y-6">
+        <CardContent className="space-y-6 pt-6">
           {matches.map((match, index) => (
             <MatchCard
               key={index}
@@ -214,16 +215,14 @@ export default function Matches({
 
       <div className="flex flex-col items-center gap-4">
         {!isLastRound ? (
-          <>
-            <div className="flex gap-4">
-              <Button
-                onClick={handleNextRound}
-                className="text-lg bg-green-500 hover:bg-green-600 disabled:opacity-50 disabled:cursor-not-allowed disabled:bg-gray-500"
-                disabled={!areAllScoresValid()}
-              >
-                Next <ChevronRight />
-              </Button>
-            </div>
+          <div className="flex flex-col sm:flex-row items-center gap-4">
+            <Button
+              onClick={handleNextRound}
+              className="text-lg bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 border-none shadow-lg transition-all duration-200 disabled:from-gray-400 disabled:to-gray-500 w-48 h-12"
+              disabled={!areAllScoresValid()}
+            >
+              Next Round <ChevronRight className="ml-1" />
+            </Button>
             {mode === "individual" && (
               <Button
                 onClick={() => {
@@ -235,17 +234,17 @@ export default function Matches({
                     );
                   }
                 }}
-                className="text-lg bg-purple-500 hover:bg-purple-600 disabled:opacity-50 disabled:cursor-not-allowed"
+                className="text-lg bg-gradient-to-r from-purple-500 to-indigo-600 hover:from-purple-600 hover:to-indigo-700 border-none shadow-lg transition-all duration-200 disabled:from-gray-400 disabled:to-gray-500 w-48 h-12"
                 disabled={!areAllScoresValid()}
               >
                 Final Round
               </Button>
             )}
-          </>
+          </div>
         ) : (
           <Button
             onClick={handleNextRound}
-            className="text-lg bg-green-500 hover:bg-green-600 disabled:opacity-50 disabled:cursor-not-allowed disabled:bg-gray-500"
+            className="text-lg bg-gradient-to-r from-yellow-500 to-orange-600 hover:from-yellow-600 hover:to-orange-700 border-none shadow-lg transition-all duration-200 disabled:from-gray-400 disabled:to-gray-500 w-48 h-12"
             disabled={!areAllScoresValid()}
           >
             Finish Tournament

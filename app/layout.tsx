@@ -5,7 +5,7 @@ import "./globals.css";
 const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
-  title: "Mexicano Padel",
+  title: "Padel Tournament Generator",
   description: "Create exciting padel tournaments with just a few clicks",
 };
 
@@ -17,7 +17,7 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body
-        className={`${inter.className} min-h-screen bg-gradient-to-br from-yellow-100 to-red-100`}
+        className={`${inter.className} min-h-screen bg-gradient-to-br from-gray-700 to-green-900`}
       >
         {children}
       </body>
