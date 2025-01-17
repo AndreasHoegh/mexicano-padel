@@ -210,7 +210,7 @@ export default function App() {
 
   useEffect(() => {
     window.scrollTo(0, 0);
-  }, [isTournamentNameSet, numberOfPlayers, arePlayerNamesSet]);
+  }, [isTournamentNameSet, arePlayerNamesSet]);
 
   useEffect(() => {
     if (localStorage.getItem(STORAGE_KEY)) {
@@ -954,7 +954,7 @@ export default function App() {
       )}
 
       {isTournamentNameSet && (
-        <h1 className="text-center text-2xl font-bold mb-6">
+        <h1 className="text-center text-2xl font-bold my-6">
           {tournamentName}
         </h1>
       )}

@@ -122,7 +122,7 @@ export default function TournamentNameForm({
                 <Input
                   id="tournamentName"
                   placeholder={t.enterTournamentName}
-                  defaultValue={"Mexicano"}
+                  defaultValue={"My tournament"}
                   onFocus={(e) => e.target.select()}
                   {...register("tournamentName", {
                     required: t.tournamentNameRequired,

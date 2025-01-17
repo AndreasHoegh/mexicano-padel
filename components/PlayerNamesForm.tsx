@@ -158,9 +158,6 @@ export default function PlayerNamesForm({
                     Remove
                   </Button>
                 </div>
-                <div className="text-sm text-gray-500 text-center">
-                  Players {index * 2 + 1} & {index * 2 + 2}
-                </div>
               </div>
             ))}
           </div>
