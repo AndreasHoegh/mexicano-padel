@@ -7,13 +7,14 @@ import { Input } from "./ui/input";
 import { useState, useRef } from "react";
 
 interface PlayerNamesFormProps {
-  numberOfPlayers: number;
+  initialPlayerCount: number;
   onSubmit: (settings: TournamentSettings) => void;
   mode: "individual" | "team";
+  onPlayerCountChange: (newCount: number) => void;
 }
 
 interface FormValues {
-  [key: string]: string; // Allow any string key
+  [key: string]: string;
   pointsPerMatch: string;
   maxRounds: string;
 }
@@ -23,11 +24,13 @@ const getMaxCourts = (playerCount: number) => {
 };
 
 export default function PlayerNamesForm({
-  numberOfPlayers,
+  initialPlayerCount,
   onSubmit,
   mode,
+  onPlayerCountChange,
 }: PlayerNamesFormProps) {
-  const { register, handleSubmit, setValue } = useForm<FormValues>({
+  const [playerCount, setPlayerCount] = useState(initialPlayerCount);
+  const { register, handleSubmit, setValue, unregister } = useForm<FormValues>({
     defaultValues: {
       pointsPerMatch: "21",
       maxRounds: "5",
@@ -35,7 +38,7 @@ export default function PlayerNamesForm({
   });
 
   const nextIdRef = useRef(2);
-  const maxCourts = getMaxCourts(numberOfPlayers);
+  const maxCourts = getMaxCourts(playerCount);
 
   const [courts, setCourts] = useState<Court[]>(() => {
     const initialCourts = [];
@@ -49,8 +52,12 @@ export default function PlayerNamesForm({
     return initialCourts;
   });
 
+  const [finalRoundPattern, setFinalRoundPattern] = useState<number[]>([
+    0, 2, 1, 3,
+  ]);
+
   const addCourt = () => {
-    if (courts.length < getMaxCourts(numberOfPlayers)) {
+    if (courts.length < getMaxCourts(playerCount)) {
       setCourts((prev) => [
         ...prev,
         {
@@ -74,9 +81,38 @@ export default function PlayerNamesForm({
     );
   };
 
-  const [finalRoundPattern, setFinalRoundPattern] = useState<number[]>([
-    0, 2, 1, 3,
-  ]);
+  const removePlayer = (index: number) => {
+    if ((mode === "team" && playerCount <= 4) || (!mode && playerCount <= 4)) {
+      return; // Don't allow removal if we're at minimum players
+    }
+
+    // Unregister the field from react-hook-form
+    unregister(`playerName${index}`);
+
+    // Shift all player names up
+    for (let i = index; i < playerCount - 1; i++) {
+      const nextValue = document.querySelector<HTMLInputElement>(
+        `input[name="playerName${i + 1}"]`
+      )?.value;
+      setValue(`playerName${i}`, nextValue || `Player${i + 1}`);
+    }
+
+    // Update player count
+    const newCount = playerCount - (mode === "team" ? 2 : 1);
+    setPlayerCount(newCount);
+    onPlayerCountChange(newCount);
+
+    // Adjust courts if necessary
+    if (courts.length > getMaxCourts(newCount)) {
+      setCourts((prev) => prev.slice(0, getMaxCourts(newCount)));
+    }
+  };
+
+  const addPlayer = () => {
+    const newCount = playerCount + (mode === "team" ? 2 : 1);
+    setPlayerCount(newCount);
+    onPlayerCountChange(newCount);
+  };
 
   const handlePlayerNamesSubmit = (data: FieldValues) => {
     const playerNames = Object.keys(data)
@@ -102,7 +138,7 @@ export default function PlayerNamesForm({
         {mode === "team" ? (
           <div className="space-y-4">
             <h2 className="text-lg font-semibold text-center">Team Names</h2>
-            {[...Array(numberOfPlayers / 2)].map((_, index) => (
+            {[...Array(playerCount / 2)].map((_, index) => (
               <div key={index} className="space-y-2">
                 <div className="flex justify-center gap-2">
                   <input
@@ -112,6 +148,15 @@ export default function PlayerNamesForm({
                     {...register(`playerName${index * 2}`, { required: true })}
                     onFocus={(e) => e.target.select()}
                   />
+                  <Button
+                    type="button"
+                    variant="outline"
+                    onClick={() => removePlayer(index * 2)}
+                    disabled={playerCount <= 4}
+                    className="text-red-500"
+                  >
+                    Remove
+                  </Button>
                 </div>
                 <div className="text-sm text-gray-500 text-center">
                   Players {index * 2 + 1} & {index * 2 + 2}
@@ -122,7 +167,7 @@ export default function PlayerNamesForm({
         ) : (
           <div className="space-y-4">
             <h2 className="text-lg font-semibold text-center">Player Names</h2>
-            {[...Array(numberOfPlayers)].map((_, index) => (
+            {[...Array(playerCount)].map((_, index) => (
               <div key={index} className="flex justify-center gap-2">
                 <input
                   className="border-2 border-slate-500 p-1 rounded"
@@ -131,10 +176,30 @@ export default function PlayerNamesForm({
                   {...register(`playerName${index}`, { required: true })}
                   onFocus={(e) => e.target.select()}
                 />
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={() => removePlayer(index)}
+                  disabled={playerCount <= 4}
+                  className="text-red-500"
+                >
+                  Remove
+                </Button>
               </div>
             ))}
           </div>
         )}
+
+        <div className="flex justify-center">
+          <Button
+            type="button"
+            variant="outline"
+            onClick={addPlayer}
+            className="w-48"
+          >
+            Add {mode === "team" ? "Team" : "Player"}
+          </Button>
+        </div>
 
         <div className="space-y-3">
           <h2 className="text-lg font-semibold text-center">
@@ -278,11 +343,11 @@ export default function PlayerNamesForm({
               variant="outline"
               onClick={addCourt}
               className="w-full"
-              disabled={courts.length >= getMaxCourts(numberOfPlayers)}
+              disabled={courts.length >= getMaxCourts(playerCount)}
             >
               Add Court{" "}
-              {courts.length < getMaxCourts(numberOfPlayers) &&
-                `(${courts.length}/${getMaxCourts(numberOfPlayers)})`}
+              {courts.length < getMaxCourts(playerCount) &&
+                `(${courts.length}/${getMaxCourts(playerCount)})`}
             </Button>
           </div>
         </div>

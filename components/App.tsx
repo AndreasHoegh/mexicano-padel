@@ -967,7 +967,8 @@ export default function App() {
         <>
           <BackButton onClick={goBackToPlayerCount} />
           <PlayerNamesForm
-            numberOfPlayers={numberOfPlayers}
+            initialPlayerCount={numberOfPlayers}
+            onPlayerCountChange={(newCount) => setNumberOfPlayers(newCount)}
             mode={mode}
             onSubmit={(settings) => {
               console.log("Player Names Submitted:", settings.playerNames);
