@@ -505,6 +505,8 @@ export default function App() {
       console.log("=== Starting Round", round, "===");
       console.log("Current Partnership State:", partnerships);
 
+      const shuffledPlayers = shuffle(players);
+
       function findLeastPlayedWith(
         player: string,
         availablePlayers: string[],
@@ -562,11 +564,11 @@ export default function App() {
       }
 
       // Initialize partnerships if needed
-      if (!partnerships[players[0]]) {
+      if (!partnerships[shuffledPlayers[0]]) {
         console.log("Initializing partnerships");
-        players.forEach((p1) => {
+        shuffledPlayers.forEach((p1) => {
           partnerships[p1] = {};
-          players.forEach((p2) => {
+          shuffledPlayers.forEach((p2) => {
             if (p1 !== p2) {
               partnerships[p1][p2] = 0;
             }
@@ -575,11 +577,14 @@ export default function App() {
       }
 
       // Handle sitting out players and get active players
-      const maxActive = Math.min(players.length, courtsToUse.length * 4);
+      const maxActive = Math.min(
+        shuffledPlayers.length,
+        courtsToUse.length * 4
+      );
       const activeCount = Math.floor(maxActive / 4) * 4;
-      const numSittingOut = players.length - activeCount;
+      const numSittingOut = shuffledPlayers.length - activeCount;
 
-      const playersBySitouts = [...players].sort(
+      const playersBySitouts = [...shuffledPlayers].sort(
         (a, b) => (sittingOutCounts[a] || 0) - (sittingOutCounts[b] || 0)
       );
 
