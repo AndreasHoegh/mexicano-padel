@@ -592,7 +592,7 @@ export default function App() {
 
       //const newMatches: Match[] = [];
 
-      let newMatches: Match[] = [];
+      const newMatches: Match[] = [];
 
       // Handle final round separately
       if (maxRounds !== null && round === maxRounds) {
