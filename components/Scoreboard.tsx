@@ -3,7 +3,7 @@ import PlayerScores from "./PlayerScores";
 import { X } from "lucide-react";
 import { PlayerScore } from "../lib/types";
 
-interface ScoreboardProps {
+type ScoreboardProps = {
   isOpen: boolean;
   onClose: () => void;
   scores: {
@@ -12,7 +12,7 @@ interface ScoreboardProps {
   sortedPlayers: [string, PlayerScore][];
   getRowColor: (index: number) => string;
   onUpdateScores: (newScores: { [key: string]: PlayerScore }) => void;
-}
+};
 
 const Scoreboard: React.FC<ScoreboardProps> = ({ isOpen, onClose, scores }) => {
   return (

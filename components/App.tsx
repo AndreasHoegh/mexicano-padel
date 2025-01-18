@@ -8,13 +8,10 @@ import TournamentNameForm, {
 import NumOfPlayersForm from "./NumOfPlayersForm";
 import PlayerNamesForm from "./PlayerNamesForm";
 import Matches from "./Matches";
-import Scoreboard from "./Scoreboard";
-import { Trophy } from "lucide-react";
 import { Button } from "./ui/button";
 import PlayerScores from "./PlayerScores";
 import { Court, PlayerScore } from "../lib/types";
 import RestoreDialog from "./RestoreDialog";
-import DetailsModal from "./DetailsModal";
 
 interface Match {
   team1: string[];
@@ -41,12 +38,6 @@ interface EditingScores {
   [key: number]: {
     team1: number;
     team2: number;
-  };
-}
-
-interface PlayerPartnerships {
-  [key: string]: {
-    [key: string]: number; // Number of times played together
   };
 }
 
@@ -79,11 +70,6 @@ const BackButton = ({
 );
 
 export default function App() {
-  const [playedAgainstCounts, setPlayedAgainstCounts] = useState<{
-    [key: string]: { [key: string]: number };
-  }>({});
-
-  const [isModalOpen, setIsModalOpen] = useState(false);
   const [numberOfPlayers, setNumberOfPlayers] = useState<number>(0);
 
   const [names, setNames] = useState<string[]>([]);
@@ -116,17 +102,12 @@ export default function App() {
       sittingOutPlayers: string[];
     }>
   >([]);
-  const [isDetailsOpen, setIsDetailsOpen] = useState(false);
   const [sortedPlayers, setSortedPlayers] = useState<[string, PlayerScore][]>(
     []
   );
-  const [getRowColor, setGetRowColor] = useState<(index: number) => string>(
-    () => () => ""
-  );
   const [format, setFormat] = useState<"mexicano" | "americano">("mexicano");
-  const [partnerships, setPartnerships] = useState<{
-    [key: string]: { [key: string]: number };
-  }>({});
+  const partnerships: { [key: string]: { [key: string]: number } } = {};
+
   const [playerHistory, setPlayerHistory] = useState<PlayerHistory>({});
 
   const STORAGE_KEY = "tournament_state";
@@ -236,9 +217,6 @@ export default function App() {
     }
   };
 
-  const openModal = () => setIsModalOpen(true);
-  const closeModal = () => setIsModalOpen(false);
-
   const isLastRound = useCallback(() => {
     return maxRounds !== null && round === maxRounds;
   }, [maxRounds, round]);
@@ -326,14 +304,13 @@ export default function App() {
     ]
   );
 
-  // Add this function to get the pattern for each round
   const getMatchPattern = (roundIndex: number): number[] => {
     const patterns = [
-      [0, 2, 1, 3], // Round 1: 1&3 vs 2&4
-      [0, 3, 1, 2], // Round 2: 1&4 vs 2&3
-      [0, 1, 2, 3], // Round 3: 1&2 vs 3&4
+      [0, 2, 1, 3],
+      [0, 3, 1, 2],
+      [0, 1, 2, 3],
     ];
-    return patterns[roundIndex % 3]; // Use modulo to loop through patterns
+    return patterns[roundIndex % 3];
   };
 
   const generateAmericanoMatchesTeamMode = useCallback(
@@ -350,7 +327,6 @@ export default function App() {
         availableUnits: string[],
         usedPartnerships: Set<string>
       ): { partner: string; remaining: string[] } {
-        // Calculate total partnerships for each available unit
         const playedWith = availableUnits
           .filter((u) => u !== unit && !usedPartnerships.has(`${unit}-${u}`))
           .map((u) => {
@@ -366,7 +342,6 @@ export default function App() {
             };
           });
 
-        // Sort first by direct partnerships, then by total partnerships
         playedWith.sort((a, b) => {
           if (a.directPartnerships !== b.directPartnerships) {
             return a.directPartnerships - b.directPartnerships;
@@ -439,7 +414,7 @@ export default function App() {
       const usedPartnerships = new Set<string>();
 
       while (
-        availableUnits.length >= 2 && // Each match requires 2 units
+        availableUnits.length >= 2 &&
         newMatches.length < courtsToUse.length
       ) {
         console.log(`\n=== Creating Match ${newMatches.length + 1} ===`);
@@ -502,8 +477,14 @@ export default function App() {
 
   const generateAmericanoMatches = useCallback(
     (players: string[], courtsToUse = courts) => {
+      const allUnits = [...players];
+      console.log("ALL UNITS:", allUnits);
       console.log("=== Starting Round", round, "===");
       console.log("Current Partnership State:", partnerships);
+      console.log("PLAYERS:", players);
+
+      const maxMatchesByPlayers = Math.floor(players.length / 4);
+      const numMatches = Math.min(maxMatchesByPlayers, courtsToUse.length);
 
       const shuffledPlayers = shuffle(players);
 
@@ -598,6 +579,8 @@ export default function App() {
       });
       setSittingOutCounts(newSittingOutCounts);
 
+      console.log("Available playerssssssss:", playersBySitouts);
+
       // Get active players
       let availablePlayers = playersBySitouts
         .filter((p) => !sittingOut.includes(p))
@@ -607,126 +590,129 @@ export default function App() {
             Object.values(partnerships[b]).reduce((sum, val) => sum + val, 0)
         );
 
-      const newMatches: Match[] = [];
-      const usedPartnerships = new Set<string>();
+      //const newMatches: Match[] = [];
 
-      function findOpponent(
-        player: string,
-        availablePlayers: string[],
-        usedPartnerships: Set<string>
-      ): { opponent: string; remaining: string[] } {
-        const validOpponents = availablePlayers.filter(
-          (p) => p !== player && !usedPartnerships.has(`${player}-${p}`)
+      let newMatches: Match[] = [];
+
+      // Handle final round separately
+      if (maxRounds !== null && round === maxRounds) {
+        availablePlayers = allUnits.sort(
+          (a, b) => scores[b].points - scores[a].points
         );
-
-        if (validOpponents.length === 0) {
-          throw new Error(`No valid opponent found for ${player}`);
-        }
-
-        // For simplicity, just pick the first valid opponent
-        const opponent = validOpponents[0];
-
-        return {
-          opponent,
-          remaining: availablePlayers.filter((p) => p !== opponent),
-        };
-      }
-
-      while (
-        availablePlayers.length >= 4 &&
-        newMatches.length < courtsToUse.length
-      ) {
-        console.log(`\n=== Creating Match ${newMatches.length + 1} ===`);
-        console.log(
-          "Available players at start of this match:",
-          availablePlayers
-        );
-
-        // Select first player
-        const player1 = availablePlayers[0];
-        console.log("Selected first player:", player1);
-
-        // Select partner for player1
-        const { partner: player2, remaining: afterPlayer2 } =
-          findLeastPlayedWith(player1, availablePlayers, usedPartnerships);
-        console.log(`Partner selected for ${player1}: ${player2}`);
-
-        // Get all remaining players for opponents
-        const potentialOpponents = afterPlayer2;
-
-        // Evaluate all possible opponent pairs for minimal overlap
-        const opponentPairs = [];
-        for (let i = 0; i < potentialOpponents.length; i++) {
-          for (let j = i + 1; j < potentialOpponents.length; j++) {
-            const player3 = potentialOpponents[i];
-            const player4 = potentialOpponents[j];
-
-            // Calculate "score" for this pairing based on recent match history
-            const teamScore =
-              (partnerships[player3]?.[player4] || 0) +
-              (partnerships[player4]?.[player3] || 0);
-
-            opponentPairs.push({
-              players: [player3, player4],
-              score: teamScore,
+        for (let i = 0; i < numMatches; i++) {
+          const pattern = finalPairingPattern;
+          const startIdx = i * 4;
+          const players = availablePlayers.slice(startIdx, startIdx + 4);
+          if (players.length === 4) {
+            newMatches.push({
+              team1: [players[pattern[0]], players[pattern[1]]],
+              team2: [players[pattern[2]], players[pattern[3]]],
+              team1Score: 0,
+              team2Score: 0,
+              isScoreSubmitted: false,
             });
           }
         }
+      } else {
+        // Regular round match generation
 
-        // Sort pairs by score, prioritize least played pairings
-        opponentPairs.sort((a, b) => a.score - b.score);
+        const usedPartnerships = new Set<string>();
 
-        const selectedOpponents = opponentPairs[0].players;
-        const [player3, player4] = selectedOpponents;
-        console.log(`Opponent pair selected: ${player3}, ${player4}`);
+        while (
+          availablePlayers.length >= 4 &&
+          newMatches.length < courtsToUse.length
+        ) {
+          console.log(`\n=== Creating Match ${newMatches.length + 1} ===`);
+          console.log(
+            "Available players at start of this match:",
+            availablePlayers
+          );
 
-        console.log("Final match pairing:", {
-          team1: [player1, player2],
-          team2: [player3, player4],
-        });
+          // Select first player
+          const player1 = availablePlayers[0];
+          console.log("Selected first player:", player1);
 
-        // Track partnerships
-        usedPartnerships.add(`${player1}-${player2}`);
-        usedPartnerships.add(`${player2}-${player1}`);
-        usedPartnerships.add(`${player3}-${player4}`);
-        usedPartnerships.add(`${player4}-${player3}`);
+          // Select partner for player1
+          const { partner: player2, remaining: afterPlayer2 } =
+            findLeastPlayedWith(player1, availablePlayers, usedPartnerships);
+          console.log(`Partner selected for ${player1}: ${player2}`);
 
-        // Create match
-        newMatches.push({
-          team1: [player1, player2],
-          team2: [player3, player4],
-          team1Score: 0,
-          team2Score: 0,
-          isScoreSubmitted: false,
-        });
+          // Get all remaining players for opponents
+          const potentialOpponents = afterPlayer2;
 
-        // Update partnerships
-        partnerships[player1][player2] =
-          (partnerships[player1][player2] || 0) + 1;
-        partnerships[player2][player1] =
-          (partnerships[player2][player1] || 0) + 1;
-        partnerships[player3][player4] =
-          (partnerships[player3][player4] || 0) + 1;
-        partnerships[player4][player3] =
-          (partnerships[player4][player3] || 0) + 1;
+          // Evaluate all possible opponent pairs for minimal overlap
+          const opponentPairs = [];
+          for (let i = 0; i < potentialOpponents.length; i++) {
+            for (let j = i + 1; j < potentialOpponents.length; j++) {
+              const player3 = potentialOpponents[i];
+              const player4 = potentialOpponents[j];
 
-        // Remove used players from the pool
-        availablePlayers = availablePlayers.filter(
-          (p) => ![player1, player2, player3, player4].includes(p)
-        );
+              // Calculate "score" for this pairing based on recent match history
+              const teamScore =
+                (partnerships[player3]?.[player4] || 0) +
+                (partnerships[player4]?.[player3] || 0);
 
-        console.log("Updated partnerships for this match:", {
-          [`${player1}-${player2}`]: partnerships[player1][player2],
-          [`${player3}-${player4}`]: partnerships[player3][player4],
-        });
+              opponentPairs.push({
+                players: [player3, player4],
+                score: teamScore,
+              });
+            }
+          }
+
+          // Sort pairs by score, prioritize least played pairings
+          opponentPairs.sort((a, b) => a.score - b.score);
+
+          const selectedOpponents = opponentPairs[0].players;
+          const [player3, player4] = selectedOpponents;
+          console.log(`Opponent pair selected: ${player3}, ${player4}`);
+
+          console.log("Final match pairing:", {
+            team1: [player1, player2],
+            team2: [player3, player4],
+          });
+
+          // Track partnerships
+          usedPartnerships.add(`${player1}-${player2}`);
+          usedPartnerships.add(`${player2}-${player1}`);
+          usedPartnerships.add(`${player3}-${player4}`);
+          usedPartnerships.add(`${player4}-${player3}`);
+
+          // Create match
+          newMatches.push({
+            team1: [player1, player2],
+            team2: [player3, player4],
+            team1Score: 0,
+            team2Score: 0,
+            isScoreSubmitted: false,
+          });
+
+          // Update partnerships
+          partnerships[player1][player2] =
+            (partnerships[player1][player2] || 0) + 1;
+          partnerships[player2][player1] =
+            (partnerships[player2][player1] || 0) + 1;
+          partnerships[player3][player4] =
+            (partnerships[player3][player4] || 0) + 1;
+          partnerships[player4][player3] =
+            (partnerships[player4][player3] || 0) + 1;
+
+          // Remove used players from the pool
+          availablePlayers = availablePlayers.filter(
+            (p) => ![player1, player2, player3, player4].includes(p)
+          );
+        }
       }
-
       setMatches(newMatches);
-      console.log("\n=== Round", round, "Complete ===");
-      console.log("Final matches:", newMatches);
-      console.log("Updated partnership state:", partnerships);
     },
-    [courts, partnerships, sittingOutCounts, round]
+    [
+      courts,
+      partnerships,
+      sittingOutCounts,
+      round,
+      maxRounds,
+      finalPairingPattern,
+      scores,
+    ]
   );
 
   const shuffle = (players: string[]): string[] => {
@@ -752,7 +738,6 @@ export default function App() {
 
   useEffect(() => {
     if (round > 1 && names.length > 0 && matches.length === 0) {
-      console.log("Generating matches for round:", round, "with names:", names);
       if (format === "americano" && mode === "individual") {
         generateAmericanoMatches(names, courts);
       } else if (format === "americano" && mode === "team") {
@@ -769,7 +754,7 @@ export default function App() {
     generateAmericanoMatchesTeamMode,
     courts,
     matches.length,
-  ]); // Only add matches.length
+  ]);
 
   const checkTournamentEnd = useCallback(() => {
     if (maxRounds === null) return false; // Endless tournament
@@ -780,9 +765,12 @@ export default function App() {
     return shouldEnd;
   }, [round, maxRounds]);
 
+  const handlePauseChange = (paused: boolean) => {
+    setIsPaused(paused);
+  };
+
   const nextRound = useCallback(() => {
     if (!checkTournamentEnd()) {
-      // Save current state to history BEFORE clearing matches
       setTournamentHistory((prevHistory) => {
         const newState = {
           matches: matches.map((match) => ({ ...match })),
@@ -792,8 +780,6 @@ export default function App() {
         };
         return [...prevHistory, newState];
       });
-
-      // Then clear matches and increment round
       setMatches([]);
       setRound((prevRound) => prevRound + 1);
     }
@@ -897,44 +883,6 @@ export default function App() {
     );
     setSortedPlayers(sorted);
   }, [scores]);
-
-  useEffect(() => {
-    setGetRowColor(() => (index: number) => {
-      if (index === 0) return "bg-yellow-100";
-      if (index === 1) return "bg-gray-100";
-      if (index === 2) return "bg-orange-100";
-      return index % 2 === 0 ? "bg-white" : "bg-gray-50";
-    });
-  }, [sortedPlayers]);
-
-  // Helper function to generate all possible combinations
-  function getAllCombinations<T>(arr: T[], n: number): T[][] {
-    const array = Array.from(arr);
-    if (n === 1) return array.map((item) => [item]);
-
-    const combinations: T[][] = [];
-
-    for (let i = 0; i < array.length - n + 1; i++) {
-      const current = array[i];
-      const subCombinations = getAllCombinations(array.slice(i + 1), n - 1);
-
-      for (const subComb of subCombinations) {
-        combinations.push([current, ...subComb]);
-      }
-    }
-
-    return combinations;
-  }
-
-  // Add this function near your other utility functions
-  function shuffleCombinations<T>(combinations: T[][]): T[][] {
-    const shuffled = [...combinations];
-    for (let i = shuffled.length - 1; i > 0; i--) {
-      const j = Math.floor(Math.random() * (i + 1));
-      [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
-    }
-    return shuffled;
-  }
 
   return (
     <div className="container mx-auto px-4 py-8 relative">
@@ -1135,41 +1083,7 @@ export default function App() {
                 mode={mode}
                 sittingOutPlayers={sittingOutPlayers}
                 onStartFinalRound={startFinalRound}
-              />
-
-              <div className="mt-8 flex flex-col justify-center gap-3">
-                <button
-                  onClick={openModal}
-                  className="bg-yellow-600 hover:bg-yellow-700 text-white px-6 py-3 rounded-lg shadow-lg flex items-center justify-center gap-2"
-                >
-                  <Trophy className="h-5 w-5" />
-                  <span>View Standings</span>
-                </button>
-
-                <Button
-                  onClick={() => setIsPaused(true)}
-                  className="bg-red-500 hover:bg-red-600 text-white px-6 py-3 flex items-center justify-center gap-2"
-                >
-                  End Tournament
-                </Button>
-              </div>
-
-              <Scoreboard
-                isOpen={isModalOpen}
-                onClose={closeModal}
-                scores={scores}
-                sortedPlayers={sortedPlayers}
-                getRowColor={getRowColor}
-                onUpdateScores={updateScores}
-              />
-
-              <DetailsModal
-                isOpen={isDetailsOpen}
-                onClose={() => setIsDetailsOpen(false)}
-                scores={scores}
-                sortedPlayers={sortedPlayers}
-                getRowColor={getRowColor}
-                onUpdateScores={updateScores}
+                onPause={handlePauseChange}
               />
             </>
           )}

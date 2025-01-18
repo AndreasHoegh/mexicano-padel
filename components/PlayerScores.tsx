@@ -2,11 +2,10 @@
 
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { Trophy, Target } from "lucide-react";
 import DetailsModal from "./DetailsModal";
 
-interface PlayerScoresProps {
+type PlayerScoresProps = {
   scores: {
     [key: string]: {
       points: number;
@@ -15,7 +14,7 @@ interface PlayerScoresProps {
       pointsPerRound: (number | "sitout")[];
     };
   };
-}
+};
 
 export default function PlayerScores({ scores }: PlayerScoresProps) {
   const [sortBy, setSortBy] = useState<"points" | "wins">("points");

@@ -1,10 +1,13 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { ChevronRight } from "lucide-react";
+import { ChevronRight, Trophy } from "lucide-react";
 import Image from "next/image";
 import padelIcon from "../app/assets/padelIcon.png";
 import { MatchCard } from "./MatchCard";
+import Scoreboard from "./Scoreboard";
+import DetailsModal from "./DetailsModal";
+import { PlayerScore } from "@/lib/types";
 
 interface Match {
   team1: string[];
@@ -55,6 +58,18 @@ interface MatchesProps {
   mode: "individual" | "team";
   sittingOutPlayers: string[];
   onStartFinalRound: (editingScores: EditingScores) => void;
+  onPause: (paused: boolean) => void;
+}
+
+interface Scores {
+  [key: string]: {
+    points: number;
+    wins: number;
+    matchesPlayed: number;
+    pointsPerRound: (number | "sitout")[];
+    team?: string;
+    teamName?: string;
+  };
 }
 
 export default function Matches({
@@ -70,22 +85,40 @@ export default function Matches({
   mode,
   sittingOutPlayers,
   onStartFinalRound,
+  onPause,
 }: MatchesProps) {
   const [editingScores, setEditingScores] = useState<EditingScores>({});
   const [openPopovers, setOpenPopovers] = useState<{ [key: string]: boolean }>(
     {}
   );
 
+  const openModal = () => setIsModalOpen(true);
+  const closeModal = () => setIsModalOpen(false);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isPaused, setIsPaused] = useState(false);
+  const [isDetailsOpen, setIsDetailsOpen] = useState(false);
+  const [sortedPlayers, setSortedPlayers] = useState<[string, PlayerScore][]>(
+    []
+  );
+  const [getRowColor, setGetRowColor] = useState<(index: number) => string>(
+    () => () => ""
+  );
+  const [scoresss, setScoresss] = useState<Scores>({});
+
+  const updateScores = useCallback((updatedScores: Scores) => {
+    setScoresss(updatedScores);
+  }, []);
+
   useEffect(() => {
     const initialEditingScores: EditingScores = {};
-    matches.forEach((match, index) => {
+    matches.forEach((_, index) => {
       initialEditingScores[index] = {
         team1: 0,
         team2: 0,
       };
     });
     setEditingScores(initialEditingScores);
-  }, [matches]); // Only run when matches change
+  }, [matches]);
 
   const handleScoreChange = (
     index: number,
@@ -133,6 +166,9 @@ export default function Matches({
     matches.forEach((match, index) => {
       const team1Score = editingScores[index].team1;
       const team2Score = editingScores[index].team2;
+
+      console.log(match);
+      console.log(newScores);
 
       [...match.team1, ...match.team2].forEach((player) => {
         newScores[player].matchesPlayed += 1;
@@ -251,6 +287,43 @@ export default function Matches({
           </Button>
         )}
       </div>
+      <div className="mt-8 flex flex-col justify-center gap-3">
+        <button
+          onClick={openModal}
+          className="bg-yellow-600 hover:bg-yellow-700 text-white px-6 py-3 rounded-lg shadow-lg flex items-center justify-center gap-2"
+        >
+          <Trophy className="h-5 w-5" />
+          <span>View Standings</span>
+        </button>
+
+        <Button
+          onClick={() => {
+            setIsPaused(true);
+            onPause(true); // Notify parent of the change
+          }}
+          className="bg-red-500 hover:bg-red-600 text-white px-6 py-3 flex items-center justify-center gap-2"
+        >
+          End Tournament
+        </Button>
+      </div>
+
+      <Scoreboard
+        isOpen={isModalOpen}
+        onClose={closeModal}
+        scores={scores}
+        sortedPlayers={sortedPlayers}
+        getRowColor={getRowColor}
+        onUpdateScores={updateScores}
+      />
+
+      <DetailsModal
+        isOpen={isDetailsOpen}
+        onClose={() => setIsDetailsOpen(false)}
+        scores={scores}
+        sortedPlayers={sortedPlayers}
+        getRowColor={getRowColor}
+        onUpdateScores={updateScores}
+      />
     </div>
   );
 }

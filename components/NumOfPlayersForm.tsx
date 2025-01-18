@@ -4,17 +4,17 @@ import { RadioGroup, RadioGroupItem } from "./ui/radio-group";
 import { Label } from "./ui/label";
 import { useState } from "react";
 
-interface NumOfPlayersFormProps {
+type NumOfPlayersFormProps = {
   onSubmit: (data: {
     mode: "individual" | "team";
     format: "mexicano" | "americano";
     count: number;
   }) => void;
-}
+};
 
-interface FormData {
+type FormData = {
   "Number of players": string;
-}
+};
 
 export default function NumOfPlayersForm({ onSubmit }: NumOfPlayersFormProps) {
   const [mode, setMode] = useState<"individual" | "team">("individual");

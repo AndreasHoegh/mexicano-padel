@@ -7,7 +7,7 @@ import {
 } from "@/components/ui/popover";
 import VSLogo from "./VSLogo";
 
-interface Match {
+type Match = {
   team1: string[];
   team2: string[];
   team1Score: number;
@@ -15,16 +15,16 @@ interface Match {
   isScoreSubmitted: boolean;
   team1Name?: string;
   team2Name?: string;
-}
+};
 
-interface EditingScores {
+type EditingScores = {
   [key: number]: {
     team1: number;
     team2: number;
   };
 }
 
-interface MatchCardProps {
+type MatchCardProps = {
   match: Match;
   index: number;
   courtName: string;

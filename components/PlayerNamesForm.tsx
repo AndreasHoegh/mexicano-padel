@@ -6,18 +6,18 @@ import { Label } from "@/components/ui/label";
 import { Input } from "./ui/input";
 import { useState, useRef } from "react";
 
-interface PlayerNamesFormProps {
+type PlayerNamesFormProps = {
   initialPlayerCount: number;
   onSubmit: (settings: TournamentSettings) => void;
   mode: "individual" | "team";
   onPlayerCountChange: (newCount: number) => void;
-}
+};
 
-interface FormValues {
+type FormValues = {
   [key: string]: string;
   pointsPerMatch: string;
   maxRounds: string;
-}
+};
 
 const getMaxCourts = (playerCount: number) => {
   return Math.floor(playerCount / 4);
@@ -58,14 +58,19 @@ export default function PlayerNamesForm({
 
   const addCourt = () => {
     if (courts.length < getMaxCourts(playerCount)) {
+      // Calculate the next available ID based on the current courts
+      const maxId =
+        courts.length > 0 ? Math.max(...courts.map((court) => court.id)) : 0;
+
+      const nextId = maxId + 1;
+
       setCourts((prev) => [
         ...prev,
         {
-          id: nextIdRef.current,
-          name: `Court ${nextIdRef.current}`,
+          id: nextId,
+          name: `Court ${nextId}`,
         },
       ]);
-      nextIdRef.current += 1;
     }
   };
 
@@ -82,23 +87,35 @@ export default function PlayerNamesForm({
   };
 
   const removePlayer = (index: number) => {
-    if ((mode === "team" && playerCount <= 4) || (!mode && playerCount <= 4)) {
+    if (playerCount <= 4) {
       return; // Don't allow removal if we're at minimum players
     }
 
-    // Unregister the field from react-hook-form
-    unregister(`playerName${index}`);
-
-    // Shift all player names up
-    for (let i = index; i < playerCount - 1; i++) {
-      const nextValue = document.querySelector<HTMLInputElement>(
-        `input[name="playerName${i + 1}"]`
-      )?.value;
-      setValue(`playerName${i}`, nextValue || `Player${i + 1}`);
+    // Unregister the players for this team in "team" mode
+    if (mode === "team") {
+      unregister(`playerName${index}`);
+      unregister(`playerName${index + 1}`);
+    } else {
+      unregister(`playerName${index}`);
     }
 
-    // Update player count
-    const newCount = playerCount - (mode === "team" ? 2 : 1);
+    // Update the player names to fill gaps
+    const step = mode === "team" ? 2 : 1;
+    for (let i = index; i < playerCount - step; i += step) {
+      const nextValue1 = document.querySelector<HTMLInputElement>(
+        `input[name="playerName${i + step}"]`
+      )?.value;
+
+      setValue(`playerName${i}`, nextValue1 || `Player${i + 1}`);
+      if (mode === "team") {
+        const nextValue2 = document.querySelector<HTMLInputElement>(
+          `input[name="playerName${i + step + 1}"]`
+        )?.value;
+        setValue(`playerName${i + 1}`, nextValue2 || `Player${i + 2}`);
+      }
+    }
+
+    const newCount = playerCount - step;
     setPlayerCount(newCount);
     onPlayerCountChange(newCount);
 
@@ -116,14 +133,19 @@ export default function PlayerNamesForm({
     // Add a court if we have enough players for an additional court
     const newMaxCourts = getMaxCourts(newCount);
     if (courts.length < newMaxCourts) {
+      // Calculate the next available ID based on the current courts
+      const maxId =
+        courts.length > 0 ? Math.max(...courts.map((court) => court.id)) : 0;
+
+      const nextId = maxId + 1;
+
       setCourts((prev) => [
         ...prev,
         {
-          id: nextIdRef.current,
-          name: `Court ${nextIdRef.current}`,
+          id: nextId,
+          name: `Court ${nextId}`,
         },
       ]);
-      nextIdRef.current += 1;
     }
   };
 

@@ -3,14 +3,14 @@
 import { X, Pencil, Check } from "lucide-react";
 import { useState, useEffect } from "react";
 
-interface PlayerScore {
+type PlayerScore = {
   points: number;
   wins: number;
   matchesPlayed: number;
   pointsPerRound: (number | "sitout")[];
-}
+};
 
-interface DetailsModalProps {
+type DetailsModalProps = {
   isOpen: boolean;
   onClose: () => void;
   scores: {
@@ -19,7 +19,7 @@ interface DetailsModalProps {
   sortedPlayers: [string, PlayerScore][];
   getRowColor: (index: number) => string;
   onUpdateScores?: (newScores: { [key: string]: PlayerScore }) => void;
-}
+};
 
 export default function DetailsModal({
   isOpen,

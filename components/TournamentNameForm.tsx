@@ -31,9 +31,9 @@ export type TournamentNameFormData = {
   tournamentName: string;
 };
 
-interface TournamentNameFormProps {
+type TournamentNameFormProps = {
   onSubmit: SubmitHandler<TournamentNameFormData>;
-}
+};
 
 export default function TournamentNameForm({
   onSubmit,
