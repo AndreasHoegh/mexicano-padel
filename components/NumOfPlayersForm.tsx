@@ -46,12 +46,12 @@ export default function NumOfPlayersForm({ onSubmit }: NumOfPlayersFormProps) {
             {
               value: "mexicano",
               label: "Mexicano",
-              description: "Rotating partners each round",
+              description: "Matchups by ranks",
             },
             {
               value: "americano",
               label: "Americano",
-              description: "Fixed partners for tournament",
+              description: "Play with and against everyone",
             },
           ].map((option) => (
             <div key={option.value}>
