@@ -2,29 +2,23 @@
 
 import Script from "next/script";
 
-export default function GoogleAnalytics({
-  GA_MEASUREMENT_ID,
-}: {
-  GA_MEASUREMENT_ID: string;
-}) {
+export default function GoogleAnalytics() {
   return (
     <>
+      {/* Google tag (gtag.js) */}
       <Script
+        src="https://www.googletagmanager.com/gtag/js?id=G-MSBZN2XFXQ"
         strategy="afterInteractive"
-        src={`https://www.googletagmanager.com/gtag/js?id=${GA_MEASUREMENT_ID}`}
       />
-      <Script
-        id="google-analytics"
-        strategy="afterInteractive"
-        dangerouslySetInnerHTML={{
-          __html: `
-            window.dataLayer = window.dataLayer || [];
-            function gtag(){dataLayer.push(arguments);}
-            gtag('js', new Date());
-            gtag('config', '${GA_MEASUREMENT_ID}');
-          `,
-        }}
-      />
+      <Script id="google-analytics" strategy="afterInteractive">
+        {`
+          window.dataLayer = window.dataLayer || [];
+          function gtag(){dataLayer.push(arguments);}
+          gtag('js', new Date());
+
+          gtag('config', 'G-MSBZN2XFXQ');
+        `}
+      </Script>
     </>
   );
 }

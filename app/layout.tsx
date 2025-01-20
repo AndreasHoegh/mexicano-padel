@@ -5,8 +5,6 @@ import GoogleAnalytics from "@/components/GoogleAnalytics";
 
 const inter = Inter({ subsets: ["latin"] });
 
-const GA_MEASUREMENT_ID = process.env.NEXT_PUBLIC_GA_ID;
-
 const APP_NAME = "PadelAmericano";
 const APP_DESCRIPTION =
   "The ultimate padel tournament management system for organizing and running americano and mexicano padel tournaments";
@@ -92,9 +90,7 @@ export default function RootLayout({
             }),
           }}
         />
-        {GA_MEASUREMENT_ID && (
-          <GoogleAnalytics GA_MEASUREMENT_ID={GA_MEASUREMENT_ID} />
-        )}
+        <GoogleAnalytics />
       </head>
       <body
         className={`${inter.className} min-h-screen bg-gradient-to-br from-gray-700 to-green-900`}

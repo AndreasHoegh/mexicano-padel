@@ -3,10 +3,21 @@ export const trackEvent = (
   category: string,
   label?: string
 ) => {
-  if (typeof window !== "undefined" && (window as any).gtag) {
-    (window as any).gtag("event", action, {
+  if (typeof window !== "undefined" && window.gtag) {
+    window.gtag("event", action, {
       event_category: category,
       event_label: label,
     });
   }
 };
+
+// Add type definition for gtag
+declare global {
+  interface Window {
+    gtag: (
+      command: string,
+      action: string,
+      params: { [key: string]: any }
+    ) => void;
+  }
+}
