@@ -1,6 +1,6 @@
 export const translations = {
   en: {
-    welcome: "Welcome to Padel Tournament Generator!",
+    welcome: "Welcome to Padel Americano!",
     createTournaments: "Create exciting tournaments with just a few clicks",
     whatIsPadelTournaments:
       "What are Mexicano and Americano Padel Tournaments?",
@@ -22,7 +22,7 @@ export const translations = {
     letsPlay: "Let’s play!",
   },
   es: {
-    welcome: "¡Bienvenidos al Generador de Torneos de Padel!",
+    welcome: "¡Bienvenidos al Padel Americano!",
     createTournaments: "Crea torneos emocionantes con solo unos clics",
     whatIsPadelTournaments:
       "¿Qué son los torneos de Mexicano y Americano Padel?",
@@ -43,7 +43,7 @@ export const translations = {
     letsPlay: "¡Vamos a jugar!",
   },
   da: {
-    welcome: "Velkommen til Padel Turnering Generator!",
+    welcome: "Velkommen til Padel Americano!",
     createTournaments: "Opret spændende turneringer med bare få klik",
     whatIsPadelTournaments: "Hvad er Mexicano og Americano Padel Turneringer?",
     aboutPadelTournaments:
