@@ -23,6 +23,7 @@ import {
   generateAmericanoMatches,
   updatePartnerships,
 } from "../lib/generateAmericano";
+import Footer from "./Footer";
 
 export default function App() {
   const [numberOfPlayers, setNumberOfPlayers] = useState<number>(0);
@@ -374,7 +375,7 @@ export default function App() {
   }, [scores]);
 
   return (
-    <div className="container mx-auto px-4 py-8 relative">
+    <div className="min-h-screen flex flex-col">
       {(isTournamentNameSet || numberOfPlayers > 0) &&
         !arePlayerNamesSet &&
         matches.length === 0 && (
@@ -621,6 +622,7 @@ export default function App() {
           }}
         />
       )}
+      <Footer />
     </div>
   );
 }

@@ -33,7 +33,7 @@ export default function NumOfPlayersForm({ onSubmit }: NumOfPlayersFormProps) {
   return (
     <form
       onSubmit={handleSubmit(onFormSubmit)}
-      className="space-y-8 text-gray-200"
+      className="space-y-8 text-gray-200 max-w-2xl mx-auto"
     >
       <div className="space-y-4">
         <h2 className="text-xl font-semibold text-center">Tournament Format</h2>

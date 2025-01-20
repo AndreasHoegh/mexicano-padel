@@ -168,7 +168,7 @@ export default function PlayerNamesForm({
     <div className="flex flex-col items-center mt-4">
       <form
         onSubmit={handleSubmit(handlePlayerNamesSubmit)}
-        className="space-y-8 w-full max-w-2xl px-4"
+        className="mb-12 space-y-8 w-full max-w-2xl px-4"
       >
         {mode === "team" ? (
           <div className="space-y-4">
@@ -176,25 +176,23 @@ export default function PlayerNamesForm({
               Team Names
             </h2>
             {[...Array(playerCount / 2)].map((_, index) => (
-              <div key={index} className="space-y-2">
-                <div className="flex justify-center gap-2">
-                  <input
-                    className="text-black text-center text-lg w-64 h-12 rounded-md border-2 bg-white focus:border-black focus:outline-none transition-all p-2"
-                    type="text"
-                    defaultValue={`Team ${index + 1}`}
-                    {...register(`playerName${index * 2}`, { required: true })}
-                    onFocus={(e) => e.target.select()}
-                  />
-                  <Button
-                    type="button"
-                    variant="outline"
-                    onClick={() => removePlayer(index * 2)}
-                    disabled={playerCount <= 4}
-                    className="h-12 border-2 hover:bg-red-50 hover:text-red-600 disabled:opacity-50"
-                  >
-                    Remove
-                  </Button>
-                </div>
+              <div key={index} className="flex justify-center gap-2">
+                <input
+                  className="text-black text-center text-m rounded-md border-2 bg-white focus:border-black focus:outline-none transition-all"
+                  type="text"
+                  defaultValue={`Team ${index + 1}`}
+                  {...register(`playerName${index * 2}`, { required: true })}
+                  onFocus={(e) => e.target.select()}
+                />
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={() => removePlayer(index * 2)}
+                  disabled={playerCount <= 4}
+                  className=" border-2 hover:bg-red-50 hover:text-red-600 disabled:opacity-50"
+                >
+                  -
+                </Button>
               </div>
             ))}
           </div>
@@ -389,7 +387,7 @@ export default function PlayerNamesForm({
         </div>
 
         <Button
-          className="mx-auto block w-full border-2 h-12 text-l bg-yellow-600 hover:bg-yellow-700 text-white transition-all duration-300 transform hover:scale-105 shadow-lg"
+          className=" mx-auto block w-full border-2 h-12 text-l bg-yellow-600 hover:bg-yellow-700 text-white transition-all duration-300 transform hover:scale-105 shadow-lg"
           type="submit"
         >
           Generate Matches
