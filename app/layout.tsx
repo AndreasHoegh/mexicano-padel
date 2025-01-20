@@ -6,7 +6,7 @@ const inter = Inter({ subsets: ["latin"] });
 
 const APP_NAME = "PadelAmericano";
 const APP_DESCRIPTION =
-  "The ultimate padel tournament management system for organizing and running professional padel tournaments";
+  "The ultimate padel tournament management system for organizing and running americano and mexicano padel tournaments";
 
 export const metadata: Metadata = {
   metadataBase: new URL("https://padelamericano.com"),
