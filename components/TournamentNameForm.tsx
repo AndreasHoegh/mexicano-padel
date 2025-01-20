@@ -49,7 +49,7 @@ export default function TournamentNameForm({
   const t = translations[language];
 
   return (
-    <div className="min-h-screen flex items-center justify-center p-4">
+    <div className="min-h-screen flex items-center justify-center p-4 bg-gradient-to-br from-gray-700 to-green-900">
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
@@ -86,9 +86,9 @@ export default function TournamentNameForm({
                 🇩🇰
               </button>
             </div>
-            <h1 className="text-5xl font-bold text-white mb-2">
-              PadelAmericano
-            </h1>
+            <CardTitle className="text-5xl font-bold text-white mb-2">
+              {t.welcome}
+            </CardTitle>
             <CardDescription className="text-xl text-white/80 mt-2">
               {t.createTournaments}
             </CardDescription>

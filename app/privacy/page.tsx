@@ -3,13 +3,17 @@ import type { Metadata } from "next";
 
 export default function PrivacyPolicy() {
   return (
-    <div className="min-h-screen p-8">
+    <div className="min-h-screen p-4 sm:p-8">
       <PageBackButton />
-      <div className="max-w-3xl mx-auto bg-white/10 backdrop-blur-lg rounded-lg p-8 text-gray-200">
-        <h1 className="text-3xl font-bold mb-6">Privacy Policy</h1>
+      <div className="max-w-3xl mx-auto bg-white/10 backdrop-blur-lg rounded-lg p-4 sm:p-8 text-gray-200">
+        <h1 className="text-2xl sm:text-3xl font-bold mb-4 sm:mb-6">
+          Privacy Policy
+        </h1>
         <div className="space-y-4">
           <section>
-            <h2 className="text-xl font-semibold mb-2">Data Collection</h2>
+            <h2 className="text-lg sm:text-xl font-semibold mb-2">
+              Data Collection
+            </h2>
             <p>
               We only store tournament data locally in your browser&apos;s
               storage. No personal information is collected or transmitted to

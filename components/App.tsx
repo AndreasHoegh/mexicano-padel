@@ -150,7 +150,7 @@ export default function App() {
 
   useEffect(() => {
     window.scrollTo(0, 0);
-  }, [isTournamentNameSet, arePlayerNamesSet]);
+  }, [isTournamentNameSet, numberOfPlayers, arePlayerNamesSet]);
 
   useEffect(() => {
     if (localStorage.getItem(STORAGE_KEY)) {
@@ -518,7 +518,7 @@ export default function App() {
       )}
 
       {matches.length > 0 && (
-        <div className="flex flex-col items-center relative space-y-4">
+        <div className="flex flex-col items-center relative space-y-4 mb-12">
           {isFinished || isPaused ? (
             <div className="text-center space-y-4">
               <h2 className="text-2xl font-bold text-white">

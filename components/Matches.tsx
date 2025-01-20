@@ -214,7 +214,7 @@ export default function Matches({
   };
 
   return (
-    <div className="space-y-8 my-12 px-4 max-w-4xl mx-auto">
+    <div className="space-y-8 px-4 max-w-4xl mx-auto">
       <Card className="bg-gradient-to-br from-gray-400 to-gray-300 shadow-xl border border-gray-600">
         <CardHeader className="text-center pb-2">
           <CardTitle className="text-3xl font-extrabold text-gray-200 flex items-center justify-center gap-3">

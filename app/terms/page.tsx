@@ -3,13 +3,17 @@ import type { Metadata } from "next";
 
 export default function TermsOfUse() {
   return (
-    <div className="min-h-screen p-8">
+    <div className="min-h-screen p-4 sm:p-8">
       <PageBackButton />
-      <div className="max-w-3xl mx-auto bg-white/10 backdrop-blur-lg rounded-lg p-8 text-gray-200">
-        <h1 className="text-3xl font-bold mb-6">Terms of Use</h1>
+      <div className="max-w-3xl mx-auto bg-white/10 backdrop-blur-lg rounded-lg p-4 sm:p-8 text-gray-200">
+        <h1 className="text-2xl sm:text-3xl font-bold mb-4 sm:mb-6">
+          Terms of Use
+        </h1>
         <div className="space-y-4">
           <section>
-            <h2 className="text-xl font-semibold mb-2">Acceptance of Terms</h2>
+            <h2 className="text-lg sm:text-xl font-semibold mb-2">
+              Acceptance of Terms
+            </h2>
             <p>
               By accessing and using PadelAmericano, you accept and agree to be
               bound by the terms and conditions of this agreement.

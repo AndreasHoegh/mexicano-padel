@@ -165,7 +165,7 @@ export default function PlayerNamesForm({
   };
 
   return (
-    <div className="flex flex-col items-center mt-4">
+    <div className="flex flex-col items-center mt-4 mb-12">
       <form
         onSubmit={handleSubmit(handlePlayerNamesSubmit)}
         className="mb-12 space-y-8 w-full max-w-2xl px-4"
