@@ -26,6 +26,7 @@ import {
 } from "lucide-react";
 import { translations, Language } from "../lib/translations";
 import { motion } from "framer-motion";
+import { trackEvent } from "@/lib/analytics";
 
 export type TournamentNameFormData = {
   tournamentName: string;
@@ -47,6 +48,11 @@ export default function TournamentNameForm({
   const [language, setLanguage] = useState<Language>("en");
 
   const t = translations[language];
+
+  const onFormSubmit = (data: TournamentNameFormData) => {
+    trackEvent("tournament_created", "tournament", data.tournamentName);
+    onSubmit(data);
+  };
 
   return (
     <div className="min-h-screen flex items-center justify-center p-4 bg-gradient-to-br from-gray-700 to-green-900">
@@ -106,7 +112,7 @@ export default function TournamentNameForm({
                 </AccordionItem>
               </Accordion>
 
-              <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+              <form onSubmit={handleSubmit(onFormSubmit)} className="space-y-4">
                 <div>
                   <label
                     htmlFor="tournamentName"

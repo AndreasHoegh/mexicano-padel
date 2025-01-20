@@ -27,6 +27,7 @@
     "lucide-react": "^0.468.0",
     "motion": "^11.13.5",
     "next": "14.2.20",
+    "nextjs-google-analytics": "^2.3.7",
     "react": "^18",
     "react-dom": "^18",
     "react-hook-form": "^7.53.2",

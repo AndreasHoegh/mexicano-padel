@@ -24,6 +24,7 @@ import {
   updatePartnerships,
 } from "../lib/generateAmericano";
 import Footer from "./Footer";
+import { trackEvent } from "@/lib/analytics";
 
 export default function App() {
   const [numberOfPlayers, setNumberOfPlayers] = useState<number>(0);
@@ -261,6 +262,7 @@ export default function App() {
   }, [round, maxRounds]);
 
   const handlePauseChange = (paused: boolean) => {
+    trackEvent("tournament_paused", "game_progress", tournamentName);
     setIsPaused(paused);
   };
 
@@ -289,6 +291,7 @@ export default function App() {
 
   const startFinalRound = useCallback(
     (editingScores: EditingScores) => {
+      trackEvent("final_round_started", "game_progress", tournamentName);
       // First update scores
       const newScores = { ...scores };
 
@@ -344,7 +347,7 @@ export default function App() {
       setRound((prevRound) => prevRound + 1);
       setMaxRounds(round + 1);
     },
-    [matches, round, updateMatches, scores, sittingOutPlayers]
+    [matches, round, updateMatches, scores, sittingOutPlayers, tournamentName]
   );
 
   const goBackToTournamentName = () => {
