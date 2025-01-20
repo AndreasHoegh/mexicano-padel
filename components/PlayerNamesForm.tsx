@@ -33,7 +33,7 @@ export default function PlayerNamesForm({
   const { register, handleSubmit, setValue, unregister } = useForm<FormValues>({
     defaultValues: {
       pointsPerMatch: "21",
-      maxRounds: "5",
+      maxRounds: "∞",
     },
   });
 
@@ -271,7 +271,7 @@ export default function PlayerNamesForm({
             Number of Rounds
           </h2>
           <RadioGroup
-            defaultValue="5"
+            defaultValue="∞"
             className="grid grid-cols-2 sm:grid-cols-3 gap-4"
             onValueChange={(value) => setValue("maxRounds", value)}
           >

@@ -4,34 +4,64 @@ function findLeastPlayedWith(
   player: string,
   availablePlayers: string[],
   usedPartnerships: Set<string>,
-  partnerships: { [key: string]: { [key: string]: number } }
+  partnerships: { [key: string]: { [key: string]: number } },
+  remainingPlayers: string[] = []
 ): { partner: string; remaining: string[] } {
   console.log(`\nFinding partner for ${player}`);
   console.log("Available players:", availablePlayers);
   console.log("Used partnerships:", Array.from(usedPartnerships));
   console.log("Current partnerships for", player, ":", partnerships[player]);
 
-  const playedWith = availablePlayers
+  // Calculate a score for each potential partner
+  const partnerScores = availablePlayers
     .filter((p) => p !== player && !usedPartnerships.has(`${player}-${p}`))
-    .map((p) => ({
-      id: p,
-      playedWith: partnerships[player]?.[p] || 0,
-    }));
+    .map((p) => {
+      // Base score is the number of times they've played together
+      let score = partnerships[player]?.[p] || 0;
 
-  console.log("\nTimes played with each available player:");
-  playedWith.forEach((p) => {
-    console.log(`${p.id}: played with ${player} ${p.playedWith} times`);
+      // If this is for the first player of a match and we have remaining players
+      // Look ahead to see if choosing this partner would force any bad partnerships
+      if (remainingPlayers.length > 0) {
+        const otherPlayers = remainingPlayers.filter(
+          (rp) => rp !== player && rp !== p
+        );
+
+        // Calculate the average partnership count between remaining players
+        let forcedPartnershipsScore = 0;
+        if (otherPlayers.length >= 2) {
+          for (let i = 0; i < otherPlayers.length - 1; i++) {
+            for (let j = i + 1; j < otherPlayers.length; j++) {
+              const timesPlayed =
+                (partnerships[otherPlayers[i]]?.[otherPlayers[j]] || 0) +
+                (partnerships[otherPlayers[j]]?.[otherPlayers[i]] || 0);
+              forcedPartnershipsScore += timesPlayed;
+            }
+          }
+          // Add this to the score to penalize choices that would force frequent partnerships
+          score += forcedPartnershipsScore / 2;
+        }
+      }
+
+      return {
+        id: p,
+        score,
+      };
+    });
+
+  console.log("\nScores for each potential partner:");
+  partnerScores.forEach((p) => {
+    console.log(`${p.id}: score ${p.score}`);
   });
 
-  // Sort by times played with
-  playedWith.sort((a, b) => a.playedWith - b.playedWith);
+  // Sort by score (lower is better)
+  partnerScores.sort((a, b) => a.score - b.score);
 
-  // Get all players who have played the minimum number of times with this player
-  const minPlayedWith = playedWith[0]?.playedWith || 0;
-  const candidates = playedWith.filter((p) => p.playedWith === minPlayedWith);
+  // Get all players who have the minimum score
+  const minScore = partnerScores[0]?.score || 0;
+  const candidates = partnerScores.filter((p) => p.score === minScore);
 
   console.log(
-    `\nCandidates who played least with ${player} (${minPlayedWith} times):`,
+    `\nCandidates with best score (${minScore}):`,
     candidates.map((c) => c.id)
   );
 
@@ -56,51 +86,63 @@ function findOpponentForTeam(
   team: string[],
   availablePlayers: string[],
   partnerships: { [key: string]: { [key: string]: number } }
-): string {
+): { opponent: string; remaining: string[] } {
   console.log(`\nFinding opponent for team: ${team.join(", ")}`);
   console.log("Available players:", availablePlayers);
 
-  // Calculate total times played against for each available player
-  const playedAgainst = availablePlayers.map((player) => {
-    let totalPlayedAgainst = 0;
+  // Calculate scores for each potential opponent
+  const opponentScores = availablePlayers.map((player) => {
+    // Base score is total times played against the team
+    let score = 0;
     for (const teamPlayer of team) {
       const timesPlayed =
         (partnerships[teamPlayer]?.[player] || 0) +
         (partnerships[player]?.[teamPlayer] || 0);
-      console.log(
-        `${player} has played against ${teamPlayer}: ${timesPlayed} times`
-      );
-      totalPlayedAgainst += timesPlayed;
+      score += timesPlayed;
     }
+
+    // Look ahead: Add score based on partnership history with remaining players
+    const remainingPlayers = availablePlayers.filter((p) => p !== player);
+    if (remainingPlayers.length > 0) {
+      let partnershipScore = 0;
+      remainingPlayers.forEach((partner) => {
+        partnershipScore +=
+          (partnerships[player]?.[partner] || 0) +
+          (partnerships[partner]?.[player] || 0);
+      });
+      score += partnershipScore / remainingPlayers.length;
+    }
+
     return {
       id: player,
-      playedAgainst: totalPlayedAgainst,
+      score,
     };
   });
 
-  console.log("\nTotal times played against the team:");
-  playedAgainst.forEach((p) => {
-    console.log(`${p.id}: played against team ${p.playedAgainst} times`);
+  console.log("\nScores for each potential opponent:");
+  opponentScores.forEach((p) => {
+    console.log(`${p.id}: score ${p.score}`);
   });
 
-  // Sort by times played against
-  playedAgainst.sort((a, b) => a.playedAgainst - b.playedAgainst);
+  // Sort by score (lower is better)
+  opponentScores.sort((a, b) => a.score - b.score);
 
-  // Get all players who have played against the team the minimum number of times
-  const minPlayedAgainst = playedAgainst[0]?.playedAgainst || 0;
-  const candidates = playedAgainst.filter(
-    (p) => p.playedAgainst === minPlayedAgainst
-  );
+  // Get all players with minimum score
+  const minScore = opponentScores[0]?.score || 0;
+  const candidates = opponentScores.filter((p) => p.score === minScore);
 
   console.log(
-    `\nCandidates who played least against team (${minPlayedAgainst} times):`,
+    `\nCandidates who played least against team (${minScore}):`,
     candidates.map((c) => c.id)
   );
 
   // Randomly select one from the candidates
   const selected = candidates[Math.floor(Math.random() * candidates.length)];
-  console.log(`Selected opponent: ${selected?.id}`);
-  return selected?.id;
+
+  return {
+    opponent: selected.id,
+    remaining: availablePlayers.filter((p) => p !== selected.id),
+  };
 }
 
 export const generateAmericanoMatches = (
@@ -214,23 +256,24 @@ export const generateAmericanoMatches = (
       const player1 = availablePlayers[randomIndex];
       console.log("\nRandomly selected first player:", player1);
 
-      // Find partner for first player
+      // Find partner for first player, passing all remaining players for look-ahead
       const { partner: player2, remaining: afterPlayer2 } = findLeastPlayedWith(
         player1,
         availablePlayers,
         usedPartnerships,
-        partnerships
+        partnerships,
+        availablePlayers.filter((p) => p !== player1)
       );
 
       // Find first opponent
       const team1 = [player1, player2];
-      const opponent1 = findOpponentForTeam(team1, afterPlayer2, partnerships);
+      const { opponent: opponent1, remaining: afterOpponent1 } =
+        findOpponentForTeam(team1, afterPlayer2, partnerships);
 
       // Find partner for first opponent
-      const remainingForOpponent = afterPlayer2.filter((p) => p !== opponent1);
       const { partner: opponent2 } = findLeastPlayedWith(
         opponent1,
-        remainingForOpponent,
+        afterOpponent1,
         usedPartnerships,
         partnerships
       );
