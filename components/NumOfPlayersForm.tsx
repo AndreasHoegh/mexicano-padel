@@ -62,7 +62,7 @@ export default function NumOfPlayersForm({ onSubmit }: NumOfPlayersFormProps) {
               />
               <Label
                 htmlFor={`format-${option.value}`}
-                className="text-black flex flex-col items-center justify-between rounded-md border-2 bg-popover p-4 peer-data-[state=checked]:border-black peer-data-[state=checked]:border-4 [&:has([data-state=checked])]:scale-105 cursor-pointer transition-transform"
+                className="text-black flex flex-col items-center justify-between rounded-md border-2 bg-popover p-4 peer-data-[state=checked]:border-yellow-600 peer-data-[state=checked]:border-4 [&:has([data-state=checked])]:scale-105 cursor-pointer transition-transform"
               >
                 <span className="text-xl font-semibold">{option.label}</span>
                 <span className="text-sm text-muted-foreground text-center">
@@ -100,7 +100,7 @@ export default function NumOfPlayersForm({ onSubmit }: NumOfPlayersFormProps) {
                 />
                 <Label
                   htmlFor={`mode-${option.value}`}
-                  className="text-black flex flex-col items-center justify-between rounded-md border-2 bg-popover p-4 peer-data-[state=checked]:border-black peer-data-[state=checked]:border-4 [&:has([data-state=checked])]:scale-105 cursor-pointer transition-transform"
+                  className="text-black flex flex-col items-center justify-between rounded-md border-2 bg-popover p-4 peer-data-[state=checked]:border-yellow-600 peer-data-[state=checked]:border-4 [&:has([data-state=checked])]:scale-105 cursor-pointer transition-transform"
                 >
                   <span className="text-xl font-semibold">{option.label}</span>
                   <span className="text-sm text-muted-foreground text-center">

@@ -176,7 +176,7 @@ export default function PlayerNamesForm({
               Team Names
             </h2>
             {[...Array(playerCount / 2)].map((_, index) => (
-              <div key={index} className="flex justify-center gap-2">
+              <div key={index} className="flex items-center gap-2 w-64 mx-auto">
                 <input
                   className="text-black text-center text-m rounded-md border-2 bg-white focus:border-black focus:outline-none transition-all"
                   type="text"
@@ -184,15 +184,12 @@ export default function PlayerNamesForm({
                   {...register(`playerName${index * 2}`, { required: true })}
                   onFocus={(e) => e.target.select()}
                 />
-                <Button
-                  type="button"
-                  variant="outline"
+                <span
                   onClick={() => removePlayer(index * 2)}
-                  disabled={playerCount <= 4}
-                  className=" border-2 hover:bg-red-50 hover:text-red-600 disabled:opacity-50"
+                  className="text-sm text-gray-400 hover:text-red-500 cursor-pointer transition-colors select-none ml-auto"
                 >
-                  -
-                </Button>
+                  remove
+                </span>
               </div>
             ))}
           </div>
@@ -202,7 +199,7 @@ export default function PlayerNamesForm({
               Player Names
             </h2>
             {[...Array(playerCount)].map((_, index) => (
-              <div key={index} className="flex justify-center gap-2">
+              <div key={index} className="flex items-center gap-2 w-64 mx-auto">
                 <input
                   className="text-black text-center text-m rounded-md border-2 bg-white focus:border-black focus:outline-none transition-all"
                   type="text"
@@ -210,15 +207,12 @@ export default function PlayerNamesForm({
                   {...register(`playerName${index}`, { required: true })}
                   onFocus={(e) => e.target.select()}
                 />
-                <Button
-                  type="button"
-                  variant="outline"
+                <span
                   onClick={() => removePlayer(index)}
-                  disabled={playerCount <= 4}
-                  className=" border-2 hover:bg-red-50 hover:text-red-600 disabled:opacity-50"
+                  className="text-sm text-gray-400 hover:text-red-500 cursor-pointer transition-colors select-none ml-auto"
                 >
-                  -
-                </Button>
+                  remove
+                </span>
               </div>
             ))}
           </div>
@@ -254,7 +248,7 @@ export default function PlayerNamesForm({
                 />
                 <Label
                   htmlFor={`points-${points}`}
-                  className="text-black flex flex-col items-center justify-between rounded-md border-2 bg-white p-4 peer-data-[state=checked]:border-black peer-data-[state=checked]:border-4 [&:has([data-state=checked])]:scale-105 cursor-pointer transition-transform"
+                  className="text-black flex flex-col items-center justify-between rounded-md border-2 bg-white p-4 peer-data-[state=checked]:border-yellow-600 peer-data-[state=checked]:border-4 [&:has([data-state=checked])]:scale-105 cursor-pointer transition-transform"
                 >
                   <span className="text-xl font-semibold">{points}</span>
                   <span className="text-sm text-muted-foreground">points</span>
@@ -283,7 +277,7 @@ export default function PlayerNamesForm({
                 />
                 <Label
                   htmlFor={`rounds-${rounds}`}
-                  className="text-black flex flex-col items-center justify-between rounded-md border-2 bg-white p-4 peer-data-[state=checked]:border-black peer-data-[state=checked]:border-4 [&:has([data-state=checked])]:scale-105 cursor-pointer transition-transform"
+                  className="text-black flex flex-col items-center justify-between rounded-md border-2 bg-white p-4 peer-data-[state=checked]:border-yellow-600 peer-data-[state=checked]:border-4 [&:has([data-state=checked])]:scale-105 cursor-pointer transition-transform"
                 >
                   <span className="text-xl font-semibold">{rounds}</span>
                   <span className="text-sm text-muted-foreground">rounds</span>
@@ -354,23 +348,21 @@ export default function PlayerNamesForm({
           </h2>
           <div className=" space-y-2 w-64 mx-auto flex flex-col items-center">
             {courts.map((court) => (
-              <div className="flex justify-center gap-2" key={court.id}>
+              <div className="flex items-center gap-2 w-64" key={court.id}>
                 <Input
                   value={court.name}
                   onFocus={(e) => e.target.select()}
                   onChange={(e) => updateCourtName(court.id, e.target.value)}
-                  className="flex-1  text-black text-center text-m border-2 bg-white focus:border-black focus:outline-none transition-all"
+                  className="flex-1 text-black text-center text-m border-2 bg-white focus:border-black focus:outline-none transition-all"
                   placeholder="Court name"
                 />
                 {courts.length > 1 && (
-                  <Button
-                    type="button"
-                    variant="outline"
-                    className=" border-2 text-m hover:bg-red-50 hover:text-red-600 disabled:opacity-50"
+                  <span
                     onClick={() => removeCourt(court.id)}
+                    className="text-sm text-gray-400 hover:text-red-500 cursor-pointer transition-colors select-none ml-auto"
                   >
-                    Remove
-                  </Button>
+                    remove
+                  </span>
                 )}
               </div>
             ))}
