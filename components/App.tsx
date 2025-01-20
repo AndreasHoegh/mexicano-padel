@@ -456,51 +456,53 @@ export default function App() {
               setScores(initialScores);
               setSittingOutCounts({});
 
-              // Just call generateMatches directly
+              // Generate first round matches
+              let initialMatches: Match[];
               if (format === "americano" && mode === "individual") {
-                setMatches(
-                  generateAmericanoMatches(
-                    settings.playerNames,
-                    initialCourts,
-                    partnerships,
-                    round,
-                    sittingOutCounts,
-                    setSittingOutCounts,
-                    setSittingOutPlayers,
-                    maxRounds,
-                    finalPairingPattern,
-                    scores
-                  )
+                initialMatches = generateAmericanoMatches(
+                  settings.playerNames,
+                  initialCourts,
+                  partnerships,
+                  round,
+                  sittingOutCounts,
+                  setSittingOutCounts,
+                  setSittingOutPlayers,
+                  maxRounds,
+                  finalPairingPattern,
+                  scores
                 );
+                // Update partnerships after generating matches
+                const updatedPartnerships = updatePartnerships(
+                  partnerships,
+                  initialMatches
+                );
+                setPartnerships(updatedPartnerships);
               } else if (format === "americano" && mode === "team") {
-                setMatches(
-                  generateAmericanoMatchesTeamMode(
-                    settings.playerNames,
-                    initialCourts,
-                    partnerships,
-                    round,
-                    sittingOutCounts,
-                    setSittingOutCounts,
-                    setSittingOutPlayers,
-                    mode
-                  )
+                initialMatches = generateAmericanoMatchesTeamMode(
+                  settings.playerNames,
+                  initialCourts,
+                  partnerships,
+                  round,
+                  sittingOutCounts,
+                  setSittingOutCounts,
+                  setSittingOutPlayers,
+                  mode
                 );
               } else {
-                setMatches(
-                  generateMatches(
-                    settings.playerNames,
-                    initialCourts,
-                    round,
-                    scores,
-                    mode,
-                    sittingOutCounts,
-                    setSittingOutCounts,
-                    setSittingOutPlayers,
-                    maxRounds,
-                    finalPairingPattern
-                  )
+                initialMatches = generateMatches(
+                  settings.playerNames,
+                  initialCourts,
+                  round,
+                  scores,
+                  mode,
+                  sittingOutCounts,
+                  setSittingOutCounts,
+                  setSittingOutPlayers,
+                  maxRounds,
+                  finalPairingPattern
                 );
               }
+              setMatches(initialMatches);
               setArePlayerNamesSet(true);
 
               // Update the final round pattern

@@ -1,5 +1,4 @@
 import { Match, Scores, Court } from "../lib/types";
-import { shuffle } from "./matchGenerator";
 
 function findLeastPlayedWith(
   player: string,
@@ -10,6 +9,7 @@ function findLeastPlayedWith(
   console.log(`\nFinding partner for ${player}`);
   console.log("Available players:", availablePlayers);
   console.log("Used partnerships:", Array.from(usedPartnerships));
+  console.log("Current partnerships for", player, ":", partnerships[player]);
 
   const playedWith = availablePlayers
     .filter((p) => p !== player && !usedPartnerships.has(`${player}-${p}`))
@@ -18,7 +18,7 @@ function findLeastPlayedWith(
       playedWith: partnerships[player]?.[p] || 0,
     }));
 
-  console.log("\nPartnership history for each available player:");
+  console.log("\nTimes played with each available player:");
   playedWith.forEach((p) => {
     console.log(`${p.id}: played with ${player} ${p.playedWith} times`);
   });
@@ -121,17 +121,16 @@ export const generateAmericanoMatches = (
     "Current Partnership State:",
     JSON.stringify(partnerships, null, 2)
   );
-  console.log("PLAYERS:", players);
+  console.log("Players:", players);
 
   // Initialize partnerships if needed
-  const newPartnerships = { ...partnerships };
   players.forEach((p1) => {
-    if (!newPartnerships[p1]) {
-      newPartnerships[p1] = {};
+    if (!partnerships[p1]) {
+      partnerships[p1] = {};
     }
     players.forEach((p2) => {
-      if (p1 !== p2 && newPartnerships[p1][p2] === undefined) {
-        newPartnerships[p1][p2] = 0;
+      if (p1 !== p2 && partnerships[p1][p2] === undefined) {
+        partnerships[p1][p2] = 0;
       }
     });
   });
@@ -167,8 +166,8 @@ export const generateAmericanoMatches = (
     .filter((p) => !sittingOut.includes(p))
     .sort(
       (a, b) =>
-        Object.values(newPartnerships[a]).reduce((sum, val) => sum + val, 0) -
-        Object.values(newPartnerships[b]).reduce((sum, val) => sum + val, 0)
+        Object.values(partnerships[a]).reduce((sum, val) => sum + val, 0) -
+        Object.values(partnerships[b]).reduce((sum, val) => sum + val, 0)
     );
 
   console.log("\nActive players for this round:", availablePlayers);
@@ -181,11 +180,16 @@ export const generateAmericanoMatches = (
     availablePlayers = allUnits.sort(
       (a, b) => scores[b].points - scores[a].points
     );
+    console.log("Players sorted by score:", availablePlayers);
     for (let i = 0; i < numMatches; i++) {
       const pattern = finalPairingPattern;
       const startIdx = i * 4;
       const players = availablePlayers.slice(startIdx, startIdx + 4);
       if (players.length === 4) {
+        console.log(`\nCreating final round match ${i + 1}:`, {
+          team1: [players[pattern[0]], players[pattern[1]]],
+          team2: [players[pattern[2]], players[pattern[3]]],
+        });
         newMatches.push({
           team1: [players[pattern[0]], players[pattern[1]]],
           team2: [players[pattern[2]], players[pattern[3]]],
@@ -215,16 +219,12 @@ export const generateAmericanoMatches = (
         player1,
         availablePlayers,
         usedPartnerships,
-        newPartnerships
+        partnerships
       );
 
       // Find first opponent
       const team1 = [player1, player2];
-      const opponent1 = findOpponentForTeam(
-        team1,
-        afterPlayer2,
-        newPartnerships
-      );
+      const opponent1 = findOpponentForTeam(team1, afterPlayer2, partnerships);
 
       // Find partner for first opponent
       const remainingForOpponent = afterPlayer2.filter((p) => p !== opponent1);
@@ -232,7 +232,7 @@ export const generateAmericanoMatches = (
         opponent1,
         remainingForOpponent,
         usedPartnerships,
-        newPartnerships
+        partnerships
       );
 
       console.log("\nFinal match pairing:", {
@@ -253,23 +253,12 @@ export const generateAmericanoMatches = (
         isScoreSubmitted: false,
       });
 
-      // Update partnership counts
-      newPartnerships[player1][player2] =
-        (newPartnerships[player1][player2] || 0) + 1;
-      newPartnerships[player2][player1] =
-        (newPartnerships[player2][player1] || 0) + 1;
-      newPartnerships[opponent1][opponent2] =
-        (newPartnerships[opponent1][opponent2] || 0) + 1;
-      newPartnerships[opponent2][opponent1] =
-        (newPartnerships[opponent2][opponent1] || 0) + 1;
-
       availablePlayers = availablePlayers.filter(
         (p) => ![player1, player2, opponent1, opponent2].includes(p)
       );
     }
   }
 
-  // Return both the matches and the updated partnerships
   return newMatches;
 };
 
@@ -277,9 +266,17 @@ export const updatePartnerships = (
   currentPartnerships: { [key: string]: { [key: string]: number } },
   matches: Match[]
 ): { [key: string]: { [key: string]: number } } => {
+  console.log("\n=== Updating Partnerships ===");
+  console.log(
+    "Current partnerships:",
+    JSON.stringify(currentPartnerships, null, 2)
+  );
+  console.log("Matches to process:", matches);
+
   const updatedPartnerships = { ...currentPartnerships };
 
-  matches.forEach((match) => {
+  matches.forEach((match, index) => {
+    console.log(`\nProcessing match ${index + 1}:`);
     const [player1, player2] = match.team1;
     const [opponent1, opponent2] = match.team2;
 
@@ -304,7 +301,16 @@ export const updatePartnerships = (
       (updatedPartnerships[opponent1][opponent2] || 0) + 1;
     updatedPartnerships[opponent2][opponent1] =
       (updatedPartnerships[opponent2][opponent1] || 0) + 1;
+
+    console.log("Updated partnerships after match:", {
+      [`${player1}-${player2}`]: updatedPartnerships[player1][player2],
+      [`${opponent1}-${opponent2}`]: updatedPartnerships[opponent1][opponent2],
+    });
   });
 
+  console.log(
+    "\nFinal partnership state:",
+    JSON.stringify(updatedPartnerships, null, 2)
+  );
   return updatedPartnerships;
 };

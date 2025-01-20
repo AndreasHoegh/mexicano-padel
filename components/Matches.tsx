@@ -92,9 +92,6 @@ export default function Matches({
   const [openPopovers, setOpenPopovers] = useState<{ [key: string]: boolean }>(
     {}
   );
-
-  const openModal = () => setIsModalOpen(true);
-  const closeModal = () => setIsModalOpen(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isPaused, setIsPaused] = useState(false);
   const [isDetailsOpen, setIsDetailsOpen] = useState(false);
@@ -106,6 +103,9 @@ export default function Matches({
   );
   const [scoresss, setScoresss] = useState<Scores>({});
   const [showFinalRoundModal, setShowFinalRoundModal] = useState(false);
+
+  const openModal = () => setIsModalOpen(true);
+  const closeModal = () => setIsModalOpen(false);
 
   const updateScores = useCallback((updatedScores: Scores) => {
     setScoresss(updatedScores);
@@ -148,6 +148,10 @@ export default function Matches({
     );
   };
 
+  const areAllScoresValid = () => {
+    return matches.every((_, index) => isScoreValid(index));
+  };
+
   const handleNextRound = () => {
     if (!areAllScoresValid()) {
       alert(
@@ -156,7 +160,7 @@ export default function Matches({
       return;
     }
 
-    // First update scores and matches
+    // First update scores
     const newScores = { ...scores };
 
     // Mark sitting out players for this round
@@ -207,10 +211,6 @@ export default function Matches({
 
     // Then move to next round
     onNextRound();
-  };
-
-  const areAllScoresValid = () => {
-    return matches.every((_, index) => isScoreValid(index));
   };
 
   return (
