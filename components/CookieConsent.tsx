@@ -4,6 +4,9 @@ import { useState, useEffect } from "react";
 import { Button } from "./ui/button";
 
 export default function CookieConsent() {
+  // Temporarily disabled as we only use anonymous analytics
+  return null;
+
   const [showConsent, setShowConsent] = useState(false);
 
   useEffect(() => {
