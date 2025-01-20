@@ -11,7 +11,7 @@ export default function BackButton({
     <Button
       onClick={onClick}
       variant="ghost"
-      className={`absolute top-4 left-3 flex items-center gap-2 text-white hover:text-gray-900 transition-colors ${
+      className={`absolute top-1 left-1 flex items-center gap-2 text-white hover:text-gray-900 transition-colors ${
         !visible ? "hidden" : ""
       }`}
     >

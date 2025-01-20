@@ -392,7 +392,7 @@ export default function App() {
       )}
 
       {isTournamentNameSet && (
-        <h1 className="text-center text-2xl font-bold my-6 text-gray-500">
+        <h1 className="text-center text-2xl font-bold my-8 text-gray-500">
           {tournamentName}
         </h1>
       )}
