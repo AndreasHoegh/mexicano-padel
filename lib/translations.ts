@@ -19,7 +19,7 @@ export const translations = {
     chooseTournamentType: "Choose Tournament Type",
     selectType: "Select the type of tournament: Mexicano or Americano",
     createTournament: "Create Tournament",
-    letsPlay: "Let’s play!",
+    letsPlay: "Let's play!",
   },
   es: {
     welcome: "¡Bienvenidos al Padel Americano!",

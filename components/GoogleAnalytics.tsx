@@ -16,6 +16,17 @@ export default function GoogleAnalytics() {
           function gtag(){dataLayer.push(arguments);}
           gtag('js', new Date());
 
+          gtag('consent', 'default', {
+            'analytics_storage': 'denied'
+          });
+
+          const consent = localStorage.getItem('cookie-consent');
+          if (consent === 'true') {
+            gtag('consent', 'update', {
+              'analytics_storage': 'granted'
+            });
+          }
+
           gtag('config', 'G-MSBZN2XFXQ');
         `}
       </Script>

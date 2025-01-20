@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import "./globals.css";
 import GoogleAnalytics from "@/components/GoogleAnalytics";
+import CookieConsent from "@/components/CookieConsent";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -96,6 +97,7 @@ export default function RootLayout({
         className={`${inter.className} min-h-screen bg-gradient-to-br from-gray-700 to-green-900`}
       >
         {children}
+        <CookieConsent />
       </body>
     </html>
   );
