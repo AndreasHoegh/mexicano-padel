@@ -28,9 +28,9 @@ export default function TermsOfUse() {
           <section>
             <h2 className="text-xl font-semibold mb-2">Disclaimer</h2>
             <p>
-              This software is provided "as is", without warranty of any kind,
-              express or implied. In no event shall the authors be liable for
-              any claim, damages, or other liability.
+              This software is provided &quot;as is&quot;, without warranty of
+              any kind, express or implied. In no event shall the authors be
+              liable for any claim, damages, or other liability.
             </p>
           </section>
 

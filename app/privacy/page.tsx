@@ -11,18 +11,18 @@ export default function PrivacyPolicy() {
           <section>
             <h2 className="text-xl font-semibold mb-2">Data Collection</h2>
             <p>
-              We only store tournament data locally in your browser's storage.
-              No personal information is collected or transmitted to any
-              servers.
+              We only store tournament data locally in your browser&apos;s
+              storage. No personal information is collected or transmitted to
+              any servers.
             </p>
           </section>
 
           <section>
             <h2 className="text-xl font-semibold mb-2">Local Storage</h2>
             <p>
-              Tournament data is saved in your browser's local storage to allow
-              you to continue tournaments later. This data never leaves your
-              device.
+              Tournament data is saved in your browser&apos;s local storage to
+              allow you to continue tournaments later. This data never leaves
+              your device.
             </p>
           </section>
 
