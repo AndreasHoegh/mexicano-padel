@@ -22,7 +22,7 @@ type EditingScores = {
     team1: number;
     team2: number;
   };
-}
+};
 
 type MatchCardProps = {
   match: Match;
@@ -40,7 +40,7 @@ type MatchCardProps = {
     team: "team1" | "team2",
     value: number
   ) => void;
-}
+};
 
 function TeamDisplay({
   team,

@@ -8,6 +8,7 @@ import { MatchCard } from "./MatchCard";
 import Scoreboard from "./Scoreboard";
 import DetailsModal from "./DetailsModal";
 import { PlayerScore } from "@/lib/types";
+import FinalRoundModal from "./FinalRoundModal";
 
 interface Match {
   team1: string[];
@@ -104,6 +105,7 @@ export default function Matches({
     () => () => ""
   );
   const [scoresss, setScoresss] = useState<Scores>({});
+  const [showFinalRoundModal, setShowFinalRoundModal] = useState(false);
 
   const updateScores = useCallback((updatedScores: Scores) => {
     setScoresss(updatedScores);
@@ -167,9 +169,6 @@ export default function Matches({
       const team1Score = editingScores[index].team1;
       const team2Score = editingScores[index].team2;
 
-      console.log(match);
-      console.log(newScores);
-
       [...match.team1, ...match.team2].forEach((player) => {
         newScores[player].matchesPlayed += 1;
       });
@@ -216,7 +215,7 @@ export default function Matches({
 
   return (
     <div className="space-y-8 mt-8 px-4 max-w-4xl mx-auto">
-      <Card className="bg-gradient-to-br from-gray-700 to-gray-900 shadow-xl border border-gray-600">
+      <Card className="bg-gradient-to-br from-gray-400 to-gray-300 shadow-xl border border-gray-600">
         <CardHeader className="text-center pb-2">
           <CardTitle className="text-3xl font-extrabold text-gray-200 flex items-center justify-center gap-3">
             <Image
@@ -226,7 +225,7 @@ export default function Matches({
               height={36}
               className="opacity-90"
             />
-            <span className="px-4 py-2 rounded-lg bg-gray-800/50 border border-gray-600">
+            <span className="px-4 py-2 rounded-lg bg-gray-900/50 border border-gray-600">
               {isLastRound ? "Final Round" : `Round ${round}`}
             </span>
           </CardTitle>
@@ -254,7 +253,7 @@ export default function Matches({
           <div className="flex flex-col sm:flex-row items-center gap-4">
             <Button
               onClick={handleNextRound}
-              className="text-lg bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 border-none shadow-lg transition-all duration-200 disabled:from-gray-400 disabled:to-gray-500 w-48 h-12"
+              className="hover:scale-105 text-lg bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 border-none shadow-lg transition-all duration-200 disabled:from-gray-400 disabled:to-gray-500 w-48 h-12"
               disabled={!areAllScoresValid()}
             >
               Next Round <ChevronRight className="ml-1" />
@@ -263,14 +262,14 @@ export default function Matches({
               <Button
                 onClick={() => {
                   if (areAllScoresValid()) {
-                    onStartFinalRound(editingScores);
+                    setShowFinalRoundModal(true);
                   } else {
                     alert(
                       "Please ensure all match scores are valid before proceeding to the final round."
                     );
                   }
                 }}
-                className="text-lg bg-gradient-to-r from-purple-500 to-indigo-600 hover:from-purple-600 hover:to-indigo-700 border-none shadow-lg transition-all duration-200 disabled:from-gray-400 disabled:to-gray-500 w-48 h-12"
+                className="hover:scale-105 text-lg bg-gradient-to-r from-gray-900 to-gray-800 hover:from-gray-800 hover:to-gray-900 border-none shadow-lg transition-all duration-200 disabled:from-gray-400 disabled:to-gray-500 w-48 h-12"
                 disabled={!areAllScoresValid()}
               >
                 Final Round
@@ -280,7 +279,7 @@ export default function Matches({
         ) : (
           <Button
             onClick={handleNextRound}
-            className="text-lg bg-gradient-to-r from-yellow-500 to-orange-600 hover:from-yellow-600 hover:to-orange-700 border-none shadow-lg transition-all duration-200 disabled:from-gray-400 disabled:to-gray-500 w-48 h-12"
+            className="hover:scale-105 text-lg bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 border-none shadow-lg transition-all duration-200 disabled:from-gray-400 disabled:to-gray-500 w-48 h-12"
             disabled={!areAllScoresValid()}
           >
             Finish Tournament
@@ -290,7 +289,7 @@ export default function Matches({
       <div className="mt-8 flex flex-col justify-center gap-3">
         <button
           onClick={openModal}
-          className="bg-yellow-600 hover:bg-yellow-700 text-white px-6 py-3 rounded-lg shadow-lg flex items-center justify-center gap-2"
+          className="hover:scale-105 bg-yellow-600 hover:bg-yellow-600 text-white px-6 py-3 rounded-lg shadow-lg flex items-center justify-center gap-2"
         >
           <Trophy className="h-5 w-5" />
           <span>View Standings</span>
@@ -301,7 +300,7 @@ export default function Matches({
             setIsPaused(true);
             onPause(true); // Notify parent of the change
           }}
-          className="bg-red-500 hover:bg-red-600 text-white px-6 py-3 flex items-center justify-center gap-2"
+          className="hover:scale-105 bg-red-500 hover:bg-red-600 text-white px-6 py-3 flex items-center justify-center gap-2"
         >
           End Tournament
         </Button>
@@ -323,6 +322,12 @@ export default function Matches({
         sortedPlayers={sortedPlayers}
         getRowColor={getRowColor}
         onUpdateScores={updateScores}
+      />
+
+      <FinalRoundModal
+        isOpen={showFinalRoundModal}
+        onClose={() => setShowFinalRoundModal(false)}
+        onConfirm={() => onStartFinalRound(editingScores)}
       />
     </div>
   );

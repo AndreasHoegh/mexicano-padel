@@ -206,7 +206,7 @@ export default function PlayerNamesForm({
             {[...Array(playerCount)].map((_, index) => (
               <div key={index} className="flex justify-center gap-2">
                 <input
-                  className="text-black text-center text-lg w-64 h-12 rounded-md border-2 bg-white focus:border-black focus:outline-none transition-all p-2"
+                  className="text-black text-center text-m rounded-md border-2 bg-white focus:border-black focus:outline-none transition-all"
                   type="text"
                   defaultValue={`Player${index + 1}`}
                   {...register(`playerName${index}`, { required: true })}
@@ -217,9 +217,9 @@ export default function PlayerNamesForm({
                   variant="outline"
                   onClick={() => removePlayer(index)}
                   disabled={playerCount <= 4}
-                  className="h-12 border-2 hover:bg-red-50 hover:text-red-600 disabled:opacity-50"
+                  className=" border-2 hover:bg-red-50 hover:text-red-600 disabled:opacity-50"
                 >
-                  Remove
+                  -
                 </Button>
               </div>
             ))}
@@ -231,7 +231,7 @@ export default function PlayerNamesForm({
             type="button"
             variant="outline"
             onClick={addPlayer}
-            className="w-64 h-12 border-2 hover:border-black"
+            className=" bg-yellow-600 hover:bg-yellow-600 text-white transition-all duration-300 transform hover:scale-105 shadow-lg"
           >
             Add {mode === "team" ? "Team" : "Player"}
           </Button>
@@ -297,7 +297,7 @@ export default function PlayerNamesForm({
 
         {mode === "individual" && (
           <div className="space-y-3">
-            <h2 className="text-lg font-semibold text-center">
+            <h2 className="text-2xl font-semibold text-center text-gray-200">
               Final Round Pairing
             </h2>
             <div className="flex flex-wrap justify-center gap-2">
@@ -354,21 +354,21 @@ export default function PlayerNamesForm({
           <h2 className="text-2xl font-semibold text-center text-gray-200">
             Courts
           </h2>
-          <div className="space-y-2">
+          <div className=" space-y-2 w-64 mx-auto flex flex-col items-center">
             {courts.map((court) => (
-              <div key={court.id} className="flex items-center gap-2">
+              <div className="flex justify-center gap-2" key={court.id}>
                 <Input
                   value={court.name}
                   onFocus={(e) => e.target.select()}
                   onChange={(e) => updateCourtName(court.id, e.target.value)}
-                  className="flex-1 h-12 text-black text-center text-lg border-2 bg-white focus:border-black focus:outline-none transition-all"
+                  className="flex-1  text-black text-center text-m border-2 bg-white focus:border-black focus:outline-none transition-all"
                   placeholder="Court name"
                 />
                 {courts.length > 1 && (
                   <Button
                     type="button"
                     variant="outline"
-                    className="h-12 border-2 hover:bg-red-50 hover:text-red-600 disabled:opacity-50"
+                    className=" border-2 text-m hover:bg-red-50 hover:text-red-600 disabled:opacity-50"
                     onClick={() => removeCourt(court.id)}
                   >
                     Remove
@@ -380,17 +380,18 @@ export default function PlayerNamesForm({
               type="button"
               variant="outline"
               onClick={addCourt}
-              className="w-full h-12 border-2 hover:border-black"
+              className=" border-2 bg-yellow-600 hover:bg-yellow-600 text-white transition-all duration-300 transform hover:scale-105 shadow-lg"
               disabled={courts.length >= getMaxCourts(playerCount)}
             >
-              Add Court{" "}
-              {courts.length < getMaxCourts(playerCount) &&
-                `(${courts.length}/${getMaxCourts(playerCount)})`}
+              Add Court
             </Button>
           </div>
         </div>
 
-        <Button className="mx-auto block w-64 h-12" type="submit">
+        <Button
+          className="mx-auto block w-full border-2 h-12 text-l bg-yellow-600 hover:bg-yellow-700 text-white transition-all duration-300 transform hover:scale-105 shadow-lg"
+          type="submit"
+        >
           Generate Matches
         </Button>
       </form>

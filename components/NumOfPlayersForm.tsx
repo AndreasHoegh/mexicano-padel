@@ -23,7 +23,6 @@ export default function NumOfPlayersForm({ onSubmit }: NumOfPlayersFormProps) {
 
   const onFormSubmit = (data: FormData) => {
     const count = parseInt(data["Number of players"]);
-    console.log("Form Submitted with Count:", count);
     onSubmit({
       mode,
       format,
@@ -136,7 +135,10 @@ export default function NumOfPlayersForm({ onSubmit }: NumOfPlayersFormProps) {
         </div>
       </div>
 
-      <Button className="mx-auto block" type="submit">
+      <Button
+        className="mx-auto block bg-yellow-600 hover:bg-yellow-600 text-white transition-all duration-300 transform hover:scale-105 shadow-lg"
+        type="submit"
+      >
         Next
       </Button>
     </form>

@@ -98,10 +98,10 @@ export default function TournamentNameForm({
               <Accordion type="single" collapsible className="w-full">
                 <AccordionItem value="about" className="border-white/20">
                   <AccordionTrigger className="text-white hover:text-white/80">
-                    {t.whatIsMexicanoPadel}
+                    {t.whatIsPadelTournaments}
                   </AccordionTrigger>
                   <AccordionContent className="text-white/80">
-                    <p className="leading-relaxed">{t.aboutMexicanoPadel}</p>
+                    <p className="leading-relaxed">{t.aboutPadelTournaments}</p>
                   </AccordionContent>
                 </AccordionItem>
               </Accordion>
@@ -132,7 +132,7 @@ export default function TournamentNameForm({
                 </div>
                 <Button
                   type="submit"
-                  className="w-full bg-gradient-to-r from-yellow-500 to-green-600 hover:from-yellow-600 hover:to-green-700 text-white transition-all duration-300 transform hover:scale-105 shadow-lg"
+                  className="w-full bg-yellow-600 hover:bg-yellow-600 text-white transition-all duration-300 transform hover:scale-105 shadow-lg"
                   onMouseEnter={() => setIsHovered(true)}
                   onMouseLeave={() => setIsHovered(false)}
                 >
@@ -153,7 +153,7 @@ export default function TournamentNameForm({
                 whileHover={{ scale: 1.05 }}
                 transition={{ type: "spring", stiffness: 300 }}
               >
-                <Trophy className="h-12 w-12 text-yellow-400" />
+                <Trophy className="h-12 w-12 text-yellow-600" />
                 <h3 className="font-semibold text-lg text-white">
                   {t.dynamicTournaments}
                 </h3>

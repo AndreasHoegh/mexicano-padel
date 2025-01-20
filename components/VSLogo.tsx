@@ -7,7 +7,6 @@ export default function VSLogo() {
       initial={{ scale: 0 }}
       animate={{ scale: 1 }}
       transition={{ type: "spring", stiffness: 200, damping: 10 }}
-      whileHover={{ rotate: 360 }}
     >
       <motion.span
         className="text-2xl font-bold"
