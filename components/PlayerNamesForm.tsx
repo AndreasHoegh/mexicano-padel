@@ -30,12 +30,13 @@ export default function PlayerNamesForm({
   onPlayerCountChange,
 }: PlayerNamesFormProps) {
   const [playerCount, setPlayerCount] = useState(initialPlayerCount);
-  const { register, handleSubmit, setValue, unregister } = useForm<FormValues>({
-    defaultValues: {
-      pointsPerMatch: "21",
-      maxRounds: "∞",
-    },
-  });
+  const { register, handleSubmit, setValue, unregister, watch } =
+    useForm<FormValues>({
+      defaultValues: {
+        pointsPerMatch: "24",
+        maxRounds: "∞",
+      },
+    });
 
   const nextIdRef = useRef(2);
   const maxCourts = getMaxCourts(playerCount);
@@ -154,10 +155,22 @@ export default function PlayerNamesForm({
       .filter((key) => key.startsWith("playerName"))
       .map((key) => data[key]);
 
+    const pointsPerMatch =
+      data.pointsPerMatch === "custom"
+        ? data.customPoints
+        : parseInt(data.pointsPerMatch);
+
+    const maxRounds =
+      data.maxRounds === "custom"
+        ? data.customRounds
+        : data.maxRounds === "∞"
+        ? null
+        : parseInt(data.maxRounds);
+
     onSubmit({
       playerNames,
-      pointsPerMatch: parseInt(data.pointsPerMatch),
-      maxRounds: data.maxRounds === "∞" ? null : parseInt(data.maxRounds),
+      pointsPerMatch,
+      maxRounds,
       courts,
       mode,
       finalRoundPattern,
@@ -234,14 +247,14 @@ export default function PlayerNamesForm({
             Points per Match
           </h2>
           <RadioGroup
-            defaultValue="21"
+            defaultValue="24"
             className="grid grid-cols-2 sm:grid-cols-4 gap-4"
             onValueChange={(value) => setValue("pointsPerMatch", value)}
           >
-            {[15, 21, 24, 32].map((points) => (
+            {[16, 20, 24, 32, "custom"].map((points) => (
               <div key={points}>
                 <RadioGroupItem
-                  value={points.toString()}
+                  value={points === "custom" ? "custom" : points.toString()}
                   id={`points-${points}`}
                   className="peer sr-only"
                   {...register("pointsPerMatch")}
@@ -250,12 +263,32 @@ export default function PlayerNamesForm({
                   htmlFor={`points-${points}`}
                   className="text-black flex flex-col items-center justify-between rounded-md border-2 bg-white p-4 peer-data-[state=checked]:border-yellow-600 peer-data-[state=checked]:border-4 [&:has([data-state=checked])]:scale-105 cursor-pointer transition-transform"
                 >
-                  <span className="text-xl font-semibold">{points}</span>
+                  <span className="text-xl font-semibold">
+                    {points === "custom" ? "Custom" : points}
+                  </span>
                   <span className="text-sm text-muted-foreground">points</span>
                 </Label>
               </div>
             ))}
           </RadioGroup>
+          <div
+            className={`flex justify-center transition-all duration-300 ${
+              watch("pointsPerMatch") === "custom"
+                ? "h-12 opacity-100"
+                : "h-0 opacity-0"
+            }`}
+          >
+            <input
+              type="number"
+              min={1}
+              className="text-black text-center text-xl font-semibold w-20 h-12 rounded-md border-2 focus:border-black focus:outline-none transition-all p-2 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+              placeholder="Points"
+              {...register("customPoints", {
+                min: 1,
+                valueAsNumber: true,
+              })}
+            />
+          </div>
         </div>
 
         <div className="space-y-3">
@@ -267,7 +300,7 @@ export default function PlayerNamesForm({
             className="grid grid-cols-2 sm:grid-cols-3 gap-4"
             onValueChange={(value) => setValue("maxRounds", value)}
           >
-            {[3, 5, 7, 10, 15, "∞"].map((rounds) => (
+            {[3, 5, 7, 10, 15, "∞", "custom"].map((rounds) => (
               <div key={rounds}>
                 <RadioGroupItem
                   value={rounds.toString()}
@@ -279,12 +312,32 @@ export default function PlayerNamesForm({
                   htmlFor={`rounds-${rounds}`}
                   className="text-black flex flex-col items-center justify-between rounded-md border-2 bg-white p-4 peer-data-[state=checked]:border-yellow-600 peer-data-[state=checked]:border-4 [&:has([data-state=checked])]:scale-105 cursor-pointer transition-transform"
                 >
-                  <span className="text-xl font-semibold">{rounds}</span>
+                  <span className="text-xl font-semibold">
+                    {rounds === "custom" ? "Custom" : rounds}
+                  </span>
                   <span className="text-sm text-muted-foreground">rounds</span>
                 </Label>
               </div>
             ))}
           </RadioGroup>
+          <div
+            className={`flex justify-center transition-all duration-300 ${
+              watch("maxRounds") === "custom"
+                ? "h-12 opacity-100"
+                : "h-0 opacity-0"
+            }`}
+          >
+            <input
+              type="number"
+              min={1}
+              className="text-black text-center text-xl font-semibold w-20 h-12 rounded-md border-2 focus:border-black focus:outline-none transition-all p-2 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+              placeholder="Rounds"
+              {...register("customRounds", {
+                min: 1,
+                valueAsNumber: true,
+              })}
+            />
+          </div>
         </div>
 
         {mode === "individual" && (
@@ -375,6 +428,13 @@ export default function PlayerNamesForm({
             >
               Add Court
             </Button>
+            <p
+              className={`text-sm text-gray-400 ${
+                courts.length >= getMaxCourts(playerCount) ? "block" : "hidden"
+              }`}
+            >
+              Add more players to add more courts
+            </p>
           </div>
         </div>
 
