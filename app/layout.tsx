@@ -38,9 +38,6 @@ export const metadata: Metadata = {
     "americano",
     "mexicano",
   ],
-  authors: [{ name: "Andreas Høgh" }],
-  creator: "Andreas Høgh",
-  publisher: "Andreas Høgh",
   robots: "index, follow",
   openGraph: {
     type: "website",
