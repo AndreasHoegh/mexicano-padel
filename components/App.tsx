@@ -12,12 +12,11 @@ import { Button } from "./ui/button";
 import PlayerScores from "./PlayerScores";
 import { Court, PlayerScore } from "../lib/types";
 import RestoreDialog from "./RestoreDialog";
-import { Match, Scores, EditingScores, PlayerHistory } from "../lib/types";
+import { Match, Scores, EditingScores } from "../lib/types";
 import BackButton from "./ui/backButton";
 import {
   generateMatches,
   generateAmericanoMatchesTeamMode,
-  //generateAmericanoMatches,
 } from "../lib/matchGenerator";
 import {
   generateAmericanoMatches,
@@ -63,7 +62,6 @@ export default function App() {
     []
   );
   const [format, setFormat] = useState<"mexicano" | "americano">("mexicano");
-  const [playerHistory, setPlayerHistory] = useState<PlayerHistory>({});
   const [partnerships, setPartnerships] = useState<{
     [key: string]: { [key: string]: number };
   }>({});

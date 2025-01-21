@@ -75,7 +75,7 @@ export const translations = {
     tournamentNameRequired: "El nombre del torneo es obligatorio",
     chooseTournamentType: "Elige el Tipo de Torneo",
     selectType: "Selecciona el tipo de torneo: Mexicano o Americano",
-    team: "Team",
+    team: "Equipo",
     createTournament: "Crear Torneo",
     letsPlay: "¡Vamos a jugar!",
     matchupsByRanks: "Emparejamientos por rangos",

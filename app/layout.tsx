@@ -4,8 +4,6 @@ import "./globals.css";
 import GoogleAnalytics from "@/components/GoogleAnalytics";
 import CookieConsent from "@/components/CookieConsent";
 import { LanguageProvider } from "@/lib/LanguageContext";
-import LanguageSelector from "@/components/LanguageSelector";
-import HtmlLangUpdater from "@/components/HtmlLangUpdater";
 import { headers } from "next/headers";
 
 const inter = Inter({ subsets: ["latin"] });
