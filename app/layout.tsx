@@ -61,11 +61,10 @@ export default function RootLayout({
   return (
     <html lang="en">
       <head>
-        <link
-          rel="icon"
-          type="image/png"
-          sizes="32x32"
-          href="/favicon-32x32.png"
+        <script
+          defer
+          src="https://umami-blond-eight.vercel.app/script.js"
+          data-website-id="dfd6d3bb-0b1f-4966-80db-63bcdb0c5149"
         />
         <link
           rel="icon"
