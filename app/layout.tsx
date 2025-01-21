@@ -4,7 +4,6 @@ import "./globals.css";
 import GoogleAnalytics from "@/components/GoogleAnalytics";
 import CookieConsent from "@/components/CookieConsent";
 import { LanguageProvider } from "@/lib/LanguageContext";
-import { headers } from "next/headers";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -12,16 +11,10 @@ const APP_NAME = "PadelAmericano";
 const APP_DESCRIPTION =
   "The ultimate padel tournament management system for organizing and running americano and mexicano padel tournaments";
 
-function getCanonicalUrl() {
-  const headersList = headers();
-  const path = headersList.get("x-pathname") || "";
-  return `https://padelamericano.com${path}`;
-}
-
 export const metadata: Metadata = {
   metadataBase: new URL("https://padelamericano.com"),
   alternates: {
-    canonical: getCanonicalUrl(),
+    canonical: "https://padelamericano.com",
   },
   icons: {
     icon: [
