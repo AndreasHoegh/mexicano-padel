@@ -5,6 +5,8 @@ import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Label } from "@/components/ui/label";
 import { Input } from "./ui/input";
 import { useState, useRef } from "react";
+import { useLanguage } from "@/lib/LanguageContext";
+import { translations } from "@/lib/translations";
 
 type PlayerNamesFormProps = {
   initialPlayerCount: number;
@@ -56,6 +58,9 @@ export default function PlayerNamesForm({
   const [finalRoundPattern, setFinalRoundPattern] = useState<number[]>([
     0, 2, 1, 3,
   ]);
+
+  const { language } = useLanguage();
+  const t = translations[language];
 
   const addCourt = () => {
     if (courts.length < getMaxCourts(playerCount)) {
@@ -186,7 +191,7 @@ export default function PlayerNamesForm({
         {mode === "team" ? (
           <div className="space-y-4">
             <h2 className="text-2xl font-semibold text-center text-gray-200">
-              Team Names
+              {t.teamNames}
             </h2>
             {[...Array(playerCount / 2)].map((_, index) => (
               <div key={index} className="flex items-center gap-2 w-64 mx-auto">
@@ -201,7 +206,7 @@ export default function PlayerNamesForm({
                   onClick={() => removePlayer(index * 2)}
                   className="text-sm text-gray-400 hover:text-red-500 cursor-pointer transition-colors select-none ml-auto"
                 >
-                  remove
+                  {t.remove}
                 </span>
               </div>
             ))}
@@ -209,7 +214,7 @@ export default function PlayerNamesForm({
         ) : (
           <div className="space-y-4">
             <h2 className="text-2xl font-semibold text-center text-gray-200">
-              Player Names
+              {t.playerNames}
             </h2>
             {[...Array(playerCount)].map((_, index) => (
               <div key={index} className="flex items-center gap-2 w-64 mx-auto">
@@ -224,7 +229,7 @@ export default function PlayerNamesForm({
                   onClick={() => removePlayer(index)}
                   className="text-sm text-gray-400 hover:text-red-500 cursor-pointer transition-colors select-none ml-auto"
                 >
-                  remove
+                  {t.remove}
                 </span>
               </div>
             ))}
@@ -238,13 +243,13 @@ export default function PlayerNamesForm({
             onClick={addPlayer}
             className=" bg-yellow-600 hover:bg-yellow-600 text-white transition-all duration-300 transform hover:scale-105 shadow-lg"
           >
-            Add {mode === "team" ? "Team" : "Player"}
+            {mode === "team" ? t.addTeam : t.addPlayer}
           </Button>
         </div>
 
         <div className="space-y-3">
           <h2 className="text-2xl font-semibold text-center text-gray-200">
-            Points per Match
+            {t.pointsPerMatch}
           </h2>
           <RadioGroup
             defaultValue="24"
@@ -266,7 +271,9 @@ export default function PlayerNamesForm({
                   <span className="text-xl font-semibold">
                     {points === "custom" ? "Custom" : points}
                   </span>
-                  <span className="text-sm text-muted-foreground">points</span>
+                  <span className="text-sm text-muted-foreground">
+                    {t.points}
+                  </span>
                 </Label>
               </div>
             ))}
@@ -293,7 +300,7 @@ export default function PlayerNamesForm({
 
         <div className="space-y-3">
           <h2 className="text-2xl font-semibold text-center text-gray-200">
-            Number of Rounds
+            {t.numberOfRounds}
           </h2>
           <RadioGroup
             defaultValue="∞"
@@ -315,7 +322,9 @@ export default function PlayerNamesForm({
                   <span className="text-xl font-semibold">
                     {rounds === "custom" ? "Custom" : rounds}
                   </span>
-                  <span className="text-sm text-muted-foreground">rounds</span>
+                  <span className="text-sm text-muted-foreground">
+                    {t.rounds}
+                  </span>
                 </Label>
               </div>
             ))}
@@ -397,7 +406,7 @@ export default function PlayerNamesForm({
 
         <div className="space-y-3">
           <h2 className="text-2xl font-semibold text-center text-gray-200">
-            Courts
+            {t.courts}
           </h2>
           <div className=" space-y-2 w-64 mx-auto flex flex-col items-center">
             {courts.map((court) => (
@@ -414,7 +423,7 @@ export default function PlayerNamesForm({
                     onClick={() => removeCourt(court.id)}
                     className="text-sm text-gray-400 hover:text-red-500 cursor-pointer transition-colors select-none ml-auto"
                   >
-                    remove
+                    {t.remove}
                   </span>
                 )}
               </div>
@@ -426,14 +435,14 @@ export default function PlayerNamesForm({
               className=" border-2 bg-yellow-600 hover:bg-yellow-600 text-white transition-all duration-300 transform hover:scale-105 shadow-lg"
               disabled={courts.length >= getMaxCourts(playerCount)}
             >
-              Add Court
+              {t.addCourt}
             </Button>
             <p
               className={`text-sm text-gray-400 ${
                 courts.length >= getMaxCourts(playerCount) ? "block" : "hidden"
               }`}
             >
-              Add more players to add more courts
+              {t.addMorePlayersForCourts}
             </p>
           </div>
         </div>
@@ -442,7 +451,7 @@ export default function PlayerNamesForm({
           className=" mx-auto block w-full border-2 h-12 text-l bg-yellow-600 hover:bg-yellow-700 text-white transition-all duration-300 transform hover:scale-105 shadow-lg"
           type="submit"
         >
-          Generate Matches
+          {t.generateMatches}
         </Button>
       </form>
     </div>

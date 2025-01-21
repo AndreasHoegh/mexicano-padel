@@ -3,6 +3,8 @@ import { Button } from "./ui/button";
 import { RadioGroup, RadioGroupItem } from "./ui/radio-group";
 import { Label } from "./ui/label";
 import { useState } from "react";
+import { useLanguage } from "@/lib/LanguageContext";
+import { translations } from "@/lib/translations";
 
 type NumOfPlayersFormProps = {
   onSubmit: (data: {
@@ -20,6 +22,8 @@ export default function NumOfPlayersForm({ onSubmit }: NumOfPlayersFormProps) {
   const [mode, setMode] = useState<"individual" | "team">("individual");
   const [format, setFormat] = useState<"mexicano" | "americano">("mexicano");
   const { register, handleSubmit } = useForm<FormData>();
+  const { language } = useLanguage();
+  const t = translations[language];
 
   const onFormSubmit = (data: FormData) => {
     const count = parseInt(data["Number of players"]);
@@ -36,22 +40,24 @@ export default function NumOfPlayersForm({ onSubmit }: NumOfPlayersFormProps) {
       className="space-y-8 text-gray-200 max-w-2xl mx-auto mb-12 px-4"
     >
       <div className="space-y-4">
-        <h2 className="text-xl font-semibold text-center">Tournament Format</h2>
+        <h2 className="text-xl font-semibold text-center">
+          {t.tournamentFormat}
+        </h2>
         <RadioGroup
           defaultValue="mexicano"
-          className="grid grid-cols-2 gap-4 "
+          className="grid grid-cols-2 gap-4"
           onValueChange={(value: "mexicano" | "americano") => setFormat(value)}
         >
           {[
             {
               value: "mexicano",
               label: "Mexicano",
-              description: "Matchups by ranks",
+              description: t.matchupsByRanks,
             },
             {
               value: "americano",
               label: "Americano",
-              description: "Play with and against everyone",
+              description: t.playWithEveryone,
             },
           ].map((option) => (
             <div key={option.value}>
@@ -74,7 +80,9 @@ export default function NumOfPlayersForm({ onSubmit }: NumOfPlayersFormProps) {
         </RadioGroup>
 
         <div className="space-y-3">
-          <h2 className="text-lg font-semibold text-center">Tournament Mode</h2>
+          <h2 className="text-lg font-semibold text-center">
+            {t.tournamentMode}
+          </h2>
           <RadioGroup
             defaultValue="individual"
             className="grid grid-cols-2 gap-4"
@@ -83,13 +91,13 @@ export default function NumOfPlayersForm({ onSubmit }: NumOfPlayersFormProps) {
             {[
               {
                 value: "individual",
-                label: "Individual",
-                description: "Players collect points individually",
+                label: t.individual,
+                description: t.playersCollectIndividually,
               },
               {
                 value: "team",
-                label: "Team",
-                description: "Points are collected for teams",
+                label: t.team,
+                description: t.pointsForTeams,
               },
             ].map((option) => (
               <div key={option.value}>
@@ -114,7 +122,7 @@ export default function NumOfPlayersForm({ onSubmit }: NumOfPlayersFormProps) {
 
         <div className="space-y-3">
           <h2 className="text-lg font-semibold text-center">
-            Number of {mode === "team" ? "Teams" : "Players"}
+            {mode === "team" ? t.numberOfTeams : t.numberOfPlayers}
           </h2>
           <div className="flex justify-center">
             <input
@@ -128,9 +136,7 @@ export default function NumOfPlayersForm({ onSubmit }: NumOfPlayersFormProps) {
             />
           </div>
           <p className="text-sm text-gray-500 text-center">
-            {mode === "team"
-              ? "Minimum 2 teams (4 players)"
-              : "Minimum 4 players"}
+            {mode === "team" ? t.minimumTeams : t.minimumPlayers}
           </p>
         </div>
       </div>
@@ -139,7 +145,7 @@ export default function NumOfPlayersForm({ onSubmit }: NumOfPlayersFormProps) {
         className="mx-auto block bg-yellow-600 hover:bg-yellow-600 text-white transition-all duration-300 transform hover:scale-105 shadow-lg"
         type="submit"
       >
-        Next
+        {t.next}
       </Button>
     </form>
   );

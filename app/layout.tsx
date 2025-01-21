@@ -3,6 +3,8 @@ import { Inter } from "next/font/google";
 import "./globals.css";
 import GoogleAnalytics from "@/components/GoogleAnalytics";
 import CookieConsent from "@/components/CookieConsent";
+import { LanguageProvider } from "@/lib/LanguageContext";
+import LanguageSelector from "@/components/LanguageSelector";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -14,10 +16,10 @@ export const metadata: Metadata = {
   metadataBase: new URL("https://padelamericano.com"),
   icons: {
     icon: [
-      { url: "/favicon-32x32.png", sizes: "32x32", type: "image/png" },
-      { url: "/favicon-16x16.png", sizes: "16x16", type: "image/png" },
+      { url: "favicon-32x32.png", sizes: "32x32", type: "image/png" },
+      { url: "favicon-16x16.png", sizes: "16x16", type: "image/png" },
     ],
-    shortcut: "/favicon.ico",
+    shortcut: "favicon.ico",
   },
   title: {
     default: APP_NAME,
@@ -95,8 +97,10 @@ export default function RootLayout({
       <body
         className={`${inter.className} min-h-screen bg-gradient-to-br from-gray-700 to-green-900`}
       >
-        {children}
-        <CookieConsent />
+        <LanguageProvider>
+          {children}
+          <CookieConsent />
+        </LanguageProvider>
       </body>
     </html>
   );

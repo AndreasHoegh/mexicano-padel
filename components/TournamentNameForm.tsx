@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { useForm, SubmitHandler } from "react-hook-form";
+import { useForm, type SubmitHandler } from "react-hook-form";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
@@ -17,16 +17,12 @@ import {
   AccordionItem,
   AccordionTrigger,
 } from "@/components/ui/accordion";
-import {
-  ChevronRight,
-  Trophy,
-  Users,
-  Calendar,
-  RatIcon as Racquet,
-} from "lucide-react";
-import { translations, Language } from "../lib/translations";
+import { ChevronRight, Trophy, Users, Calendar } from "lucide-react";
+import { translations, type Language } from "../lib/translations";
 import { motion } from "framer-motion";
 import { trackEvent } from "@/lib/analytics";
+import { useLanguage } from "@/lib/LanguageContext";
+import WorldFlag from "react-world-flags";
 
 export type TournamentNameFormData = {
   tournamentName: string;
@@ -45,13 +41,20 @@ export default function TournamentNameForm({
     formState: { errors },
   } = useForm<TournamentNameFormData>();
   const [isHovered, setIsHovered] = useState(false);
-  const [language, setLanguage] = useState<Language>("en");
-
+  const { language, setLanguage } = useLanguage();
   const t = translations[language];
 
   const onFormSubmit = (data: TournamentNameFormData) => {
     trackEvent("tournament_created", "tournament", data.tournamentName);
     onSubmit(data);
+  };
+
+  const handleLanguageChange = (
+    newLanguage: Language,
+    event: React.MouseEvent
+  ) => {
+    event.preventDefault();
+    setLanguage(newLanguage);
   };
 
   return (
@@ -61,37 +64,36 @@ export default function TournamentNameForm({
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5 }}
       >
-        <Card className="w-full max-w-3xl shadow-2xl bg-white/10 backdrop-blur-lg border border-white/20">
-          <CardHeader className="text-center">
-            <div className="flex justify-end mb-4 space-x-2">
-              <button
-                onClick={() => setLanguage("en")}
-                className={`text-2xl ${
-                  language === "en" ? "opacity-100" : "opacity-50"
-                }`}
-                aria-label="English"
-              >
-                🇬🇧
-              </button>
-              <button
-                onClick={() => setLanguage("es")}
-                className={`text-2xl ${
-                  language === "es" ? "opacity-100" : "opacity-50"
-                }`}
-                aria-label="Español"
-              >
-                🇪🇸
-              </button>
-              <button
-                onClick={() => setLanguage("da")}
-                className={`text-2xl ${
-                  language === "da" ? "opacity-100" : "opacity-50"
-                }`}
-                aria-label="Dansk"
-              >
-                🇩🇰
-              </button>
-            </div>
+        <Card className="w-full max-w-3xl shadow-2xl bg-white/10 backdrop-blur-lg border border-white/20 relative">
+          {/* Language Flags positioned in the top right corner */}
+          <div className="absolute top-4 right-4 flex gap-4 z-10">
+            <span
+              onClick={(e) => handleLanguageChange("en", e)}
+              className={`cursor-pointer ${
+                language === "en" ? "opacity-100" : "opacity-50"
+              } hover:opacity-100 transition-opacity`}
+            >
+              <WorldFlag code="GB" className="h-4 w-4 sm:h-5 sm:w-5" />
+            </span>
+            <span
+              onClick={(e) => handleLanguageChange("da", e)}
+              className={`cursor-pointer ${
+                language === "da" ? "opacity-100" : "opacity-50"
+              } hover:opacity-100 transition-opacity`}
+            >
+              <WorldFlag code="DK" className="h-4 w-4 sm:h-5 sm:w-5" />
+            </span>
+            <span
+              onClick={(e) => handleLanguageChange("es", e)}
+              className={`cursor-pointer ${
+                language === "es" ? "opacity-100" : "opacity-50"
+              } hover:opacity-100 transition-opacity`}
+            >
+              <WorldFlag code="ES" className="h-4 w-4 sm:h-5 sm:w-5" />
+            </span>
+          </div>
+
+          <CardHeader className="text-center pt-16">
             <CardTitle className="text-5xl font-bold text-white mb-2">
               {t.welcome}
             </CardTitle>

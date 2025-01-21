@@ -1,3 +1,5 @@
+"use client";
+
 import { useState, useEffect, useCallback } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -9,6 +11,8 @@ import Scoreboard from "./Scoreboard";
 import DetailsModal from "./DetailsModal";
 import { PlayerScore } from "@/lib/types";
 import FinalRoundModal from "./FinalRoundModal";
+import { useLanguage } from "@/lib/LanguageContext";
+import { translations } from "@/lib/translations";
 
 interface Match {
   team1: string[];
@@ -103,6 +107,8 @@ export default function Matches({
   );
   const [scoresss, setScoresss] = useState<Scores>({});
   const [showFinalRoundModal, setShowFinalRoundModal] = useState(false);
+  const { language } = useLanguage();
+  const t = translations[language];
 
   const openModal = () => setIsModalOpen(true);
   const closeModal = () => setIsModalOpen(false);
@@ -213,6 +219,11 @@ export default function Matches({
     onNextRound();
   };
 
+  const handlePauseClick = () => {
+    setIsPaused(!isPaused);
+    onPause(!isPaused);
+  };
+
   return (
     <div className="space-y-8 px-4 max-w-4xl mx-auto">
       <Card className="bg-gradient-to-br from-gray-400 to-gray-300 shadow-xl border border-gray-600">
@@ -256,7 +267,7 @@ export default function Matches({
               className="hover:scale-105 text-lg bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 border-none shadow-lg transition-all duration-200 disabled:from-gray-400 disabled:to-gray-500 w-48 h-12"
               disabled={!areAllScoresValid()}
             >
-              Next Round <ChevronRight className="ml-1" />
+              {t.nextRound} <ChevronRight className="ml-1" />
             </Button>
             {mode === "individual" && (
               <Button
@@ -278,11 +289,11 @@ export default function Matches({
           </div>
         ) : (
           <Button
-            onClick={handleNextRound}
+            onClick={() => onStartFinalRound(editingScores)}
             className="hover:scale-105 text-lg bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 border-none shadow-lg transition-all duration-200 disabled:from-gray-400 disabled:to-gray-500 w-48 h-12"
             disabled={!areAllScoresValid()}
           >
-            Finish Tournament
+            {t.startFinalRound}
           </Button>
         )}
       </div>
@@ -296,13 +307,11 @@ export default function Matches({
         </button>
 
         <Button
-          onClick={() => {
-            setIsPaused(true);
-            onPause(true); // Notify parent of the change
-          }}
-          className="hover:scale-105 bg-red-500 hover:bg-red-600 text-white px-6 py-3 flex items-center justify-center gap-2"
+          onClick={handlePauseClick}
+          variant={isPaused ? "default" : "outline"}
+          className="hover:scale-105 bg-red-600 hover:bg-red-700 text-white px-6 py-3 rounded-lg shadow-lg flex items-center justify-center gap-2"
         >
-          End Tournament
+          {isPaused ? t.resume : "End Tournament"}
         </Button>
       </div>
 

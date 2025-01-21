@@ -20,6 +20,42 @@ export const translations = {
     selectType: "Select the type of tournament: Mexicano or Americano",
     createTournament: "Create Tournament",
     letsPlay: "Let's play!",
+    tournamentFormat: "Tournament Format",
+    tournamentMode: "Tournament Mode",
+    numberOfPlayers: "Number of Players",
+    numberOfTeams: "Number of Teams",
+    minimumPlayers: "Minimum 4 players",
+    minimumTeams: "Minimum 2 teams (4 players)",
+    individual: "Individual",
+    team: "Team",
+    points: "points",
+    rounds: "rounds",
+    custom: "Custom",
+    addPlayer: "Add Player",
+    addTeam: "Add Team",
+    addCourt: "Add Court",
+    generateMatches: "Generate Matches",
+    finalRoundPairing: "Final Round Pairing",
+    courts: "Courts",
+    next: "Next",
+    remove: "remove",
+    addMorePlayersForCourts: "Add more players to add more courts",
+    matchupsByRanks: "Matchups by ranks",
+    playWithEveryone: "Play with and against everyone",
+    playersCollectIndividually: "Players collect points individually",
+    pointsForTeams: "Points are collected for teams",
+    teamNames: "Team Names",
+    playerNames: "Player Names",
+    pointsPerMatch: "Points per Match",
+    numberOfRounds: "Number of Rounds",
+    round: "Round",
+    resume: "Resume",
+    pause: "Pause",
+    court: "Court",
+    player: "Player",
+    saveScores: "Save Scores",
+    startFinalRound: "Start Final Round",
+    nextRound: "Next Round",
   },
   es: {
     welcome: "¡Bienvenidos al Padel Americano!",
@@ -39,8 +75,44 @@ export const translations = {
     tournamentNameRequired: "El nombre del torneo es obligatorio",
     chooseTournamentType: "Elige el Tipo de Torneo",
     selectType: "Selecciona el tipo de torneo: Mexicano o Americano",
+    team: "Team",
     createTournament: "Crear Torneo",
     letsPlay: "¡Vamos a jugar!",
+    matchupsByRanks: "Emparejamientos por rangos",
+    playWithEveryone: "Juega con y contra todos",
+    playersCollectIndividually: "Los jugadores acumulan puntos individualmente",
+    pointsForTeams: "Los puntos se acumulan por equipos",
+    teamNames: "Nombres de Equipos",
+    playerNames: "Nombres de Jugadores",
+    pointsPerMatch: "Puntos por Partido",
+    numberOfRounds: "Número de Rondas",
+    finalRoundPairing: "Emparejamiento Final",
+    custom: "Personalizado",
+    round: "Ronda",
+    resume: "Reanudar",
+    pause: "Pausar",
+    court: "Pista",
+    player: "Jugador",
+    saveScores: "Guardar Puntuación",
+    startFinalRound: "Comenzar Ronda Final",
+    nextRound: "Siguiente Ronda",
+    tournamentFormat: "Formato del Torneo",
+    tournamentMode: "Modo del Torneo",
+    addTeam: "Añadir Equipo",
+    addPlayer: "Añadir Jugador",
+    addCourt: "Añadir Pista",
+    generateMatches: "Generar Partidos",
+    courts: "Pistas",
+    next: "Siguiente",
+    remove: "eliminar",
+    addMorePlayersForCourts: "Añade más jugadores para añadir más pistas",
+    points: "puntos",
+    rounds: "rondas",
+    individual: "Individual",
+    numberOfTeams: "Número de Equipos",
+    numberOfPlayers: "Número de Jugadores",
+    minimumTeams: "Mínimo 2 equipos (4 jugadores)",
+    minimumPlayers: "Mínimo 4 jugadores",
   },
   da: {
     welcome: "Velkommen til Padel Americano!",
@@ -62,7 +134,97 @@ export const translations = {
     selectType: "Vælg typen af turnering: Mexicano eller Americano",
     createTournament: "Opret Turnering",
     letsPlay: "Lad os spille!",
+    matchupsByRanks: "Matchups efter rangering",
+    playWithEveryone: "Spil med og mod alle",
+    playersCollectIndividually: "Spillere samler point individuelt",
+    pointsForTeams: "Point samles for hold",
+    teamNames: "Holdnavne",
+    playerNames: "Spillernavne",
+    pointsPerMatch: "Point per Kamp",
+    numberOfRounds: "Antal Runder",
+    finalRoundPairing: "Final Runde Parring",
+    team: "Team",
+    custom: "Tilpasset",
+    round: "Runde",
+    resume: "Genoptag",
+    pause: "Pause",
+    court: "Bane",
+    player: "Spiller",
+    saveScores: "Gem Score",
+    startFinalRound: "Start Finalerunde",
+    nextRound: "Næste Runde",
+    tournamentFormat: "Turneringsformat",
+    tournamentMode: "Turneringsmodus",
+    addTeam: "Tilføj Hold",
+    addPlayer: "Tilføj Spiller",
+    addCourt: "Tilføj Bane",
+    generateMatches: "Generer Kampe",
+    courts: "Baner",
+    next: "Næste",
+    remove: "fjern",
+    addMorePlayersForCourts: "Tilføj flere spillere for at tilføje flere baner",
+    points: "point",
+    rounds: "runder",
+    individual: "Individuel",
+    numberOfTeams: "Antal Hold",
+    numberOfPlayers: "Antal Spillere",
+    minimumTeams: "Minimum 2 hold (4 spillere)",
+    minimumPlayers: "Minimum 4 spillere",
   },
 };
 
 export type Language = keyof typeof translations;
+
+export interface Translations {
+  welcome: string;
+  createTournaments: string;
+  whatIsPadelTournaments: string;
+  aboutPadelTournaments: string;
+  tournamentName: string;
+  enterTournamentName: string;
+  tournamentNameRequired: string;
+  createTournament: string;
+  letsPlay: string;
+  dynamicTournaments: string;
+  shortExcitingMatches: string;
+  forEveryone: string;
+  allLevels: string;
+  easyToOrganize: string;
+  createManageEffortlessly: string;
+  tournamentFormat: string;
+  tournamentMode: string;
+  numberOfPlayers: string;
+  numberOfTeams: string;
+  minimumPlayers: string;
+  minimumTeams: string;
+  individual: string;
+  team: string;
+  matchupsByRanks: string;
+  playWithEveryone: string;
+  playersCollectIndividually: string;
+  pointsForTeams: string;
+  points: string;
+  rounds: string;
+  custom: string;
+  addPlayer: string;
+  addTeam: string;
+  addCourt: string;
+  generateMatches: string;
+  finalRoundPairing: string;
+  courts: string;
+  next: string;
+  remove: string;
+  addMorePlayersForCourts: string;
+  teamNames: string;
+  playerNames: string;
+  pointsPerMatch: string;
+  numberOfRounds: string;
+  round: string;
+  resume: string;
+  pause: string;
+  court: string;
+  player: string;
+  saveScores: string;
+  startFinalRound: string;
+  nextRound: string;
+}
