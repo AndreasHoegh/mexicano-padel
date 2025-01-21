@@ -14,7 +14,7 @@ const APP_DESCRIPTION =
 export const metadata: Metadata = {
   metadataBase: new URL("https://padelamericano.com"),
   alternates: {
-    canonical: "https://padelamericano.com",
+    canonical: "https://padelamericano.org",
   },
   icons: {
     icon: [
