@@ -378,7 +378,7 @@ export default function App() {
   }, [scores]);
 
   return (
-    <div className="min-h-screen flex flex-col">
+    <article>
       {(isTournamentNameSet || numberOfPlayers > 0) &&
         !arePlayerNamesSet &&
         matches.length === 0 && (
@@ -626,6 +626,6 @@ export default function App() {
         />
       )}
       <Footer />
-    </div>
+    </article>
   );
 }
