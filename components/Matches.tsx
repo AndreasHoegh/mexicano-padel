@@ -260,43 +260,43 @@ export default function Matches({
       </Card>
 
       <div className="flex flex-col items-center gap-4">
-        {!isLastRound ? (
+        {mode === "individual" && !isLastRound ? (
           <div className="flex flex-col sm:flex-row items-center gap-4">
             <Button
               onClick={handleNextRound}
               className="hover:scale-105 text-lg bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 border-none shadow-lg transition-all duration-200 disabled:from-gray-400 disabled:to-gray-500 w-48 h-12"
               disabled={!areAllScoresValid()}
             >
-              {t.nextRound} <ChevronRight className="ml-1" />
+              Next Round <ChevronRight className="ml-1" />
             </Button>
-            {mode === "individual" && (
-              <Button
-                onClick={() => {
-                  if (areAllScoresValid()) {
-                    setShowFinalRoundModal(true);
-                  } else {
-                    alert(
-                      "Please ensure all match scores are valid before proceeding to the final round."
-                    );
-                  }
-                }}
-                className="hover:scale-105 text-lg bg-gradient-to-r from-gray-900 to-gray-800 hover:from-gray-800 hover:to-gray-900 border-none shadow-lg transition-all duration-200 disabled:from-gray-400 disabled:to-gray-500 w-48 h-12"
-                disabled={!areAllScoresValid()}
-              >
-                Final Round
-              </Button>
-            )}
+            <Button
+              onClick={() => {
+                if (areAllScoresValid()) {
+                  setShowFinalRoundModal(true);
+                } else {
+                  alert(
+                    "Please ensure all match scores are valid before proceeding to the final round."
+                  );
+                }
+              }}
+              className="hover:scale-105 text-lg bg-gradient-to-r from-gray-900 to-gray-800 hover:from-gray-800 hover:to-gray-900 border-none shadow-lg transition-all duration-200 disabled:from-gray-400 disabled:to-gray-500 w-48 h-12"
+              disabled={!areAllScoresValid()}
+            >
+              Final Round
+            </Button>
           </div>
         ) : (
           <Button
-            onClick={() => onStartFinalRound(editingScores)}
+            onClick={handleNextRound}
             className="hover:scale-105 text-lg bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 border-none shadow-lg transition-all duration-200 disabled:from-gray-400 disabled:to-gray-500 w-48 h-12"
             disabled={!areAllScoresValid()}
           >
-            {t.startFinalRound}
+            {isLastRound ? "Finish Tournament" : "Next Round"}{" "}
+            {!isLastRound && <ChevronRight className="ml-1" />}
           </Button>
         )}
       </div>
+
       <div className="mt-8 flex flex-col justify-center gap-3">
         <button
           onClick={openModal}
