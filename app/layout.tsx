@@ -12,9 +12,9 @@ const APP_DESCRIPTION =
   "The ultimate padel tournament management system for organizing and running americano and mexicano padel tournaments";
 
 export const metadata: Metadata = {
-  metadataBase: new URL("https://padelamericano.org"),
+  metadataBase: new URL("https://www.padelamericano.org"),
   alternates: {
-    canonical: "https://padelamericano.org",
+    canonical: "https://www.padelamericano.org",
   },
   icons: {
     icon: [
