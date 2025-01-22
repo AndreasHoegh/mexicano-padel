@@ -6,6 +6,7 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover";
 import VSLogo from "./VSLogo";
+import { memo } from "react";
 
 type Match = {
   team1: string[];
@@ -31,6 +32,7 @@ type MatchCardProps = {
   mode: "individual" | "team";
   editingScores: EditingScores;
   pointsPerMatch: number;
+  pointSystem: "pointsToPlay" | "pointsToWin";
   openPopovers: { [key: string]: boolean };
   setOpenPopovers: React.Dispatch<
     React.SetStateAction<{ [key: string]: boolean }>
@@ -76,70 +78,6 @@ function TeamDisplay({
   );
 }
 
-function ScoreControls({
-  index,
-  editingScores,
-  pointsPerMatch,
-  openPopovers,
-  setOpenPopovers,
-  handleScoreChange,
-}: {
-  index: number;
-  editingScores: EditingScores;
-  pointsPerMatch: number;
-  openPopovers: { [key: string]: boolean };
-  setOpenPopovers: React.Dispatch<
-    React.SetStateAction<{ [key: string]: boolean }>
-  >;
-  handleScoreChange: (
-    index: number,
-    team: "team1" | "team2",
-    value: number
-  ) => void;
-}) {
-  return (
-    <div className="flex flex-row items-center gap-4">
-      {/* Team 1 Score */}
-      <ScorePopover
-        index={index}
-        team="team1"
-        score={editingScores[index]?.team1 ?? 0}
-        isOpen={openPopovers[index]}
-        onOpenChange={(open) =>
-          setOpenPopovers((prev: { [key: string]: boolean }) => ({
-            ...prev,
-            [index]: open,
-          }))
-        }
-        pointsPerMatch={pointsPerMatch}
-        handleScoreChange={handleScoreChange}
-        isTeam1={true}
-      />
-
-      <span className="text-2xl font-bold text-blue-700">
-        <VSLogo />
-      </span>
-
-      {/* Team 2 Score */}
-      <ScorePopover
-        index={index}
-        team="team2"
-        score={editingScores[index]?.team2 ?? 0}
-        isOpen={openPopovers[`${index}-team2`]}
-        onOpenChange={(open) =>
-          setOpenPopovers((prev: { [key: string]: boolean }) => ({
-            ...prev,
-            [`${index}-team2`]: open,
-          }))
-        }
-        pointsPerMatch={pointsPerMatch}
-        handleScoreChange={handleScoreChange}
-        isTeam1={false}
-      />
-    </div>
-  );
-}
-
 function ScorePopover({
   index,
   team,
@@ -168,10 +106,12 @@ function ScorePopover({
       <PopoverTrigger asChild>
         <Button
           variant="outline"
+          role="spinbutton"
+          aria-valuenow={score}
           className={`w-12 sm:w-16 text-center text-lg sm:text-xl border ${
             isTeam1
-              ? "border-red-950 bg-red-700"
-              : "border-blue-900 bg-blue-800"
+              ? "!border-red-950 !bg-red-700"
+              : "!border-blue-900 !bg-blue-800"
           } text-white`}
         >
           {score}
@@ -198,6 +138,73 @@ function ScorePopover({
   );
 }
 
+const MemoizedScorePopover = memo(ScorePopover);
+
+function ScoreControls({
+  index,
+  editingScores,
+  pointsPerMatch,
+  openPopovers,
+  setOpenPopovers,
+  handleScoreChange,
+}: {
+  index: number;
+  editingScores: EditingScores;
+  pointsPerMatch: number;
+  pointSystem: "pointsToPlay" | "pointsToWin";
+  openPopovers: { [key: string]: boolean };
+  setOpenPopovers: React.Dispatch<
+    React.SetStateAction<{ [key: string]: boolean }>
+  >;
+  handleScoreChange: (
+    index: number,
+    team: "team1" | "team2",
+    value: number
+  ) => void;
+}) {
+  return (
+    <div className="flex flex-row items-center gap-4">
+      {/* Team 1 Score */}
+      <MemoizedScorePopover
+        index={index}
+        team="team1"
+        score={editingScores[index]?.team1 ?? 0}
+        isOpen={openPopovers[index]}
+        onOpenChange={(open) =>
+          setOpenPopovers((prev: { [key: string]: boolean }) => ({
+            ...prev,
+            [index]: open,
+          }))
+        }
+        pointsPerMatch={pointsPerMatch}
+        handleScoreChange={handleScoreChange}
+        isTeam1={true}
+      />
+
+      <span className="text-2xl font-bold text-blue-700">
+        <VSLogo />
+      </span>
+
+      {/* Team 2 Score */}
+      <MemoizedScorePopover
+        index={index}
+        team="team2"
+        score={editingScores[index]?.team2 ?? 0}
+        isOpen={openPopovers[`${index}-team2`]}
+        onOpenChange={(open) =>
+          setOpenPopovers((prev: { [key: string]: boolean }) => ({
+            ...prev,
+            [`${index}-team2`]: open,
+          }))
+        }
+        pointsPerMatch={pointsPerMatch}
+        handleScoreChange={handleScoreChange}
+        isTeam1={false}
+      />
+    </div>
+  );
+}
+
 export function MatchCard({
   match,
   index,
@@ -205,6 +212,7 @@ export function MatchCard({
   mode,
   editingScores,
   pointsPerMatch,
+  pointSystem,
   openPopovers,
   setOpenPopovers,
   handleScoreChange,
@@ -225,6 +233,7 @@ export function MatchCard({
               index={index}
               editingScores={editingScores}
               pointsPerMatch={pointsPerMatch}
+              pointSystem={pointSystem}
               openPopovers={openPopovers}
               setOpenPopovers={setOpenPopovers}
               handleScoreChange={handleScoreChange}

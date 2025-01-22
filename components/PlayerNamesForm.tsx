@@ -17,7 +17,8 @@ type PlayerNamesFormProps = {
 
 type FormValues = {
   [key: string]: string;
-  pointsPerMatch: string;
+  pointSystem: "pointsToPlay" | "pointsToWin";
+  points: string;
   maxRounds: string;
 };
 
@@ -35,7 +36,8 @@ export default function PlayerNamesForm({
   const { register, handleSubmit, setValue, unregister, watch } =
     useForm<FormValues>({
       defaultValues: {
-        pointsPerMatch: "24",
+        pointSystem: "pointsToPlay",
+        points: "24",
         maxRounds: "∞",
       },
     });
@@ -160,21 +162,22 @@ export default function PlayerNamesForm({
       .filter((key) => key.startsWith("playerName"))
       .map((key) => data[key]);
 
-    const pointsPerMatch =
-      data.pointsPerMatch === "custom"
-        ? data.customPoints
-        : parseInt(data.pointsPerMatch);
+    const points =
+      data.points === "custom"
+        ? parseInt(data.customPoints)
+        : parseInt(data.points);
 
     const maxRounds =
-      data.maxRounds === "custom"
-        ? data.customRounds
-        : data.maxRounds === "∞"
+      data.maxRounds === "∞"
         ? null
+        : data.maxRounds === "custom"
+        ? parseInt(data.customRounds)
         : parseInt(data.maxRounds);
 
     onSubmit({
       playerNames,
-      pointsPerMatch,
+      points,
+      pointSystem: data.pointSystem,
       maxRounds,
       courts,
       mode,
@@ -249,20 +252,70 @@ export default function PlayerNamesForm({
 
         <div className="space-y-3">
           <h2 className="text-2xl font-semibold text-center text-gray-200">
-            {t.pointsPerMatch}
+            {t.pointSystem}
+          </h2>
+          <RadioGroup
+            defaultValue="pointsToPlay"
+            className="grid grid-cols-1 sm:grid-cols-2 gap-4"
+            onValueChange={(value) =>
+              setValue("pointSystem", value as "pointsToPlay" | "pointsToWin")
+            }
+          >
+            <div>
+              <RadioGroupItem
+                value="pointsToPlay"
+                id="pointsToPlay"
+                className="peer sr-only"
+                {...register("pointSystem")}
+              />
+              <Label
+                htmlFor="pointsToPlay"
+                className="text-black flex flex-col items-center justify-between rounded-md border-2 bg-white p-4 peer-data-[state=checked]:border-yellow-600 peer-data-[state=checked]:border-4 [&:has([data-state=checked])]:scale-105 cursor-pointer transition-transform"
+              >
+                <span className="text-xl font-semibold">{t.pointsToPlay}</span>
+                <span className="text-sm text-muted-foreground text-center">
+                  {t.pointsToPlayDescription}
+                </span>
+              </Label>
+            </div>
+            <div>
+              <RadioGroupItem
+                value="pointsToWin"
+                id="pointsToWin"
+                className="peer sr-only"
+                {...register("pointSystem")}
+              />
+              <Label
+                htmlFor="pointsToWin"
+                className="text-black flex flex-col items-center justify-between rounded-md border-2 bg-white p-4 peer-data-[state=checked]:border-yellow-600 peer-data-[state=checked]:border-4 [&:has([data-state=checked])]:scale-105 cursor-pointer transition-transform"
+              >
+                <span className="text-xl font-semibold">{t.pointsToWin}</span>
+                <span className="text-sm text-muted-foreground text-center">
+                  {t.pointsToWinDescription}
+                </span>
+              </Label>
+            </div>
+          </RadioGroup>
+        </div>
+
+        <div className="space-y-3">
+          <h2 className="text-2xl font-semibold text-center text-gray-200">
+            {watch("pointSystem") === "pointsToPlay"
+              ? t.pointsToPlay
+              : t.pointsToWin}
           </h2>
           <RadioGroup
             defaultValue="24"
-            className="grid grid-cols-2 sm:grid-cols-4 gap-4"
-            onValueChange={(value) => setValue("pointsPerMatch", value)}
+            className="grid grid-cols-2 sm:grid-cols-3 gap-4"
+            onValueChange={(value) => setValue("points", value)}
           >
-            {[16, 20, 24, 32, "custom"].map((points) => (
+            {[16, 20, 24, 30, 32, "custom"].map((points) => (
               <div key={points}>
                 <RadioGroupItem
-                  value={points === "custom" ? "custom" : points.toString()}
+                  value={points.toString()}
                   id={`points-${points}`}
                   className="peer sr-only"
-                  {...register("pointsPerMatch")}
+                  {...register("points")}
                 />
                 <Label
                   htmlFor={`points-${points}`}
@@ -280,7 +333,7 @@ export default function PlayerNamesForm({
           </RadioGroup>
           <div
             className={`flex justify-center transition-all duration-300 ${
-              watch("pointsPerMatch") === "custom"
+              watch("points") === "custom"
                 ? "h-12 opacity-100"
                 : "h-0 opacity-0"
             }`}

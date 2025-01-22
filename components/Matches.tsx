@@ -58,6 +58,7 @@ interface MatchesProps {
   round: number;
   onNextRound: () => void;
   pointsPerMatch: number;
+  pointSystem: "pointsToPlay" | "pointsToWin";
   isLastRound: boolean;
   courts: Court[];
   mode: "individual" | "team";
@@ -85,6 +86,7 @@ export default function Matches({
   round,
   onNextRound,
   pointsPerMatch,
+  pointSystem,
   isLastRound,
   courts,
   mode,
@@ -133,14 +135,18 @@ export default function Matches({
     team: "team1" | "team2",
     value: number
   ) => {
-    setEditingScores((prev) => ({
-      ...prev,
-      [index]: {
-        ...prev[index],
-        [team]: value,
-        [team === "team1" ? "team2" : "team1"]: pointsPerMatch - value,
-      },
-    }));
+    setEditingScores((prev) => {
+      const newScores = { ...prev };
+      if (!newScores[index]) {
+        newScores[index] = { team1: 0, team2: 0 };
+      }
+      newScores[index][team] = value;
+      const otherTeam = team === "team1" ? "team2" : "team1";
+      if (pointSystem === "pointsToPlay") {
+        newScores[index][otherTeam] = pointsPerMatch - value;
+      }
+      return newScores;
+    });
   };
 
   const isScoreValid = (index: number) => {
@@ -150,7 +156,9 @@ export default function Matches({
     return (
       team1Score !== undefined &&
       team2Score !== undefined &&
-      team1Score + team2Score === pointsPerMatch
+      (pointSystem === "pointsToPlay"
+        ? team1Score + team2Score === pointsPerMatch
+        : team1Score === pointsPerMatch || team2Score === pointsPerMatch)
     );
   };
 
@@ -251,6 +259,7 @@ export default function Matches({
               mode={mode}
               editingScores={editingScores}
               pointsPerMatch={pointsPerMatch}
+              pointSystem={pointSystem}
               openPopovers={openPopovers}
               setOpenPopovers={setOpenPopovers}
               handleScoreChange={handleScoreChange}

@@ -1,4 +1,4 @@
-import { Match, Scores, Court } from "../lib/types";
+import { Match, Scores, Court } from "./types";
 
 function findLeastPlayedWith(
   player: string,
@@ -356,4 +356,167 @@ export const updatePartnerships = (
     JSON.stringify(updatedPartnerships, null, 2)
   );
   return updatedPartnerships;
+};
+
+export const generateAmericanoMatchesTeamMode = (
+  players: string[],
+  courtsToUse: Court[],
+  partnerships: { [key: string]: { [key: string]: number } },
+  round: number,
+  sittingOutCounts: { [key: string]: number },
+  setSittingOutCounts: (counts: { [key: string]: number }) => void,
+  setSittingOutPlayers: (players: string[]) => void,
+  mode: "individual" | "team"
+): Match[] => {
+  console.log("=== Starting Round", round, "===");
+  console.log("Current Partnership State:", partnerships);
+
+  const shuffleAmericano = <T>(array: T[]): T[] => {
+    return array.sort(() => Math.random() - 0.5);
+  };
+
+  function findLeastPlayedWith(
+    unit: string,
+    availableUnits: string[],
+    usedPartnerships: Set<string>
+  ): { partner: string; remaining: string[] } {
+    const playedWith = availableUnits
+      .filter((u) => u !== unit && !usedPartnerships.has(`${unit}-${u}`))
+      .map((u) => {
+        const directPartnerships = partnerships[unit]?.[u] || 0;
+        const totalPartnerships = Object.values(partnerships[u] || {}).reduce(
+          (sum, count) => sum + count,
+          0
+        );
+
+        return {
+          id: u,
+          directPartnerships,
+          totalPartnerships,
+        };
+      });
+
+    playedWith.sort((a, b) => {
+      if (a.directPartnerships !== b.directPartnerships) {
+        return a.directPartnerships - b.directPartnerships;
+      }
+      return a.totalPartnerships - b.totalPartnerships;
+    });
+
+    console.log(`Partner selection for ${unit}:`, {
+      availableUnits,
+      playedWith,
+      selectedPartner: playedWith[0],
+    });
+
+    const partner = playedWith[0]?.id;
+    if (!partner) {
+      throw new Error(`No partner found for ${unit}`);
+    }
+
+    return {
+      partner,
+      remaining: availableUnits.filter((u) => u !== partner && u !== unit),
+    };
+  }
+
+  // Initialize partnerships if needed
+  if (!partnerships[players[0]]) {
+    console.log("Initializing partnerships");
+    players.forEach((u1) => {
+      partnerships[u1] = {};
+      players.forEach((u2) => {
+        if (u1 !== u2) {
+          partnerships[u1][u2] = 0;
+        }
+      });
+    });
+  }
+
+  // Handle sitting out players and get active units
+  const allUnits = [...players];
+  const unitsPerMatch = mode === "team" ? 1 : 2;
+
+  const maxActive = Math.min(
+    allUnits.length,
+    courtsToUse.length * unitsPerMatch * 2
+  );
+  const activeCount =
+    Math.floor(maxActive / (unitsPerMatch * 2)) * (unitsPerMatch * 2);
+  const numSittingOut = allUnits.length - activeCount;
+
+  const unitsBySitouts = shuffleAmericano([...players]).sort(
+    (a, b) => (sittingOutCounts[a] || 0) - (sittingOutCounts[b] || 0)
+  );
+
+  const sittingOut = unitsBySitouts.slice(0, numSittingOut);
+  setSittingOutPlayers(sittingOut);
+
+  // Update sitout counts
+  const newSittingOutCounts = { ...sittingOutCounts };
+  sittingOut.forEach((unit) => {
+    newSittingOutCounts[unit] = (newSittingOutCounts[unit] || 0) + 1;
+  });
+  setSittingOutCounts(newSittingOutCounts);
+
+  // Get active units
+  let availableUnits = shuffleAmericano(
+    unitsBySitouts.filter((u) => !sittingOut.includes(u))
+  );
+
+  const newMatches: Match[] = [];
+  const usedPartnerships = new Set<string>();
+
+  while (availableUnits.length >= 2 && newMatches.length < courtsToUse.length) {
+    console.log(`\n=== Creating Match ${newMatches.length + 1} ===`);
+    console.log("Available units:", availableUnits);
+
+    const unit1 = availableUnits[0];
+    console.log("Selected first unit:", unit1);
+
+    // Find partner for unit1
+    const { partner: unit2, remaining: afterUnit2 } = findLeastPlayedWith(
+      unit1,
+      availableUnits,
+      usedPartnerships
+    );
+
+    console.log(`Selected partner for ${unit1}: ${unit2}`);
+
+    // Create match between unit1 and unit2
+    console.log("Final match pairing:", {
+      team1: [unit1],
+      team2: [unit2],
+      partnerships: {
+        team1: partnerships[unit1]?.[unit2] || 0,
+        team2: partnerships[unit2]?.[unit1] || 0,
+      },
+    });
+
+    // Track partnerships after units are selected
+    usedPartnerships.add(`${unit1}-${unit2}`);
+    usedPartnerships.add(`${unit2}-${unit1}`);
+
+    // Create match
+    newMatches.push({
+      team1: [unit1],
+      team2: [unit2],
+      team1Score: 0,
+      team2Score: 0,
+      isScoreSubmitted: false,
+    });
+
+    // Update partnerships
+    partnerships[unit1][unit2] = (partnerships[unit1][unit2] || 0) + 1;
+    partnerships[unit2][unit1] = (partnerships[unit2][unit1] || 0) + 1;
+
+    // Remove used units from available pool
+    availableUnits = afterUnit2;
+    console.log("Updated partnerships for this match:", {
+      [`${unit1}-${unit2}`]: partnerships[unit1][unit2],
+      [`${unit2}-${unit1}`]: partnerships[unit2][unit1],
+    });
+  }
+
+  return newMatches;
 };

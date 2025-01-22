@@ -56,6 +56,11 @@ export const translations = {
     saveScores: "Save Scores",
     startFinalRound: "Start Final Round",
     nextRound: "Next Round",
+    pointsToWin: "Points to Win",
+    pointSystem: "Point System",
+    pointsToPlay: "Points to Play",
+    pointsToPlayDescription: "Play all points, highest score wins",
+    pointsToWinDescription: "First to reach target points wins",
   },
   es: {
     welcome: "¡Bienvenidos al Padel Americano!",
@@ -113,6 +118,12 @@ export const translations = {
     numberOfPlayers: "Número de Jugadores",
     minimumTeams: "Mínimo 2 equipos (4 jugadores)",
     minimumPlayers: "Mínimo 4 jugadores",
+    pointsToWin: "Puntos para Ganar",
+    pointSystem: "Sistema de Puntos",
+    pointsToPlay: "Puntos a Jugar",
+    pointsToPlayDescription:
+      "Jugar todos los puntos, gana la puntuación más alta",
+    pointsToWinDescription: "El primero en alcanzar los puntos objetivo gana",
   },
   da: {
     welcome: "Velkommen til Padel Americano!",
@@ -170,6 +181,11 @@ export const translations = {
     numberOfPlayers: "Antal Spillere",
     minimumTeams: "Minimum 2 hold (4 spillere)",
     minimumPlayers: "Minimum 4 spillere",
+    pointsToWin: "Point for at Vinde",
+    pointSystem: "Point System",
+    pointsToPlay: "Point at Spille",
+    pointsToPlayDescription: "Spil alle point, højeste score vinder",
+    pointsToWinDescription: "Første til at nå målpoint vinder",
   },
 };
 
@@ -227,4 +243,9 @@ export interface Translations {
   saveScores: string;
   startFinalRound: string;
   nextRound: string;
+  pointsToWin: string;
+  pointSystem: string;
+  pointsToPlay: string;
+  pointsToPlayDescription: string;
+  pointsToWinDescription: string;
 }

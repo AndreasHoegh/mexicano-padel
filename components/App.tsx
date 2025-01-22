@@ -14,14 +14,12 @@ import { Court, PlayerScore } from "../lib/types";
 import RestoreDialog from "./RestoreDialog";
 import { Match, Scores, EditingScores } from "../lib/types";
 import BackButton from "./ui/backButton";
-import {
-  generateMatches,
-  generateAmericanoMatchesTeamMode,
-} from "../lib/matchGenerator";
+import { generateMatches } from "../lib/mexicanoGenerator";
 import {
   generateAmericanoMatches,
+  generateAmericanoMatchesTeamMode,
   updatePartnerships,
-} from "../lib/generateAmericano";
+} from "../lib/americanoGenerator";
 import Footer from "./Footer";
 import { trackEvent } from "@/lib/analytics";
 
@@ -65,6 +63,9 @@ export default function App() {
   const [partnerships, setPartnerships] = useState<{
     [key: string]: { [key: string]: number };
   }>({});
+  const [pointSystem, setPointSystem] = useState<
+    "pointsToPlay" | "pointsToWin"
+  >("pointsToPlay");
   const STORAGE_KEY = "tournament_state";
 
   const saveTournamentState = () => {
@@ -103,6 +104,7 @@ export default function App() {
       setSittingOutPlayers(state.sittingOutPlayers);
       setSittingOutCounts(state.sittingOutCounts);
       setPointsPerMatch(state.pointsPerMatch);
+      setPointSystem(state.pointSystem);
       setIsFinished(state.isFinished);
       setMaxRounds(state.maxRounds);
       setIsPaused(state.isPaused);
@@ -451,13 +453,13 @@ export default function App() {
 
               // Then set all the state
               setNames(settings.playerNames);
-              setPointsPerMatch(settings.pointsPerMatch);
+              setPointsPerMatch(settings.points);
               setMaxRounds(settings.maxRounds);
               setCourts(initialCourts);
               setMode(settings.mode);
               setScores(initialScores);
               setSittingOutCounts({});
-
+              setPointSystem(settings.pointSystem);
               // Generate first round matches
               let initialMatches: Match[];
               if (format === "americano" && mode === "individual") {
@@ -605,6 +607,7 @@ export default function App() {
                 sittingOutPlayers={sittingOutPlayers}
                 onStartFinalRound={startFinalRound}
                 onPause={handlePauseChange}
+                pointSystem={pointSystem}
               />
             </>
           )}

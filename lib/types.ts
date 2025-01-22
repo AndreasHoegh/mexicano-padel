@@ -12,7 +12,8 @@ export interface Court {
 export interface TournamentSettings {
   finalRoundPattern: number[];
   playerNames: string[];
-  pointsPerMatch: number;
+  points: number;
+  pointSystem: "pointsToPlay" | "pointsToWin";
   maxRounds: number | null;
   courts: Court[];
   mode: "individual" | "team";
