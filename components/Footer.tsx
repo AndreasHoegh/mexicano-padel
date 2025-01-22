@@ -3,7 +3,7 @@ export default function Footer() {
 
   return (
     <>
-      <footer className="bg-transparent py-2 sm:py-4 mt-auto px-2 sm:px-4 bg-gradient-to-br from-yellow-600/10 to-yellow-500/10 backdrop-blur-sm border-t border-yellow-600/20">
+      <footer className=" bg-transparent py-2 sm:py-4 mt-auto px-2 sm:px-4 bg-gradient-to-br from-yellow-600/10 to-yellow-500/10 backdrop-blur-sm border-t border-yellow-600/20">
         <div className="max-w-4xl mx-auto flex flex-col md:flex-row justify-between items-center gap-2 sm:gap-4 text-gray-300 text-xs sm:text-sm">
           <div className="text-center md:text-left space-y-2">
             <p>© {currentYear} PadelAmericano. All rights reserved.</p>

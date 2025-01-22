@@ -265,10 +265,12 @@ export default function Matches({
             />
           </div>
         )}
-        <span className="mt-2 px-6 text-center text-white text-xs flex justify-center">
-          Tip: Keep this window open and adjust your device&apos;s screen
-          timeout settings to ensure sound playback.
-        </span>
+        {pointSystem === "TimePlay" && (
+          <span className="mt-2 px-6 text-center text-white text-xs flex justify-center">
+            Tip: Keep this window open and adjust your device&apos;s screen
+            timeout settings to ensure sound playback.
+          </span>
+        )}
         <CardContent className="space-y-6 pt-6">
           {matches.map((match, index) => (
             <MatchCard

@@ -378,7 +378,7 @@ export default function App() {
   }, [scores]);
 
   return (
-    <article>
+    <article className=" flex flex-col min-h-screen">
       {(isTournamentNameSet || numberOfPlayers > 0) &&
         !arePlayerNamesSet &&
         matches.length === 0 && (
