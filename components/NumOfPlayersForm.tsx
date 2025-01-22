@@ -9,7 +9,7 @@ import { translations } from "@/lib/translations";
 type NumOfPlayersFormProps = {
   onSubmit: (data: {
     mode: "individual" | "team";
-    format: "mexicano" | "americano";
+    format: "mexicano" | "americano" | "groups";
     count: number;
   }) => void;
 };
@@ -20,7 +20,9 @@ type FormData = {
 
 export default function NumOfPlayersForm({ onSubmit }: NumOfPlayersFormProps) {
   const [mode, setMode] = useState<"individual" | "team">("individual");
-  const [format, setFormat] = useState<"mexicano" | "americano">("mexicano");
+  const [format, setFormat] = useState<"mexicano" | "americano" | "groups">(
+    "mexicano"
+  );
   const { register, handleSubmit } = useForm<FormData>();
   const { language } = useLanguage();
   const t = translations[language];
@@ -46,33 +48,51 @@ export default function NumOfPlayersForm({ onSubmit }: NumOfPlayersFormProps) {
         <RadioGroup
           defaultValue="mexicano"
           className="grid grid-cols-2 gap-4"
-          onValueChange={(value: "mexicano" | "americano") => setFormat(value)}
+          onValueChange={(value: "mexicano" | "americano" | "groups") => {
+            setFormat(value);
+            if (value === "groups") {
+              setMode("team");
+            }
+          }}
         >
           {[
             {
               value: "mexicano",
               label: "Mexicano",
               description: t.matchupsByRanks,
+              disabled: false,
             },
             {
               value: "americano",
               label: "Americano",
               description: t.playWithEveryone,
+              disabled: false,
             },
-          ].map((option) => (
-            <div key={option.value}>
+            {
+              value: "groups",
+              label: "Groups & Knockout",
+              description: "Coming soon",
+              disabled: true, // Disable this option
+            },
+          ].map(({ value, label, description, disabled }) => (
+            <div key={value}>
               <RadioGroupItem
-                value={option.value}
-                id={`format-${option.value}`}
+                value={value}
+                id={`format-${value}`}
                 className="peer sr-only"
+                disabled={disabled} // Add this to disable the radio button
               />
               <Label
-                htmlFor={`format-${option.value}`}
-                className="text-black flex flex-col items-center justify-between rounded-md border-2 bg-popover p-4 peer-data-[state=checked]:border-yellow-600 peer-data-[state=checked]:border-4 [&:has([data-state=checked])]:scale-105 cursor-pointer transition-transform"
+                htmlFor={`format-${value}`}
+                className={`text-black flex flex-col items-center justify-between rounded-md border-2 bg-white p-4 ${
+                  disabled
+                    ? "opacity-50 cursor-not-allowed" // Add styles for disabled state
+                    : "peer-data-[state=checked]:border-yellow-600 peer-data-[state=checked]:border-4 [&:has([data-state=checked])]:scale-105 cursor-pointer transition-transform"
+                }`}
               >
-                <span className="text-xl font-semibold">{option.label}</span>
-                <span className="text-sm text-muted-foreground text-center">
-                  {option.description}
+                <span className="text-xl font-semibold">{label}</span>
+                <span className="text-sm text-muted-foreground">
+                  {description}
                 </span>
               </Label>
             </div>
@@ -84,7 +104,7 @@ export default function NumOfPlayersForm({ onSubmit }: NumOfPlayersFormProps) {
             {t.tournamentMode}
           </h2>
           <RadioGroup
-            defaultValue="individual"
+            value={mode} // Controlled by the mode state
             className="grid grid-cols-2 gap-4"
             onValueChange={(value: "individual" | "team") => setMode(value)}
           >
@@ -93,22 +113,30 @@ export default function NumOfPlayersForm({ onSubmit }: NumOfPlayersFormProps) {
                 value: "individual",
                 label: t.individual,
                 description: t.playersCollectIndividually,
+                disabled: format === "groups", // Disable if format is groups
               },
               {
                 value: "team",
                 label: t.team,
                 description: t.pointsForTeams,
+                disabled: false, // Always enabled
               },
             ].map((option) => (
-              <div key={option.value}>
+              <div
+                key={option.value}
+                className={`${option.disabled ? "opacity-50" : ""}`}
+              >
                 <RadioGroupItem
                   value={option.value}
                   id={`mode-${option.value}`}
-                  className="peer sr-only ?"
+                  className="peer sr-only"
+                  disabled={option.disabled} // Disable radio button
                 />
                 <Label
                   htmlFor={`mode-${option.value}`}
-                  className="text-black flex flex-col items-center justify-between rounded-md border-2 bg-popover p-4 peer-data-[state=checked]:border-yellow-600 peer-data-[state=checked]:border-4 [&:has([data-state=checked])]:scale-105 cursor-pointer transition-transform"
+                  className={`text-black flex flex-col items-center justify-between rounded-md border-2 bg-popover p-4 peer-data-[state=checked]:border-yellow-600 peer-data-[state=checked]:border-4 [&:has([data-state=checked])]:scale-105 cursor-pointer transition-transform ${
+                    option.disabled ? "cursor-not-allowed" : ""
+                  }`}
                 >
                   <span className="text-xl font-semibold">{option.label}</span>
                   <span className="text-sm text-muted-foreground text-center">

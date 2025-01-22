@@ -61,6 +61,11 @@ export const translations = {
     pointsToPlay: "Points to Play",
     pointsToPlayDescription: "Play all points, highest score wins",
     pointsToWinDescription: "First to reach target points wins",
+    match: "Match",
+    matchDescription: "Play best of X sets",
+    bestOf: "Best of",
+    sets: "sets",
+    minutes: "Minutes",
   },
   es: {
     welcome: "¡Bienvenidos al Padel Americano!",
@@ -124,6 +129,11 @@ export const translations = {
     pointsToPlayDescription:
       "Jugar todos los puntos, gana la puntuación más alta",
     pointsToWinDescription: "El primero en alcanzar los puntos objetivo gana",
+    match: "Partido",
+    matchDescription: "Jugar al mejor de X sets",
+    bestOf: "Al mejor de",
+    sets: "sets",
+    minutes: "Minutos",
   },
   da: {
     welcome: "Velkommen til Padel Americano!",
@@ -186,6 +196,11 @@ export const translations = {
     pointsToPlay: "Point at Spille",
     pointsToPlayDescription: "Spil alle point, højeste score vinder",
     pointsToWinDescription: "Første til at nå målpoint vinder",
+    match: "Kamp",
+    matchDescription: "Spil bedst af X sæt",
+    bestOf: "Bedst af",
+    sets: "sæt",
+    minutes: "Minutter",
   },
 };
 
@@ -248,4 +263,9 @@ export interface Translations {
   pointsToPlay: string;
   pointsToPlayDescription: string;
   pointsToWinDescription: string;
+  match: string;
+  matchDescription: string;
+  bestOf: string;
+  sets: string;
+  minutes: string;
 }

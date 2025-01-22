@@ -59,7 +59,9 @@ export default function App() {
   const [sortedPlayers, setSortedPlayers] = useState<[string, PlayerScore][]>(
     []
   );
-  const [format, setFormat] = useState<"mexicano" | "americano">("mexicano");
+  const [format, setFormat] = useState<"mexicano" | "americano" | "groups">(
+    "mexicano"
+  );
   const [partnerships, setPartnerships] = useState<{
     [key: string]: { [key: string]: number };
   }>({});
@@ -165,7 +167,7 @@ export default function App() {
     count,
   }: {
     mode: "individual" | "team";
-    format: "mexicano" | "americano";
+    format: "mexicano" | "americano" | "groups";
     count: number;
   }) => {
     if (count >= 4) {
@@ -411,6 +413,7 @@ export default function App() {
             initialPlayerCount={numberOfPlayers}
             onPlayerCountChange={(newCount) => setNumberOfPlayers(newCount)}
             mode={mode}
+            format={format}
             onSubmit={(settings) => {
               // Ensure we have at least one court if none were selected
               const initialCourts =
