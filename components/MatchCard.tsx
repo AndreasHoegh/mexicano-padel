@@ -26,13 +26,14 @@ type EditingScores = {
 };
 
 type MatchCardProps = {
+  initialMinutes: number;
   match: Match;
   index: number;
   courtName: string;
   mode: "individual" | "team";
   editingScores: EditingScores;
   pointsPerMatch: number;
-  pointSystem: "pointsToPlay" | "pointsToWin";
+  pointSystem: "pointsToPlay" | "pointsToWin" | "TimePlay";
   openPopovers: { [key: string]: boolean };
   setOpenPopovers: React.Dispatch<
     React.SetStateAction<{ [key: string]: boolean }>
@@ -85,6 +86,7 @@ function ScorePopover({
   isOpen,
   onOpenChange,
   pointsPerMatch,
+  pointSystem,
   handleScoreChange,
   isTeam1,
 }: {
@@ -94,6 +96,7 @@ function ScorePopover({
   isOpen: boolean;
   onOpenChange: (open: boolean) => void;
   pointsPerMatch: number;
+  pointSystem: "pointsToPlay" | "pointsToWin" | "TimePlay";
   handleScoreChange: (
     index: number,
     team: "team1" | "team2",
@@ -119,19 +122,22 @@ function ScorePopover({
       </PopoverTrigger>
       <PopoverContent className="w-48 p-2">
         <div className="grid grid-cols-4 gap-2">
-          {Array.from({ length: pointsPerMatch + 1 }, (_, i) => (
-            <Button
-              key={i}
-              variant="outline"
-              className="h-8 w-8"
-              onClick={() => {
-                handleScoreChange(index, team, i);
-                onOpenChange(false);
-              }}
-            >
-              {i}
-            </Button>
-          ))}
+          {Array.from(
+            { length: pointSystem === "TimePlay" ? 50 : pointsPerMatch + 1 },
+            (_, i) => (
+              <Button
+                key={i}
+                variant="outline"
+                className="h-8 w-8"
+                onClick={() => {
+                  handleScoreChange(index, team, i);
+                  onOpenChange(false);
+                }}
+              >
+                {i}
+              </Button>
+            )
+          )}
         </div>
       </PopoverContent>
     </Popover>
@@ -144,6 +150,7 @@ function ScoreControls({
   index,
   editingScores,
   pointsPerMatch,
+  pointSystem,
   openPopovers,
   setOpenPopovers,
   handleScoreChange,
@@ -151,7 +158,7 @@ function ScoreControls({
   index: number;
   editingScores: EditingScores;
   pointsPerMatch: number;
-  pointSystem: "pointsToPlay" | "pointsToWin";
+  pointSystem: "pointsToPlay" | "pointsToWin" | "TimePlay";
   openPopovers: { [key: string]: boolean };
   setOpenPopovers: React.Dispatch<
     React.SetStateAction<{ [key: string]: boolean }>
@@ -177,6 +184,7 @@ function ScoreControls({
           }))
         }
         pointsPerMatch={pointsPerMatch}
+        pointSystem={pointSystem}
         handleScoreChange={handleScoreChange}
         isTeam1={true}
       />
@@ -198,6 +206,7 @@ function ScoreControls({
           }))
         }
         pointsPerMatch={pointsPerMatch}
+        pointSystem={pointSystem}
         handleScoreChange={handleScoreChange}
         isTeam1={false}
       />

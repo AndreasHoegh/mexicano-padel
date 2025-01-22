@@ -64,7 +64,7 @@ export default function App() {
     [key: string]: { [key: string]: number };
   }>({});
   const [pointSystem, setPointSystem] = useState<
-    "pointsToPlay" | "pointsToWin"
+    "pointsToPlay" | "pointsToWin" | "TimePlay"
   >("pointsToPlay");
   const STORAGE_KEY = "tournament_state";
 
@@ -460,7 +460,7 @@ export default function App() {
               setScores(initialScores);
               setSittingOutCounts({});
               setPointSystem(settings.pointSystem);
-              // Generate first round matches
+
               let initialMatches: Match[];
               if (format === "americano" && mode === "individual") {
                 initialMatches = generateAmericanoMatches(

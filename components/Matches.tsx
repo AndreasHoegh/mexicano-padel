@@ -13,7 +13,7 @@ import { PlayerScore } from "@/lib/types";
 import FinalRoundModal from "./FinalRoundModal";
 import { useLanguage } from "@/lib/LanguageContext";
 import { translations } from "@/lib/translations";
-
+import { Timer } from "./Timer";
 interface Match {
   team1: string[];
   team2: string[];
@@ -58,7 +58,7 @@ interface MatchesProps {
   round: number;
   onNextRound: () => void;
   pointsPerMatch: number;
-  pointSystem: "pointsToPlay" | "pointsToWin";
+  pointSystem: "pointsToPlay" | "pointsToWin" | "TimePlay";
   isLastRound: boolean;
   courts: Court[];
   mode: "individual" | "team";
@@ -153,13 +153,19 @@ export default function Matches({
     const team1Score = editingScores[index]?.team1;
     const team2Score = editingScores[index]?.team2;
 
-    return (
-      team1Score !== undefined &&
-      team2Score !== undefined &&
-      (pointSystem === "pointsToPlay"
-        ? team1Score + team2Score === pointsPerMatch
-        : team1Score === pointsPerMatch || team2Score === pointsPerMatch)
-    );
+    if (team1Score === undefined || team2Score === undefined) {
+      return false; // Invalid if any score is undefined
+    }
+
+    if (pointSystem === "pointsToPlay") {
+      return team1Score + team2Score === pointsPerMatch;
+    } else if (pointSystem === "pointsToWin") {
+      return team1Score === pointsPerMatch || team2Score === pointsPerMatch;
+    } else if (pointSystem === "TimePlay") {
+      return team1Score + team2Score > 0;
+    }
+
+    return false; // Default case if pointSystem doesn't match any condition
   };
 
   const areAllScoresValid = () => {
@@ -249,6 +255,20 @@ export default function Matches({
             </span>
           </CardTitle>
         </CardHeader>
+        {pointSystem === "TimePlay" && (
+          <div className="mt-2 flex justify-center">
+            <Timer
+              initialMinutes={pointsPerMatch}
+              onTimeUp={() => {
+                console.log("Time's up!");
+              }}
+            />
+          </div>
+        )}
+        <span className="mt-2 px-6 text-center text-white text-xs flex justify-center">
+          Tip: Keep this window open and adjust your device&apos;s screen
+          timeout settings to ensure sound playback.
+        </span>
         <CardContent className="space-y-6 pt-6">
           {matches.map((match, index) => (
             <MatchCard
@@ -260,6 +280,7 @@ export default function Matches({
               editingScores={editingScores}
               pointsPerMatch={pointsPerMatch}
               pointSystem={pointSystem}
+              initialMinutes={pointsPerMatch}
               openPopovers={openPopovers}
               setOpenPopovers={setOpenPopovers}
               handleScoreChange={handleScoreChange}

@@ -13,7 +13,7 @@ export interface TournamentSettings {
   finalRoundPattern: number[];
   playerNames: string[];
   points: number;
-  pointSystem: "pointsToPlay" | "pointsToWin";
+  pointSystem: "pointsToPlay" | "pointsToWin" | "TimePlay";
   maxRounds: number | null;
   courts: Court[];
   mode: "individual" | "team";

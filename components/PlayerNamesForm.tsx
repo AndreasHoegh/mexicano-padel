@@ -4,7 +4,7 @@ import { TournamentSettings, Court } from "@/lib/types";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Label } from "@/components/ui/label";
 import { Input } from "./ui/input";
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import { useLanguage } from "@/lib/LanguageContext";
 import { translations } from "@/lib/translations";
 
@@ -17,7 +17,7 @@ type PlayerNamesFormProps = {
 
 type FormValues = {
   [key: string]: string;
-  pointSystem: "pointsToPlay" | "pointsToWin";
+  pointSystem: "pointsToPlay" | "pointsToWin" | "SetPlay" | "TimePlay";
   points: string;
   maxRounds: string;
 };
@@ -39,8 +39,22 @@ export default function PlayerNamesForm({
         pointSystem: "pointsToPlay",
         points: "24",
         maxRounds: "∞",
+        timePlay: "10",
       },
     });
+
+  const pointSystem = watch("pointSystem");
+
+  useEffect(() => {
+    if (pointSystem === "TimePlay") {
+      setValue("points", "10");
+    } else if (
+      pointSystem === "pointsToPlay" ||
+      pointSystem === "pointsToWin"
+    ) {
+      setValue("points", "24");
+    }
+  }, [pointSystem, setValue]);
 
   const nextIdRef = useRef(2);
   const maxCourts = getMaxCourts(playerCount);
@@ -238,7 +252,6 @@ export default function PlayerNamesForm({
             ))}
           </div>
         )}
-
         <div className="flex justify-center">
           <Button
             type="button"
@@ -258,7 +271,10 @@ export default function PlayerNamesForm({
             defaultValue="pointsToPlay"
             className="grid grid-cols-1 sm:grid-cols-2 gap-4"
             onValueChange={(value) =>
-              setValue("pointSystem", value as "pointsToPlay" | "pointsToWin")
+              setValue(
+                "pointSystem",
+                value as "pointsToPlay" | "pointsToWin" | "SetPlay" | "TimePlay"
+              )
             }
           >
             <div>
@@ -295,42 +311,91 @@ export default function PlayerNamesForm({
                 </span>
               </Label>
             </div>
+            <div>
+              <RadioGroupItem
+                value="TimePlay"
+                id="TimePlay"
+                className="peer sr-only"
+                {...register("pointSystem")}
+              />
+              <Label
+                htmlFor="TimePlay"
+                className="text-black flex flex-col items-center justify-between rounded-md border-2 bg-white p-4 peer-data-[state=checked]:border-yellow-600 peer-data-[state=checked]:border-4 [&:has([data-state=checked])]:scale-105 cursor-pointer transition-transform"
+              >
+                <span className="text-xl font-semibold">Time</span>
+                <span className="text-sm text-muted-foreground text-center">
+                  Every match is X minutes
+                </span>
+              </Label>
+            </div>
           </RadioGroup>
         </div>
-
         <div className="space-y-3">
           <h2 className="text-2xl font-semibold text-center text-gray-200">
             {watch("pointSystem") === "pointsToPlay"
               ? t.pointsToPlay
+              : watch("pointSystem") === "TimePlay"
+              ? "Time (minutes)"
               : t.pointsToWin}
           </h2>
-          <RadioGroup
-            defaultValue="24"
-            className="grid grid-cols-2 sm:grid-cols-3 gap-4"
-            onValueChange={(value) => setValue("points", value)}
-          >
-            {[16, 20, 24, 30, 32, "custom"].map((points) => (
-              <div key={points}>
-                <RadioGroupItem
-                  value={points.toString()}
-                  id={`points-${points}`}
-                  className="peer sr-only"
-                  {...register("points")}
-                />
-                <Label
-                  htmlFor={`points-${points}`}
-                  className="text-black flex flex-col items-center justify-between rounded-md border-2 bg-white p-4 peer-data-[state=checked]:border-yellow-600 peer-data-[state=checked]:border-4 [&:has([data-state=checked])]:scale-105 cursor-pointer transition-transform"
-                >
-                  <span className="text-xl font-semibold">
-                    {points === "custom" ? "Custom" : points}
-                  </span>
-                  <span className="text-sm text-muted-foreground">
-                    {t.points}
-                  </span>
-                </Label>
-              </div>
-            ))}
-          </RadioGroup>
+
+          {watch("pointSystem") === "TimePlay" ? (
+            <RadioGroup
+              value={watch("points")} // Bind the value to watch("points")
+              className="grid grid-cols-2 sm:grid-cols-3 gap-4"
+              onValueChange={(value) => setValue("points", value)} // Update on change
+            >
+              {[5, 10, 15, 20, 25, "custom"].map((minutes) => (
+                <div key={minutes}>
+                  <RadioGroupItem
+                    value={minutes.toString()}
+                    id={`points-${minutes}`}
+                    className="peer sr-only"
+                  />
+                  <Label
+                    htmlFor={`points-${minutes}`}
+                    className="text-black flex flex-col items-center justify-between rounded-md border-2 bg-white p-4 peer-data-[state=checked]:border-yellow-600 peer-data-[state=checked]:border-4 [&:has([data-state=checked])]:scale-105 cursor-pointer transition-transform"
+                  >
+                    <span className="text-xl font-semibold">
+                      {minutes === "custom" ? "Custom" : minutes}
+                    </span>
+                    <span className="text-sm text-muted-foreground">
+                      minutes
+                    </span>
+                  </Label>
+                </div>
+              ))}
+            </RadioGroup>
+          ) : (
+            <RadioGroup
+              defaultValue="24"
+              className="grid grid-cols-2 sm:grid-cols-3 gap-4"
+              onValueChange={(value) => setValue("points", value)}
+            >
+              {[16, 20, 24, 30, 32, "custom"].map((points) => (
+                <div key={points}>
+                  <RadioGroupItem
+                    value={points.toString()}
+                    id={`points-${points}`}
+                    className="peer sr-only"
+                    {...register("points")}
+                  />
+                  <Label
+                    htmlFor={`points-${points}`}
+                    className="text-black flex flex-col items-center justify-between rounded-md border-2 bg-white p-4 peer-data-[state=checked]:border-yellow-600 peer-data-[state=checked]:border-4 [&:has([data-state=checked])]:scale-105 cursor-pointer transition-transform"
+                  >
+                    <span className="text-xl font-semibold">
+                      {points === "custom" ? "Custom" : points}
+                    </span>
+                    <span className="text-sm text-muted-foreground">
+                      {t.points}
+                    </span>
+                  </Label>
+                </div>
+              ))}
+            </RadioGroup>
+          )}
+
           <div
             className={`flex justify-center transition-all duration-300 ${
               watch("points") === "custom"
@@ -342,7 +407,9 @@ export default function PlayerNamesForm({
               type="number"
               min={1}
               className="text-black text-center text-xl font-semibold w-20 h-12 rounded-md border-2 focus:border-black focus:outline-none transition-all p-2 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
-              placeholder="Points"
+              placeholder={
+                watch("pointSystem") === "TimePlay" ? "Minutes" : "Points"
+              }
               {...register("customPoints", {
                 min: 1,
                 valueAsNumber: true,
@@ -350,7 +417,6 @@ export default function PlayerNamesForm({
             />
           </div>
         </div>
-
         <div className="space-y-3">
           <h2 className="text-2xl font-semibold text-center text-gray-200">
             {t.numberOfRounds}
@@ -401,7 +467,6 @@ export default function PlayerNamesForm({
             />
           </div>
         </div>
-
         {mode === "individual" && (
           <div className="space-y-3">
             <h2 className="text-2xl font-semibold text-center text-gray-200">
@@ -456,7 +521,6 @@ export default function PlayerNamesForm({
             </div>
           </div>
         )}
-
         <div className="space-y-3">
           <h2 className="text-2xl font-semibold text-center text-gray-200">
             {t.courts}
@@ -499,7 +563,6 @@ export default function PlayerNamesForm({
             </p>
           </div>
         </div>
-
         <Button
           className=" mx-auto block w-full border-2 h-12 text-l bg-yellow-600 hover:bg-yellow-700 text-white transition-all duration-300 transform hover:scale-105 shadow-lg"
           type="submit"
