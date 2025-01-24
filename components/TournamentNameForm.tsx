@@ -93,7 +93,7 @@ export default function TournamentNameForm({
           </div>
 
           <CardHeader className="text-center pt-16">
-            <h1 className="text-5xl font-bold text-white mb-2">{t.welcome}</h1>
+            <h2 className="text-5xl font-bold text-white mb-2">{t.welcome}</h2>
             <CardDescription className="text-xl text-white/80 mt-2">
               {t.createTournaments}
             </CardDescription>
