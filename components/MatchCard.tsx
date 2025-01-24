@@ -16,10 +16,15 @@ type Match = {
   isScoreSubmitted: boolean;
   team1Name?: string;
   team2Name?: string;
+  isKnockout?: boolean;
+  knockoutRound?: string;
+  matchNumber?: number;
+  group?: number;
+  round?: number;
 };
 
 type EditingScores = {
-  [key: number]: {
+  [key: string | number]: {
     team1: number;
     team2: number;
   };
@@ -41,8 +46,10 @@ type MatchCardProps = {
   handleScoreChange: (
     index: number,
     team: "team1" | "team2",
-    value: number
+    value: number,
+    isKnockout?: boolean
   ) => void;
+  isKnockout?: boolean;
 };
 
 function TeamDisplay({
@@ -89,6 +96,7 @@ function ScorePopover({
   pointSystem,
   handleScoreChange,
   isTeam1,
+  isKnockout,
 }: {
   index: number;
   team: "team1" | "team2";
@@ -100,9 +108,11 @@ function ScorePopover({
   handleScoreChange: (
     index: number,
     team: "team1" | "team2",
-    value: number
+    value: number,
+    isKnockout?: boolean
   ) => void;
   isTeam1: boolean;
+  isKnockout?: boolean;
 }) {
   return (
     <Popover open={isOpen} onOpenChange={onOpenChange}>
@@ -130,7 +140,7 @@ function ScorePopover({
                 variant="outline"
                 className="h-8 w-8"
                 onClick={() => {
-                  handleScoreChange(index, team, i);
+                  handleScoreChange(index, team, i, isKnockout);
                   onOpenChange(false);
                 }}
               >
@@ -154,6 +164,7 @@ function ScoreControls({
   openPopovers,
   setOpenPopovers,
   handleScoreChange,
+  isKnockout,
 }: {
   index: number;
   editingScores: EditingScores;
@@ -166,8 +177,10 @@ function ScoreControls({
   handleScoreChange: (
     index: number,
     team: "team1" | "team2",
-    value: number
+    value: number,
+    isKnockout?: boolean
   ) => void;
+  isKnockout?: boolean;
 }) {
   return (
     <div className="flex flex-row items-center gap-4">
@@ -175,18 +188,23 @@ function ScoreControls({
       <MemoizedScorePopover
         index={index}
         team="team1"
-        score={editingScores[index]?.team1 ?? 0}
-        isOpen={openPopovers[index]}
+        score={
+          isKnockout
+            ? editingScores[`knockout-${index}`]?.team1 ?? 0
+            : editingScores[index]?.team1 ?? 0
+        }
+        isOpen={openPopovers[isKnockout ? `knockout-${index}` : index]}
         onOpenChange={(open) =>
           setOpenPopovers((prev: { [key: string]: boolean }) => ({
             ...prev,
-            [index]: open,
+            [isKnockout ? `knockout-${index}` : index]: open,
           }))
         }
         pointsPerMatch={pointsPerMatch}
         pointSystem={pointSystem}
         handleScoreChange={handleScoreChange}
         isTeam1={true}
+        isKnockout={isKnockout}
       />
 
       <span className="text-2xl font-bold text-blue-700">
@@ -197,18 +215,27 @@ function ScoreControls({
       <MemoizedScorePopover
         index={index}
         team="team2"
-        score={editingScores[index]?.team2 ?? 0}
-        isOpen={openPopovers[`${index}-team2`]}
+        score={
+          isKnockout
+            ? editingScores[`knockout-${index}`]?.team2 ?? 1
+            : editingScores[index]?.team2 ?? 1
+        }
+        isOpen={
+          openPopovers[
+            isKnockout ? `knockout-${index}-team2` : `${index}-team2`
+          ]
+        }
         onOpenChange={(open) =>
           setOpenPopovers((prev: { [key: string]: boolean }) => ({
             ...prev,
-            [`${index}-team2`]: open,
+            [isKnockout ? `knockout-${index}-team2` : `${index}-team2`]: open,
           }))
         }
         pointsPerMatch={pointsPerMatch}
         pointSystem={pointSystem}
         handleScoreChange={handleScoreChange}
         isTeam1={false}
+        isKnockout={isKnockout}
       />
     </div>
   );
@@ -225,13 +252,18 @@ export function MatchCard({
   openPopovers,
   setOpenPopovers,
   handleScoreChange,
+  isKnockout,
 }: MatchCardProps) {
+  const isKnockoutCheck = "isKnockout" in match && match.isKnockout;
+
   return (
     <Card className="bg-slate-100">
       <CardContent className="p-6">
         <div className="space-y-4">
           <div className="text-center font-semibold text-gray-600">
-            {courtName}
+            {isKnockoutCheck
+              ? `${match.knockoutRound} - Match ${match.matchNumber}`
+              : courtName}
           </div>
           <div className="flex flex-col sm:flex-row items-center gap-4 sm:gap-8 w-full">
             {/* Team 1 */}
@@ -246,6 +278,7 @@ export function MatchCard({
               openPopovers={openPopovers}
               setOpenPopovers={setOpenPopovers}
               handleScoreChange={handleScoreChange}
+              isKnockout={isKnockoutCheck}
             />
 
             {/* Team 2 */}

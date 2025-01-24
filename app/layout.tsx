@@ -44,6 +44,7 @@ export const metadata: Metadata = {
     title: APP_NAME,
     description: APP_DESCRIPTION,
     images: ["/og-image.jpg"],
+    url: "https://www.padelamericano.org",
   },
   twitter: {
     card: "summary_large_image",

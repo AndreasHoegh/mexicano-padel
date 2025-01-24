@@ -9,15 +9,30 @@ export interface Court {
   name: string;
 }
 
+export interface KnockoutMatch {
+  team1: string[];
+  team2: string[];
+  team1Score: number;
+  team2Score: number;
+  isScoreSubmitted: boolean;
+  round: number;
+  isKnockout: boolean;
+  knockoutRound: string;
+  matchNumber: number;
+}
+
 export interface TournamentSettings {
   finalRoundPattern: number[];
   playerNames: string[];
   points: number;
   pointSystem: "pointsToPlay" | "pointsToWin" | "TimePlay";
-  maxRounds: number | null;
+  maxRounds: number;
   courts: Court[];
   mode: "individual" | "team";
   teamNames?: string[];
+  format: "mexicano" | "americano" | "groups";
+  teamsPerGroup?: number;
+  teamsAdvancing?: number;
 }
 
 export interface PlayerScore {
@@ -50,10 +65,15 @@ export interface Match {
   isScoreSubmitted: boolean;
   team1Name?: string;
   team2Name?: string;
+  group?: number;
+  round?: number;
+  isKnockout?: boolean;
+  knockoutRound?: string;
+  matchNumber?: number;
 }
 
 export interface EditingScores {
-  [key: number]: {
+  [key: string | number]: {
     team1: number;
     team2: number;
   };
@@ -67,3 +87,12 @@ export interface PlayerHistory {
     lastSatOutRound: number;
   };
 }
+
+export interface GroupStanding {
+  teamName: string;
+  points: number;
+  matchesPlayed: number;
+  wins: number;
+}
+
+export type PointSystem = "pointsToPlay" | "pointsToWin" | "TimePlay";

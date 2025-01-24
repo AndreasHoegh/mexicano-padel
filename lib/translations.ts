@@ -66,6 +66,9 @@ export const translations = {
     bestOf: "Best of",
     sets: "sets",
     minutes: "Minutes",
+    teamsPerGroup: "Teams per Group",
+    teams: "teams",
+    timePlay: "Time Play",
   },
   es: {
     welcome: "¡Bienvenidos al Padel Americano!",
@@ -134,6 +137,9 @@ export const translations = {
     bestOf: "Al mejor de",
     sets: "sets",
     minutes: "Minutos",
+    teamsPerGroup: "Equipos por Grupo",
+    teams: "equipos",
+    timePlay: "Juego por Tiempo",
   },
   da: {
     welcome: "Velkommen til Padel Americano!",
@@ -191,16 +197,19 @@ export const translations = {
     numberOfPlayers: "Antal Spillere",
     minimumTeams: "Minimum 2 hold (4 spillere)",
     minimumPlayers: "Minimum 4 spillere",
-    pointsToWin: "Point for at Vinde",
+    pointsToWin: "Spil til X point",
     pointSystem: "Point System",
-    pointsToPlay: "Point at Spille",
+    pointsToPlay: "Bedst ud af X point",
     pointsToPlayDescription: "Spil alle point, højeste score vinder",
-    pointsToWinDescription: "Første til at nå målpoint vinder",
+    pointsToWinDescription: "Første til at nå antal point vinder",
     match: "Kamp",
     matchDescription: "Spil bedst af X sæt",
     bestOf: "Bedst af",
     sets: "sæt",
     minutes: "Minutter",
+    teamsPerGroup: "Hold per Gruppe",
+    teams: "hold",
+    timePlay: "Tidsspel",
   },
 };
 
@@ -268,4 +277,7 @@ export interface Translations {
   bestOf: string;
   sets: string;
   minutes: string;
+  teamsPerGroup: string;
+  teams: string;
+  timePlay: string;
 }

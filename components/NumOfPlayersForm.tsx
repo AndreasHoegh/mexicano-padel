@@ -1,8 +1,7 @@
 import { useForm } from "react-hook-form";
-import { Button } from "./ui/button";
 import { RadioGroup, RadioGroupItem } from "./ui/radio-group";
 import { Label } from "./ui/label";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useLanguage } from "@/lib/LanguageContext";
 import { translations } from "@/lib/translations";
 
@@ -23,24 +22,40 @@ export default function NumOfPlayersForm({ onSubmit }: NumOfPlayersFormProps) {
   const [format, setFormat] = useState<"mexicano" | "americano" | "groups">(
     "mexicano"
   );
-  const { register, handleSubmit } = useForm<FormData>();
+  const { register, setValue, watch } = useForm<FormData>({
+    defaultValues: {
+      "Number of players": "8",
+    },
+  });
   const { language } = useLanguage();
   const t = translations[language];
+  const playerCount = watch("Number of players");
 
-  const onFormSubmit = (data: FormData) => {
-    const count = parseInt(data["Number of players"]);
+  // Effect to handle format changes
+  useEffect(() => {
+    if (format === "groups") {
+      setMode("team");
+    }
+  }, [format]);
+
+  // Effect to handle mode changes
+  useEffect(() => {
+    // Reset player count when mode changes
+    setValue("Number of players", "8");
+  }, [mode, setValue]);
+
+  // Effect to automatically submit form when values change
+  useEffect(() => {
+    const count = parseInt(playerCount);
     onSubmit({
       mode,
       format,
       count: mode === "team" ? count * 2 : count,
     });
-  };
+  }, [mode, format, playerCount, onSubmit]);
 
   return (
-    <form
-      onSubmit={handleSubmit(onFormSubmit)}
-      className="space-y-8 text-gray-200 max-w-2xl mx-auto mb-12 px-4"
-    >
+    <div className="space-y-8 text-gray-200 max-w-2xl mx-auto px-4">
       <div className="space-y-4">
         <h2 className="text-xl font-semibold text-center">
           {t.tournamentFormat}
@@ -50,9 +65,6 @@ export default function NumOfPlayersForm({ onSubmit }: NumOfPlayersFormProps) {
           className="grid grid-cols-2 gap-4"
           onValueChange={(value: "mexicano" | "americano" | "groups") => {
             setFormat(value);
-            if (value === "groups") {
-              setMode("team");
-            }
           }}
         >
           {[
@@ -71,8 +83,8 @@ export default function NumOfPlayersForm({ onSubmit }: NumOfPlayersFormProps) {
             {
               value: "groups",
               label: "Groups & Knockout",
-              description: "Coming soon",
-              disabled: true, // Disable this option
+              description: "Groups & Knockout",
+              disabled: true,
             },
           ].map(({ value, label, description, disabled }) => (
             <div key={value}>
@@ -80,13 +92,13 @@ export default function NumOfPlayersForm({ onSubmit }: NumOfPlayersFormProps) {
                 value={value}
                 id={`format-${value}`}
                 className="peer sr-only"
-                disabled={disabled} // Add this to disable the radio button
+                disabled={disabled}
               />
               <Label
                 htmlFor={`format-${value}`}
                 className={`text-black flex flex-col items-center justify-between rounded-md border-2 bg-white p-4 ${
                   disabled
-                    ? "opacity-50 cursor-not-allowed" // Add styles for disabled state
+                    ? "opacity-50 cursor-not-allowed"
                     : "peer-data-[state=checked]:border-yellow-600 peer-data-[state=checked]:border-4 [&:has([data-state=checked])]:scale-105 cursor-pointer transition-transform"
                 }`}
               >
@@ -104,7 +116,7 @@ export default function NumOfPlayersForm({ onSubmit }: NumOfPlayersFormProps) {
             {t.tournamentMode}
           </h2>
           <RadioGroup
-            value={mode} // Controlled by the mode state
+            value={mode}
             className="grid grid-cols-2 gap-4"
             onValueChange={(value: "individual" | "team") => setMode(value)}
           >
@@ -113,13 +125,13 @@ export default function NumOfPlayersForm({ onSubmit }: NumOfPlayersFormProps) {
                 value: "individual",
                 label: t.individual,
                 description: t.playersCollectIndividually,
-                disabled: format === "groups", // Disable if format is groups
+                disabled: format === "groups",
               },
               {
                 value: "team",
                 label: t.team,
                 description: t.pointsForTeams,
-                disabled: false, // Always enabled
+                disabled: false,
               },
             ].map((option) => (
               <div
@@ -130,7 +142,7 @@ export default function NumOfPlayersForm({ onSubmit }: NumOfPlayersFormProps) {
                   value={option.value}
                   id={`mode-${option.value}`}
                   className="peer sr-only"
-                  disabled={option.disabled} // Disable radio button
+                  disabled={option.disabled}
                 />
                 <Label
                   htmlFor={`mode-${option.value}`}
@@ -155,12 +167,29 @@ export default function NumOfPlayersForm({ onSubmit }: NumOfPlayersFormProps) {
           <div className="flex justify-center">
             <input
               defaultValue={8}
-              onFocus={(e) => e.target.select()}
               type="number"
               min={mode === "team" ? 2 : 4}
               step={1}
               className="text-black text-center text-xl font-semibold w-20 h-12 rounded-md border-2 focus:border-black focus:outline-none transition-all p-2 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
-              {...register("Number of players", { required: true })}
+              {...register("Number of players", {
+                required: true,
+                valueAsNumber: true,
+                validate: (value) =>
+                  (parseInt(value) > 0 && Number.isInteger(value)) ||
+                  "Must be a positive integer",
+              })}
+              onChange={(e) => {
+                const value = e.target.value;
+                const numericValue = parseInt(value, 10);
+
+                // Ensure the value is a valid number and meets constraints
+                if (
+                  !isNaN(numericValue) &&
+                  numericValue >= (mode === "team" ? 2 : 4)
+                ) {
+                  setValue("Number of players", numericValue.toString());
+                }
+              }}
             />
           </div>
           <p className="text-sm text-gray-500 text-center">
@@ -168,13 +197,6 @@ export default function NumOfPlayersForm({ onSubmit }: NumOfPlayersFormProps) {
           </p>
         </div>
       </div>
-
-      <Button
-        className="mx-auto block bg-yellow-600 hover:bg-yellow-600 text-white transition-all duration-300 transform hover:scale-105 shadow-lg"
-        type="submit"
-      >
-        {t.next}
-      </Button>
-    </form>
+    </div>
   );
 }
