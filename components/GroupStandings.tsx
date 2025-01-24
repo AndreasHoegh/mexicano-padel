@@ -1,12 +1,16 @@
+import React from "react";
 import { GroupStanding } from "@/lib/types";
 
 interface GroupStandingsProps {
   standings: { [key: number]: GroupStanding[] };
 }
 
-export function GroupStandings({ standings }: GroupStandingsProps) {
+export const GroupStandings: React.FC<GroupStandingsProps> = ({
+  standings,
+}) => {
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mb-8">
+      <h2 className="text-xl font-bold mb-4">Group Standings</h2>
       {Object.entries(standings).map(([groupNum, groupStandings]) => (
         <div
           key={groupNum}
@@ -54,4 +58,4 @@ export function GroupStandings({ standings }: GroupStandingsProps) {
       ))}
     </div>
   );
-}
+};

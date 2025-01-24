@@ -2,4 +2,4 @@ User-agent: *
 Allow: /
 Disallow: /api/
 
-Sitemap: https://padelamericano.com/sitemap.xml 
+Sitemap: https://padelamericano.org/sitemap.xml 

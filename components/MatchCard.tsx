@@ -260,11 +260,11 @@ export function MatchCard({
     <Card className="bg-slate-100">
       <CardContent className="p-6">
         <div className="space-y-4">
-          <div className="text-center font-semibold text-gray-600">
+          <h2 className="text-center font-semibold text-gray-600">
             {isKnockoutCheck
               ? `${match.knockoutRound} - Match ${match.matchNumber}`
               : courtName}
-          </div>
+          </h2>
           <div className="flex flex-col sm:flex-row items-center gap-4 sm:gap-8 w-full">
             {/* Team 1 */}
             <TeamDisplay team={match.team1} mode={mode} isTeam1 />
