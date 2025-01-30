@@ -1,7 +1,7 @@
 import { UseFormRegister } from "react-hook-form";
-import { FormValues } from "./PlayerNamesForm";
 import { translations } from "@/lib/translations";
 import { useLanguage } from "@/lib/LanguageContext";
+import { FormValues } from "./TournamentSettings";
 
 type NamesSectionProps = {
   mode: "individual" | "team";
