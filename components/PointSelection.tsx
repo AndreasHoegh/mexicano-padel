@@ -8,7 +8,7 @@ import {
   UseFormSetValue,
   UseFormRegister,
 } from "react-hook-form";
-import { FormValues } from "./PlayerNamesForm";
+import { FormValues } from "./TournamentSettings";
 
 type PointSelectionProps = {
   watch: UseFormWatch<FormValues>;
