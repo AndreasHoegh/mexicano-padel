@@ -1,7 +1,7 @@
 "use client";
 
 import { X, Pencil, Check } from "lucide-react";
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { Scores } from "@/lib/types";
 
 type DetailsModalProps = {

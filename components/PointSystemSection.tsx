@@ -5,7 +5,7 @@ import {
   UseFormWatch,
   UseFormSetValue,
 } from "react-hook-form";
-import { FormValues } from "./PlayerNamesForm";
+import { FormValues } from "./TournamentSettings";
 import { translations } from "@/lib/translations";
 import { useLanguage } from "@/lib/LanguageContext";
 

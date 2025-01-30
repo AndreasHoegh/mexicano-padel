@@ -165,7 +165,6 @@ function ScoreControls({
 }) {
   return (
     <div className="flex flex-row items-center gap-4">
-      {/* Team 1 Score */}
       <MemoizedScorePopover
         index={index}
         team="team1"
@@ -183,11 +182,6 @@ function ScoreControls({
         isTeam1={true}
       />
 
-      {/*       <span className="text-2xl font-bold text-blue-700">
-        <VSLogo />
-      </span> */}
-
-      {/* Team 2 Score */}
       <MemoizedScorePopover
         index={index}
         team="team2"

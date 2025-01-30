@@ -2,8 +2,6 @@ import { Scores } from "@/lib/types";
 import { Button } from "./ui/button";
 import PlayerScores from "./PlayerScores";
 
-const STORAGE_KEY = "tournament-data";
-
 export default function TournamentPaused({
   isFinished,
   scores,
