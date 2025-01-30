@@ -6,63 +6,21 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ChevronRight, Trophy } from "lucide-react";
 import Image from "next/image";
 import padelIcon from "../app/assets/padelIcon.png";
-import { MatchCard } from "./MatchCard";
 import Scoreboard from "./Scoreboard";
 import DetailsModal from "./DetailsModal";
-import type {
-  PlayerScore,
-  Match,
-  EditingScores,
-  GroupStanding,
-} from "@/lib/types";
+import type { Match, EditingScores, Court, Scores } from "@/lib/types";
 import FinalRoundModal from "./FinalRoundModal";
 import { useLanguage } from "@/lib/LanguageContext";
 import { translations } from "@/lib/translations";
 import { Timer } from "./Timer";
-import { GroupStandings } from "./GroupStandings";
-import KnockoutBracket from "./KnockoutBracket";
-import { generateKnockoutMatches } from "@/lib/groupGenerator";
-import { calculateUpdatedScores } from "@/lib/updateScores";
 import { MatchList } from "./MatchList";
-import { TournamentResults } from "./TournamentResults";
-
-interface Court {
-  id: number;
-  name: string;
-}
-
-interface KnockoutMatch {
-  team1: string[];
-  team2: string[];
-  round: number;
-  matchNumber: number;
-  team1Score: number;
-  team2Score: number;
-  isScoreSubmitted: boolean;
-  isKnockout: boolean;
-  knockoutRound: string;
-}
+import TournamentPaused from "./TournamentPaused";
 
 interface MatchesProps {
   matches: Match[];
-  knockoutMatches?: KnockoutMatch[];
-  scores: {
-    [key: string]: {
-      points: number;
-      wins: number;
-      matchesPlayed: number;
-      pointsPerRound: (number | "sitout")[];
-    };
-  };
+  scores: Scores;
   onUpdateMatches: (updatedMatches: Match[]) => void;
-  onUpdateScores: (updatedScores: {
-    [key: string]: {
-      points: number;
-      wins: number;
-      matchesPlayed: number;
-      pointsPerRound: (number | "sitout")[];
-    };
-  }) => void;
+  onUpdateScores: (updatedScores: Scores) => void;
   round: number;
   maxRounds: number | null;
   onNextRound: () => void;
@@ -74,34 +32,13 @@ interface MatchesProps {
   sittingOutPlayers: string[];
   onStartFinalRound: (editingScores: EditingScores) => void;
   onPause: (paused: boolean) => void;
-  format?: "mexicano" | "americano" | "groups";
-  groupStandings?: { [key: number]: GroupStanding[] };
-  isGroupStage?: boolean;
-  onUpdateGroupStandings?: (newStandings: {
-    [key: number]: GroupStanding[];
-  }) => void;
-  onStartKnockoutStage?: (updatedKnockoutMatches: KnockoutMatch[]) => void;
-  teamsAdvancing?: number;
-  onUpdateKnockoutMatches: (updatedKnockoutMatches: KnockoutMatch[]) => void;
-}
-
-interface Scores {
-  [key: string]: {
-    points: number;
-    wins: number;
-    matchesPlayed: number;
-    pointsPerRound: (number | "sitout")[];
-    team?: string;
-    teamName?: string;
-  };
+  format?: "mexicano" | "americano";
 }
 
 export default function Matches({
   matches,
   scores,
   onUpdateMatches,
-  knockoutMatches,
-  onUpdateKnockoutMatches,
   onUpdateScores,
   round,
   onNextRound,
@@ -109,46 +46,23 @@ export default function Matches({
   pointSystem,
   isLastRound,
   courts,
-  maxRounds,
   mode,
   sittingOutPlayers,
   onStartFinalRound,
   onPause,
   format,
-  groupStandings,
-  isGroupStage,
-  onUpdateGroupStandings,
-  onStartKnockoutStage,
-  teamsAdvancing,
 }: MatchesProps) {
   const [editingScores, setEditingScores] = useState<EditingScores>({});
-  const [editingKnockoutScores, setEditingKnockoutScores] =
-    useState<EditingScores>({});
-  const [openPopovers, setOpenPopovers] = useState<{ [key: string]: boolean }>(
-    {}
-  );
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isPaused, setIsPaused] = useState(false);
   const [isDetailsOpen, setIsDetailsOpen] = useState(false);
-  const [sortedPlayers, setSortedPlayers] = useState<[string, PlayerScore][]>(
-    []
-  );
-  const [getRowColor, setGetRowColor] = useState<(index: number) => string>(
-    () => () => ""
-  );
+  const [sortedPlayers, setSortedPlayers] = useState<
+    [string, Scores[string]][]
+  >([]);
   const [localScores, setLocalScores] = useState<Scores>(scores);
   const [showFinalRoundModal, setShowFinalRoundModal] = useState(false);
   const [localMatches, setLocalMatches] = useState<Match[]>(matches);
-  const [localKnockoutMatches, setLocalKnockoutMatches] = useState<
-    KnockoutMatch[] | undefined
-  >(knockoutMatches);
-  const [localIsGroupStage, setLocalIsGroupStage] = useState<
-    boolean | undefined
-  >(isGroupStage);
   const [localRound, setLocalRound] = useState(round);
-  const [currentKnockoutRound, setCurrentKnockoutRound] = useState<
-    string | null
-  >(null);
   const [tournamentCompleted, setTournamentCompleted] =
     useState<boolean>(false);
   const STORAGE_KEY = "tournament_state";
@@ -157,104 +71,46 @@ export default function Matches({
   const t = translations[language];
 
   useEffect(() => {
-    console.log("Matches component mounted");
-    console.log("Initial state:", {
-      localIsGroupStage,
-      localKnockoutMatches,
-      editingKnockoutScores,
-    });
-  }, []);
-
-  useEffect(() => {
-    console.log("Matches or Knockout Matches updated:", {
-      localMatches,
-      localKnockoutMatches,
-    });
-  }, [localMatches, localKnockoutMatches]);
-
-  useEffect(() => {
     const initialEditingScores: EditingScores = {};
     localMatches.forEach((_, index) => {
       initialEditingScores[index] = { team1: 0, team2: 0 };
     });
-    localKnockoutMatches?.forEach((_, index) => {
-      initialEditingScores[`knockout-${index}`] = { team1: 0, team2: 0 };
-    });
     setEditingScores(initialEditingScores);
-    setEditingKnockoutScores(initialEditingScores);
-
-    console.log("Initial editing scores set:", initialEditingScores);
-  }, [localMatches, localKnockoutMatches]);
+  }, [localMatches]);
 
   const handleScoreChange = (
     index: number,
     team: "team1" | "team2",
-    value: number,
-    isKnockout = false
+    value: number
   ) => {
-    console.log("handleScoreChange called:", {
-      index,
-      team,
-      value,
-      isKnockout,
-    });
-
-    if (isKnockout) {
-      setEditingKnockoutScores((prev) => {
-        const newScores = { ...prev };
-        newScores[`knockout-${index}`] = {
-          ...newScores[`knockout-${index}`],
-          [team]: value,
-        };
-        if (pointSystem === "pointsToPlay") {
-          if (newScores[`knockout-${index}`].team1 > pointsPerMatch)
-            newScores[`knockout-${index}`].team1 = pointsPerMatch;
-          if (newScores[`knockout-${index}`].team2 > pointsPerMatch)
-            newScores[`knockout-${index}`].team2 = pointsPerMatch;
-        }
-        console.log("Updated knockout scores:", newScores);
-        return newScores;
-      });
-    } else {
-      setEditingScores((prev) => {
-        const newScores = { ...prev };
-        if (!newScores[index]) {
-          newScores[index] = { team1: 0, team2: 0 };
-        }
-        if (pointSystem === "pointsToPlay") {
-          if (team === "team1") {
-            newScores[index].team1 = value;
-            newScores[index].team2 = pointsPerMatch - value;
-          } else {
-            newScores[index].team2 = value;
-            newScores[index].team1 = pointsPerMatch - value;
-          }
+    setEditingScores((prev) => {
+      const newScores = { ...prev };
+      if (!newScores[index]) {
+        newScores[index] = { team1: 0, team2: 0 };
+      }
+      if (pointSystem === "pointsToPlay") {
+        if (team === "team1") {
+          newScores[index].team1 = value;
+          newScores[index].team2 = pointsPerMatch - value;
         } else {
-          newScores[index][team] = value;
+          newScores[index].team2 = value;
+          newScores[index].team1 = pointsPerMatch - value;
         }
-        console.log("Updated group scores:", newScores);
-        return newScores;
-      });
-    }
+      } else {
+        newScores[index][team] = value;
+      }
+      return newScores;
+    });
   };
 
   const isScoreValid = (key: string) => {
-    console.log("Checking score validity for:", key);
-    const scores = key.startsWith("knockout-")
-      ? editingKnockoutScores[key]
-      : editingScores[key];
-    if (!scores) {
-      console.log("No scores found for key:", key);
-      return false;
-    }
+    const scores = editingScores[key];
+    if (!scores) return false;
 
     const team1Score = scores.team1;
     const team2Score = scores.team2;
 
-    if (team1Score === undefined || team2Score === undefined) {
-      console.log("Undefined scores for key:", key);
-      return false;
-    }
+    if (team1Score === undefined || team2Score === undefined) return false;
 
     let isValid = false;
     if (pointSystem === "pointsToPlay") {
@@ -265,37 +121,12 @@ export default function Matches({
       isValid = team1Score + team2Score > 0;
     }
 
-    console.log("Score validity for key:", key, "is:", isValid);
     return isValid;
   };
 
   const areAllScoresValid = () => {
-    if (localIsGroupStage) {
-      const groupMatchesValid = localMatches.every((_, index) =>
-        isScoreValid(index.toString())
-      );
-      console.log("All group scores valid:", groupMatchesValid);
-      return groupMatchesValid;
-    } else {
-      const knockoutMatchesValid = localKnockoutMatches
-        ? localKnockoutMatches.every((_, index) =>
-            isScoreValid(`knockout-${index}`)
-          )
-        : true;
-      console.log("All knockout scores valid:", knockoutMatchesValid);
-      return knockoutMatchesValid;
-    }
+    return localMatches.every((_, index) => isScoreValid(index.toString()));
   };
-
-  // Calculate if the final match is ready
-  const isFinalMatch =
-    localKnockoutMatches &&
-    localKnockoutMatches.some(
-      (match) =>
-        match.knockoutRound === "final" &&
-        match.team1[0].trim().toLowerCase() !== "tbd" &&
-        match.team2[0].trim().toLowerCase() !== "tbd"
-    );
 
   const handleNextRound = () => {
     if (!areAllScoresValid()) {
@@ -308,159 +139,54 @@ export default function Matches({
       return;
     }
 
-    if (format === "groups") {
-      if (localIsGroupStage) {
-        // Transition from group stage to knockout stage
-        if (groupStandings && teamsAdvancing) {
-          const knockoutMatchesGenerated = generateKnockoutMatches(
-            groupStandings,
-            teamsAdvancing
-          );
+    const newScores = { ...scores };
 
-          // Initialize editingKnockoutScores for the new knockout matches
-          const initialEditingKnockoutScores: EditingScores = {};
-          knockoutMatchesGenerated.forEach((_, index) => {
-            initialEditingKnockoutScores[`knockout-${index}`] = {
-              team1: 0,
-              team2: 0,
-            };
-          });
+    // Mark sitting out players for this round
+    sittingOutPlayers.forEach((player) => {
+      newScores[player].pointsPerRound[round - 1] = "sitout";
+    });
 
-          setLocalKnockoutMatches(knockoutMatchesGenerated);
-          setLocalMatches([]); // Clear localMatches
-          setLocalRound(1);
-          setLocalIsGroupStage(false);
-          setEditingKnockoutScores(initialEditingKnockoutScores); // Initialize knockout scores
-
-          if (onStartKnockoutStage) {
-            onStartKnockoutStage(knockoutMatchesGenerated);
-          }
-        }
-      } else {
-        // Handle knockout stage
-        let updatedKnockoutMatches: KnockoutMatch[] = [];
-        if (localKnockoutMatches) {
-          updatedKnockoutMatches = localKnockoutMatches.map((match, index) => ({
-            ...match,
-            team1Score:
-              editingKnockoutScores[`knockout-${index}`]?.team1 ??
-              match.team1Score,
-            team2Score:
-              editingKnockoutScores[`knockout-${index}`]?.team2 ??
-              match.team2Score,
-            isScoreSubmitted: true,
-          }));
-          console.log("Updated Knockout Matches:", updatedKnockoutMatches);
-        }
-
-        // Check if any final match is ready
-        const finalMatch = updatedKnockoutMatches.find(
-          (match) =>
-            match.knockoutRound === "final" &&
-            match.team1[0].trim().toLowerCase() !== "tbd" &&
-            match.team2[0].trim().toLowerCase() !== "tbd" &&
-            match.isScoreSubmitted
-        );
-
-        if (finalMatch && !tournamentCompleted) {
-          let winner: string | undefined;
-          if (finalMatch.team1Score > finalMatch.team2Score) {
-            winner = finalMatch.team1[0];
-          } else if (finalMatch.team2Score > finalMatch.team1Score) {
-            winner = finalMatch.team2[0];
-          } else {
-            winner = "It's a Draw";
-          }
-
-          setTournamentCompleted(true);
-          setLocalKnockoutMatches(updatedKnockoutMatches);
-          alert(`Tournament completed! Winner: ${winner}`);
-          return;
-        }
-
-        // Proceed to next knockout round
-        const winners = getKnockoutWinners(updatedKnockoutMatches, "knockout");
-        const currentRound = updatedKnockoutMatches[0]?.knockoutRound || "";
-        let nextStageMatches: KnockoutMatch[] = [];
-
-        if (currentRound === "quarter") {
-          nextStageMatches = generateSemiFinals(winners);
-        } else if (currentRound === "semi") {
-          nextStageMatches = generateFinal(winners);
-        }
-
-        if (nextStageMatches.length > 0) {
-          // Initialize editingKnockoutScores for the next stage matches
-          const initialEditingKnockoutScores: EditingScores = {};
-          nextStageMatches.forEach((_, index) => {
-            initialEditingKnockoutScores[`knockout-${index}`] = {
-              team1: 0,
-              team2: 0,
-            };
-          });
-
-          setLocalKnockoutMatches(nextStageMatches);
-          setCurrentKnockoutRound(currentRound);
-          onUpdateKnockoutMatches(nextStageMatches);
-          setLocalRound((prev) => prev + 1);
-          setEditingKnockoutScores(initialEditingKnockoutScores); // Initialize knockout scores
-          onNextRound();
-        } else {
-          // If no next stage matches, the tournament is complete
-          setTournamentCompleted(true);
-          alert("Tournament completed!");
-        }
-      }
-    } else {
-      // Handle americano and mexicano formats
-      const newScores = { ...scores };
-
-      // Mark sitting out players for this round
-      sittingOutPlayers.forEach((player) => {
-        newScores[player].pointsPerRound[round - 1] = "sitout";
+    // Update active players' scores
+    matches.forEach((match, index) => {
+      const team1Score = editingScores[index].team1;
+      const team2Score = editingScores[index].team2;
+      [...match.team1, ...match.team2].forEach((player) => {
+        newScores[player].matchesPlayed += 1;
       });
 
-      // Update active players' scores
-      matches.forEach((match, index) => {
-        const team1Score = editingScores[index].team1;
-        const team2Score = editingScores[index].team2;
-        [...match.team1, ...match.team2].forEach((player) => {
-          newScores[player].matchesPlayed += 1;
-        });
+      match.team1.forEach((player) => {
+        newScores[player].points += team1Score;
+        newScores[player].pointsPerRound[round - 1] = team1Score;
+      });
+      match.team2.forEach((player) => {
+        newScores[player].points += team2Score;
+        newScores[player].pointsPerRound[round - 1] = team2Score;
+      });
 
+      if (team1Score > team2Score) {
         match.team1.forEach((player) => {
-          newScores[player].points += team1Score;
-          newScores[player].pointsPerRound[round - 1] = team1Score;
+          newScores[player].wins += 1;
         });
+      } else if (team2Score > team1Score) {
         match.team2.forEach((player) => {
-          newScores[player].points += team2Score;
-          newScores[player].pointsPerRound[round - 1] = team2Score;
+          newScores[player].wins += 1;
         });
+      }
+    });
 
-        if (team1Score > team2Score) {
-          match.team1.forEach((player) => {
-            newScores[player].wins += 1;
-          });
-        } else if (team2Score > team1Score) {
-          match.team2.forEach((player) => {
-            newScores[player].wins += 1;
-          });
-        }
-      });
+    const updatedMatches = matches.map((match, index) => ({
+      ...match,
+      team1Score: editingScores[index].team1,
+      team2Score: editingScores[index].team2,
+      isScoreSubmitted: true,
+    }));
 
-      // Update matches
-      const updatedMatches = matches.map((match, index) => ({
-        ...match,
-        team1Score: editingScores[index].team1,
-        team2Score: editingScores[index].team2,
-        isScoreSubmitted: true,
-      }));
+    onUpdateScores(newScores);
+    onUpdateMatches(updatedMatches);
 
-      // Update the scores and matches first
-      onUpdateScores(newScores);
-      onUpdateMatches(updatedMatches);
-
-      // Then move to next round
+    if (isLastRound) {
+      setTournamentCompleted(true);
+    } else {
       onNextRound();
     }
   };
@@ -476,38 +202,18 @@ export default function Matches({
   const openModal = () => setIsModalOpen(true);
   const closeModal = () => setIsModalOpen(false);
 
-  const onTournamentEnd = () => {
-    // Implement tournament end logic here
-    console.log("Tournament has ended");
-    // You might want to show a final standings component or a "Tournament Completed" message
-  };
-
-  const handleStartNewTournament = () => {
-    localStorage.removeItem(STORAGE_KEY);
-    window.location.reload();
-  };
-
   return (
-    <div className="space-y-8 px-4 max-w-4xl mx-auto" key={localRound}>
+    <div className="space-y-8 px-4  mx-auto" key={localRound}>
       {tournamentCompleted ? (
-        <TournamentResults
-          groupStandings={localIsGroupStage ? groupStandings || {} : {}}
-          knockoutMatches={
-            localKnockoutMatches?.map((match) => ({
-              ...match,
-              team1Score:
-                editingKnockoutScores[`knockout-${match.matchNumber - 1}`]
-                  ?.team1 || 0,
-              team2Score:
-                editingKnockoutScores[`knockout-${match.matchNumber - 1}`]
-                  ?.team2 || 0,
-            })) || []
-          }
-          onStartNewTournament={handleStartNewTournament}
+        <TournamentPaused
+          isFinished={tournamentCompleted}
+          scores={localScores}
+          setIsPaused={setIsPaused}
+          setIsFinished={setTournamentCompleted}
         />
       ) : (
         <>
-          <Card className="bg-gradient-to-br from-gray-400 to-gray-300 shadow-xl border border-gray-600">
+          <Card className="bg-transparent border-none shadow-none">
             <CardHeader className="text-center pb-2">
               <CardTitle className="text-3xl font-extrabold text-gray-200 flex items-center justify-center gap-3">
                 <Image
@@ -517,7 +223,7 @@ export default function Matches({
                   height={36}
                   className="opacity-90"
                 />
-                <span className="px-4 py-2 rounded-lg bg-gray-900/50 border border-gray-600">
+                <span className="px-4 py-2 rounded-lg">
                   {isLastRound ? "Final Round" : `Round ${localRound}`}
                 </span>
               </CardTitle>
@@ -539,34 +245,15 @@ export default function Matches({
               </span>
             )}
             <CardContent className="space-y-6 pt-6">
-              {format === "groups" && localIsGroupStage && groupStandings && (
-                <GroupStandings standings={groupStandings} />
-              )}
-
-              {format === "groups" && !localIsGroupStage && (
-                <div className="mb-8">
-                  <h2 className="text-2xl font-bold text-center text-gray-200 mb-4">
-                    Knockout Stage
-                  </h2>
-                  <KnockoutBracket matches={localKnockoutMatches || []} />
-                </div>
-              )}
-
-              {/* Render matches using your MatchCard component */}
               <MatchList
-                matches={
-                  localIsGroupStage ? localMatches : localKnockoutMatches || []
-                }
-                editingScores={
-                  localIsGroupStage ? editingScores : editingKnockoutScores
-                }
+                matches={localMatches}
+                editingScores={editingScores}
                 handleScoreChange={handleScoreChange}
                 pointsPerMatch={pointsPerMatch}
                 pointSystem={pointSystem}
                 courts={courts}
                 format={format}
                 mode={mode}
-                isKnockout={!localIsGroupStage}
               />
             </CardContent>
           </Card>
@@ -603,8 +290,7 @@ export default function Matches({
                 className="hover:scale-105 text-lg bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 border-none shadow-lg transition-all duration-200 disabled:from-gray-400 disabled:to-gray-500 w-48 h-12"
                 disabled={!areAllScoresValid() || tournamentCompleted}
               >
-                {isFinalMatch ? "End Tournament" : "Next Round"}
-                {!isFinalMatch && <ChevronRight className="ml-1" />}
+                End Tournament
               </Button>
             )}
           </div>
@@ -632,7 +318,6 @@ export default function Matches({
             onClose={closeModal}
             scores={localScores}
             sortedPlayers={sortedPlayers}
-            getRowColor={getRowColor}
             onUpdateScores={setLocalScores}
           />
 
@@ -641,7 +326,6 @@ export default function Matches({
             onClose={() => setIsDetailsOpen(false)}
             scores={localScores}
             sortedPlayers={sortedPlayers}
-            getRowColor={getRowColor}
             onUpdateScores={setLocalScores}
           />
 
@@ -654,61 +338,4 @@ export default function Matches({
       )}
     </div>
   );
-}
-
-export function getKnockoutWinners(matches: Match[], round: string): string[] {
-  return matches.map((match) => {
-    if (match.team1Score > match.team2Score) {
-      return match.team1[0];
-    } else if (match.team2Score > match.team1Score) {
-      return match.team2[0];
-    } else {
-      // Implement a tie-breaker mechanism here if needed
-      return match.team1[0]; // Or another logic to determine the winner
-    }
-  });
-}
-
-function generateSemiFinals(winners: string[]): KnockoutMatch[] {
-  if (winners.length !== 4) {
-    console.error("Semi-finals require exactly four winners.");
-    return [];
-  }
-  return winners.reduce((acc, team, index, array) => {
-    if (index % 2 === 0) {
-      acc.push({
-        team1: [team],
-        team2: [array[index + 1]],
-        round: 2,
-        isKnockout: true,
-        knockoutRound: "semi",
-        matchNumber: acc.length + 1,
-        team1Score: 0,
-        team2Score: 0,
-        isScoreSubmitted: false,
-      });
-    }
-    return acc;
-  }, [] as KnockoutMatch[]);
-}
-
-function generateFinal(winners: string[]): KnockoutMatch[] {
-  if (winners.length !== 2) {
-    console.error("Final round requires exactly two winners.");
-    return [];
-  }
-
-  return [
-    {
-      team1: [winners[0]],
-      team2: [winners[1]],
-      round: 3,
-      isKnockout: true,
-      knockoutRound: "final",
-      matchNumber: 1,
-      team1Score: 0,
-      team2Score: 0,
-      isScoreSubmitted: false,
-    },
-  ];
 }

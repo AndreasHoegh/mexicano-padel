@@ -1,6 +1,4 @@
-import { EditingScores, Match } from "./types";
-
-import { Scores } from "./types";
+import { Match, EditingScores, Scores } from "./types";
 
 export const calculateUpdatedScores = (
   scores: Scores,
@@ -57,19 +55,19 @@ export const calculateUpdatedScores = (
     // Update points and wins
     if (score1 > score2) {
       newScores[team1].wins += 1;
-      newScores[team1].points += 3; // Example: win gives 3 points
+      newScores[team1].points += 3;
     } else if (score2 > score1) {
       newScores[team2].wins += 1;
-      newScores[team2].points += 3; // Example: win gives 3 points
+      newScores[team2].points += 3;
     } else {
       // Handle draw if applicable
       newScores[team1].points += 1;
       newScores[team2].points += 1;
     }
 
-    // Update points per round
-    newScores[team1].pointsPerRound.push(score1);
-    newScores[team2].pointsPerRound.push(score2);
+    // Update points per round at specific index
+    newScores[team1].pointsPerRound[round - 1] = score1;
+    newScores[team2].pointsPerRound[round - 1] = score2;
   });
 
   return newScores;

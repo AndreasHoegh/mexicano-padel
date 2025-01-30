@@ -1,34 +1,12 @@
 import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
+import Image from "next/image";
+import { Match, EditingScores } from "@/lib/types";
 import {
   Popover,
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
-import VSLogo from "./VSLogo";
 import { memo } from "react";
-
-type Match = {
-  team1: string[];
-  team2: string[];
-  team1Score: number;
-  team2Score: number;
-  isScoreSubmitted: boolean;
-  team1Name?: string;
-  team2Name?: string;
-  isKnockout?: boolean;
-  knockoutRound?: string;
-  matchNumber?: number;
-  group?: number;
-  round?: number;
-};
-
-type EditingScores = {
-  [key: string | number]: {
-    team1: number;
-    team2: number;
-  };
-};
 
 type MatchCardProps = {
   initialMinutes: number;
@@ -46,42 +24,55 @@ type MatchCardProps = {
   handleScoreChange: (
     index: number,
     team: "team1" | "team2",
-    value: number,
-    isKnockout?: boolean
+    value: number
   ) => void;
-  isKnockout?: boolean;
 };
 
 function TeamDisplay({
   team,
   mode,
-  isTeam1,
+  isLeftSide, // new prop to indicate which side
 }: {
   team: string[];
   mode: "individual" | "team";
-  isTeam1: boolean;
+  isLeftSide: boolean; // add to type definition
 }) {
   return (
-    <div className="w-full sm:flex-1 text-center">
-      <h3
-        className={`font-semibold text-lg ${
-          isTeam1 ? "text-red-700" : "text-blue-900"
-        }`}
-      >
-        {mode === "team" ? (
-          team[0]
-        ) : (
-          <div
-            className={`flex sm:flex-col items-center justify-center ${
-              isTeam1 ? "sm:items-end" : "sm:items-start"
+    <div className="h-full w-full flex items-center justify-center">
+      {mode === "team" ? (
+        // Team mode - single team name
+        <div
+          className={`relative bottom-[-40px] ${
+            isLeftSide ? "left-[40px]" : "right-[40px]"
+          }`}
+        >
+          <span className="truncate max-w-[120px] text-white text-md sm:text-lg font-semibold">
+            {team[0]}
+          </span>
+        </div>
+      ) : (
+        // Individual mode - two player names stacked
+        <div className="flex flex-col items-center justify-center space-y-4 h-full">
+          <span
+            className={`truncate max-w-[120px] text-white text-md sm:text-lg font-semibold ${
+              isLeftSide
+                ? "relative right-[-40px] top-[-20px]"
+                : "relative left-[-40px] top-[-20px]"
             }`}
           >
-            <span className="truncate max-w-[120px]">{team[0]}</span>
-            <span className="mx-2 sm:my-1 sm:mx-0">&</span>
-            <span className="truncate max-w-[120px]">{team[1]}</span>
-          </div>
-        )}
-      </h3>
+            {team[0]}
+          </span>
+          <span
+            className={`truncate max-w-[120px] text-white text-md sm:text-lg font-semibold ${
+              isLeftSide
+                ? "relative right-[-40px] bottom-[-20px]"
+                : "relative left-[-40px] bottom-[-20px]"
+            }`}
+          >
+            {team[1]}
+          </span>
+        </div>
+      )}
     </div>
   );
 }
@@ -96,7 +87,6 @@ function ScorePopover({
   pointSystem,
   handleScoreChange,
   isTeam1,
-  isKnockout,
 }: {
   index: number;
   team: "team1" | "team2";
@@ -108,11 +98,9 @@ function ScorePopover({
   handleScoreChange: (
     index: number,
     team: "team1" | "team2",
-    value: number,
-    isKnockout?: boolean
+    value: number
   ) => void;
   isTeam1: boolean;
-  isKnockout?: boolean;
 }) {
   return (
     <Popover open={isOpen} onOpenChange={onOpenChange}>
@@ -121,11 +109,7 @@ function ScorePopover({
           variant="outline"
           role="spinbutton"
           aria-valuenow={score}
-          className={`w-12 sm:w-16 text-center text-lg sm:text-xl border ${
-            isTeam1
-              ? "!border-red-950 !bg-red-700"
-              : "!border-blue-900 !bg-blue-800"
-          } text-white`}
+          className="w-12 sm:w-16 text-center text-lg sm:text-xl border text-white bg-gray-800"
         >
           {score}
         </Button>
@@ -140,7 +124,7 @@ function ScorePopover({
                 variant="outline"
                 className="h-8 w-8"
                 onClick={() => {
-                  handleScoreChange(index, team, i, isKnockout);
+                  handleScoreChange(index, team, i);
                   onOpenChange(false);
                 }}
               >
@@ -164,7 +148,6 @@ function ScoreControls({
   openPopovers,
   setOpenPopovers,
   handleScoreChange,
-  isKnockout,
 }: {
   index: number;
   editingScores: EditingScores;
@@ -177,10 +160,8 @@ function ScoreControls({
   handleScoreChange: (
     index: number,
     team: "team1" | "team2",
-    value: number,
-    isKnockout?: boolean
+    value: number
   ) => void;
-  isKnockout?: boolean;
 }) {
   return (
     <div className="flex flex-row items-center gap-4">
@@ -188,54 +169,40 @@ function ScoreControls({
       <MemoizedScorePopover
         index={index}
         team="team1"
-        score={
-          isKnockout
-            ? editingScores[`knockout-${index}`]?.team1 ?? 0
-            : editingScores[index]?.team1 ?? 0
-        }
-        isOpen={openPopovers[isKnockout ? `knockout-${index}` : index]}
+        score={editingScores[index]?.team1 ?? 0}
+        isOpen={openPopovers[index]}
         onOpenChange={(open) =>
           setOpenPopovers((prev: { [key: string]: boolean }) => ({
             ...prev,
-            [isKnockout ? `knockout-${index}` : index]: open,
+            [index]: open,
           }))
         }
         pointsPerMatch={pointsPerMatch}
         pointSystem={pointSystem}
         handleScoreChange={handleScoreChange}
         isTeam1={true}
-        isKnockout={isKnockout}
       />
 
-      <span className="text-2xl font-bold text-blue-700">
+      {/*       <span className="text-2xl font-bold text-blue-700">
         <VSLogo />
-      </span>
+      </span> */}
 
       {/* Team 2 Score */}
       <MemoizedScorePopover
         index={index}
         team="team2"
-        score={
-          isKnockout
-            ? editingScores[`knockout-${index}`]?.team2 ?? 1
-            : editingScores[index]?.team2 ?? 1
-        }
-        isOpen={
-          openPopovers[
-            isKnockout ? `knockout-${index}-team2` : `${index}-team2`
-          ]
-        }
+        score={editingScores[index]?.team2 ?? 0}
+        isOpen={openPopovers[`${index}-team2`]}
         onOpenChange={(open) =>
           setOpenPopovers((prev: { [key: string]: boolean }) => ({
             ...prev,
-            [isKnockout ? `knockout-${index}-team2` : `${index}-team2`]: open,
+            [`${index}-team2`]: open,
           }))
         }
         pointsPerMatch={pointsPerMatch}
         pointSystem={pointSystem}
         handleScoreChange={handleScoreChange}
         isTeam1={false}
-        isKnockout={isKnockout}
       />
     </div>
   );
@@ -252,40 +219,49 @@ export function MatchCard({
   openPopovers,
   setOpenPopovers,
   handleScoreChange,
-  isKnockout,
 }: MatchCardProps) {
-  const isKnockoutCheck = "isKnockout" in match && match.isKnockout;
-
   return (
-    <Card className="bg-slate-100">
-      <CardContent className="p-6">
-        <div className="space-y-4">
-          <h2 className="text-center font-semibold text-gray-600">
-            {isKnockoutCheck
-              ? `${match.knockoutRound} - Match ${match.matchNumber}`
-              : courtName}
-          </h2>
-          <div className="flex flex-col sm:flex-row items-center gap-4 sm:gap-8 w-full">
-            {/* Team 1 */}
-            <TeamDisplay team={match.team1} mode={mode} isTeam1 />
+    <div className="relative w-full h-full rounded-xl overflow-hidden border border-gray-200 shadow-lg">
+      {/* Court Image */}
+      <Image
+        src="/padelCourt.png"
+        alt="Padel Court"
+        fill
+        className="object-cover"
+        priority
+      />
 
-            {/* Score Controls */}
-            <ScoreControls
-              index={index}
-              editingScores={editingScores}
-              pointsPerMatch={pointsPerMatch}
-              pointSystem={pointSystem}
-              openPopovers={openPopovers}
-              setOpenPopovers={setOpenPopovers}
-              handleScoreChange={handleScoreChange}
-              isKnockout={isKnockoutCheck}
-            />
+      {/* Court Name */}
+      <div className="absolute top-2 left-1/2 -translate-x-1/2 bg-black/50 px-3 py-1 rounded-full">
+        <h2 className="text-white font-semibold text-xs sm:text-base">
+          {courtName}
+        </h2>
+      </div>
 
-            {/* Team 2 */}
-            <TeamDisplay team={match.team2} mode={mode} isTeam1={false} />
-          </div>
+      <div className="absolute inset-0 flex">
+        {/* Left Team */}
+        <div className="flex-1 flex items-center justify-center">
+          <TeamDisplay team={match.team1} mode={mode} isLeftSide={true} />
         </div>
-      </CardContent>
-    </Card>
+
+        {/* Center Score Controls */}
+        <div className="flex items-center justify-center w-24">
+          <ScoreControls
+            index={index}
+            editingScores={editingScores}
+            pointsPerMatch={pointsPerMatch}
+            pointSystem={pointSystem}
+            openPopovers={openPopovers}
+            setOpenPopovers={setOpenPopovers}
+            handleScoreChange={handleScoreChange}
+          />
+        </div>
+
+        {/* Right Team */}
+        <div className="flex-1 flex items-center justify-center">
+          <TeamDisplay team={match.team2} mode={mode} isLeftSide={false} />
+        </div>
+      </div>
+    </div>
   );
 }

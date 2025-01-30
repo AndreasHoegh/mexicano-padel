@@ -5,20 +5,10 @@ import type { SubmitHandler } from "react-hook-form";
 import TournamentNameForm, {
   type TournamentNameFormData,
 } from "./TournamentNameForm";
-import NumOfPlayersForm from "./NumOfPlayersForm";
-import PlayerNamesForm from "./PlayerNamesForm";
+import TournamentSettings from "./TournamentSettings";
 import Matches from "./Matches";
-import { Button } from "./ui/button";
-import PlayerScores from "./PlayerScores";
-import {
-  type Court,
-  type PlayerScore,
-  type Match,
-  type GroupStanding,
-  type Scores,
-} from "../lib/types";
+import type { Court, Match, Scores, EditingScores } from "../lib/types";
 import RestoreDialog from "./RestoreDialog";
-import type { EditingScores } from "../lib/types";
 import BackButton from "./ui/backButton";
 import { generateMatches } from "../lib/mexicanoGenerator";
 import {
@@ -27,9 +17,7 @@ import {
   updatePartnerships,
 } from "../lib/americanoGenerator";
 import Footer from "./Footer";
-import { trackEvent } from "@/lib/analytics";
-import { generateGroupMatches } from "../lib/groupGenerator";
-import { useTournament } from "@/app/hooks/useTournament";
+import TournamentPaused from "./TournamentPaused";
 
 export default function App() {
   const [numberOfPlayers, setNumberOfPlayers] = useState<number>(0);
@@ -60,39 +48,25 @@ export default function App() {
       sittingOutPlayers: string[];
     }>
   >([]);
-  const [sortedPlayers, setSortedPlayers] = useState<[string, PlayerScore][]>(
-    []
-  );
-  const [format, setFormat] = useState<"mexicano" | "americano" | "groups">(
-    "mexicano"
-  );
+  const [format, setFormat] = useState<"mexicano" | "americano">("mexicano");
   const [partnerships, setPartnerships] = useState<{
     [key: string]: { [key: string]: number };
   }>({});
   const [pointSystem, setPointSystem] = useState<
     "pointsToPlay" | "pointsToWin" | "TimePlay"
   >("pointsToPlay");
-  const [groupStandings, setGroupStandings] = useState<{
-    [key: number]: GroupStanding[];
-  }>({});
-  const [teamsAdvancing, setTeamsAdvancing] = useState<number>(2);
   const STORAGE_KEY = "tournament_state";
 
-  const {
-    matches,
-    scores,
-    round,
-    isGroupStage,
-    knockoutMatches,
-    updateMatches,
-    updateScores,
-    startKnockoutStage,
-    setMatches,
-    setScores,
-    setRound,
-    setIsGroupStage,
-    setKnockoutMatches,
-  } = useTournament();
+  const [matches, setMatches] = useState<Match[]>([]);
+  const [scores, setScores] = useState<Scores>({});
+  const [round, setRound] = useState<number>(1);
+  const updateMatches = (updatedMatches: Match[]) => {
+    setMatches(updatedMatches);
+  };
+
+  const updateScores = (updatedScores: Scores) => {
+    setScores(updatedScores);
+  };
 
   const saveTournamentState = () => {
     const state = {
@@ -114,10 +88,6 @@ export default function App() {
       arePlayerNamesSet,
       tournamentHistory,
       partnerships,
-      groupStandings,
-      isGroupStage,
-      knockoutMatches,
-      teamsAdvancing,
     };
     localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
   };
@@ -145,10 +115,6 @@ export default function App() {
       setArePlayerNamesSet(state.arePlayerNamesSet);
       setTournamentHistory(state.tournamentHistory || []);
       setPartnerships(state.partnerships || {});
-      setGroupStandings(state.groupStandings || {});
-      setIsGroupStage(state.isGroupStage);
-      setKnockoutMatches(state.knockoutMatches || []);
-      setTeamsAdvancing(state.teamsAdvancing || 2);
       return true;
     }
     return false;
@@ -181,10 +147,6 @@ export default function App() {
     arePlayerNamesSet,
     tournamentHistory,
     partnerships,
-    groupStandings,
-    isGroupStage,
-    knockoutMatches,
-    teamsAdvancing,
   ]);
 
   useEffect(() => {
@@ -203,7 +165,7 @@ export default function App() {
     count,
   }: {
     mode: "individual" | "team";
-    format: "mexicano" | "americano" | "groups";
+    format: "mexicano" | "americano";
     count: number;
   }) => {
     if (count < 4) {
@@ -291,7 +253,6 @@ export default function App() {
   }, [round, maxRounds]);
 
   const handlePauseChange = (paused: boolean) => {
-    trackEvent("tournament_paused", "game_progress", tournamentName);
     setIsPaused(paused);
   };
 
@@ -320,7 +281,6 @@ export default function App() {
 
   const startFinalRound = useCallback(
     (editingScores: EditingScores) => {
-      trackEvent("final_round_started", "game_progress", tournamentName);
       const newScores = { ...scores };
 
       sittingOutPlayers.forEach((player) => {
@@ -368,7 +328,7 @@ export default function App() {
       setRound((prevRound: number) => prevRound + 1);
       setMaxRounds(round + 1);
     },
-    [matches, round, updateMatches, scores, sittingOutPlayers, tournamentName]
+    [matches, round, updateMatches, scores, sittingOutPlayers]
   );
 
   const goBackToTournamentName = () => {
@@ -385,13 +345,6 @@ export default function App() {
     setSittingOutPlayers([]);
     setSittingOutCounts({});
   };
-
-  useEffect(() => {
-    const sorted = Object.entries(scores).sort(
-      ([, a], [, b]) => b.points - a.points
-    );
-    setSortedPlayers(sorted);
-  }, [scores]);
 
   return (
     <article className="flex flex-col min-h-screen">
@@ -416,13 +369,7 @@ export default function App() {
 
       {isTournamentNameSet && !arePlayerNamesSet && (
         <div className="space-y-8 px-4 max-w-3xl mx-auto w-full">
-          <NumOfPlayersForm onSubmit={onNumberSubmit} />
-
-          <PlayerNamesForm
-            initialPlayerCount={numberOfPlayers}
-            onPlayerCountChange={(newCount) => setNumberOfPlayers(newCount)}
-            mode={mode}
-            format={format}
+          <TournamentSettings
             onSubmit={(settings) => {
               const initialCourts =
                 settings.courts.length > 0
@@ -433,8 +380,7 @@ export default function App() {
               if (settings.mode === "team") {
                 for (let i = 0; i < settings.playerNames.length; i += 2) {
                   const teamIndex = Math.floor(i / 2);
-                  const teamName =
-                    settings.teamNames?.[teamIndex] || `Team ${teamIndex + 1}`;
+                  const teamName = `Team ${teamIndex + 1}`;
 
                   settings.playerNames.slice(i, i + 2).forEach((name) => {
                     initialScores[name] = {
@@ -466,7 +412,6 @@ export default function App() {
               setScores(initialScores);
               setSittingOutCounts({});
               setPointSystem(settings.pointSystem);
-              setTeamsAdvancing(settings.teamsAdvancing || 2);
 
               let initialMatches: Match[];
               if (
@@ -504,28 +449,6 @@ export default function App() {
                   setSittingOutPlayers,
                   settings.mode
                 );
-              } else if (settings.format === "groups") {
-                const { groupMatches, knockoutMatches, groups } =
-                  generateGroupMatches(
-                    settings.playerNames,
-                    settings.teamsPerGroup || 4,
-                    settings.teamsAdvancing || 2
-                  );
-                initialMatches = [...groupMatches];
-                setKnockoutMatches(knockoutMatches);
-
-                const initialStandings: { [key: number]: GroupStanding[] } = {};
-                Object.entries(groups).forEach(([groupNum, teams]) => {
-                  initialStandings[Number.parseInt(groupNum)] = teams.map(
-                    (team) => ({
-                      teamName: team,
-                      points: 0,
-                      matchesPlayed: 0,
-                      wins: 0,
-                    })
-                  );
-                });
-                setGroupStandings(initialStandings);
               } else {
                 initialMatches = generateMatches(
                   settings.playerNames,
@@ -542,7 +465,6 @@ export default function App() {
               }
               setMatches(initialMatches);
               setArePlayerNamesSet(true);
-
               setFinalPairingPattern(settings.finalRoundPattern);
             }}
           />
@@ -556,69 +478,14 @@ export default function App() {
       {matches.length > 0 && (
         <div className="flex flex-col items-center relative space-y-4 mb-12">
           {isFinished || isPaused ? (
-            <div className="text-center space-y-4">
-              <h2 className="text-2xl font-bold text-white">
-                {isFinished ? (
-                  <>
-                    Tournament Complete!
-                    <p className="text-lg mt-2 text-white">
-                      Congratulations to{" "}
-                      {
-                        Object.entries(scores).sort(
-                          (a, b) => b[1].points - a[1].points
-                        )[0][0]
-                      }
-                      !
-                    </p>
-                  </>
-                ) : (
-                  "Tournament Paused"
-                )}
-              </h2>
-              <div className="p-6 bg-gray-50 rounded-lg shadow-lg">
-                <h3 className="text-xl font-semibold mb-4">
-                  {isFinished ? "Final" : "Current"} Standings
-                </h3>
-                <PlayerScores scores={scores} />
-              </div>
-              {!isFinished && (
-                <div className="space-x-3">
-                  <Button
-                    onClick={() => setIsPaused(false)}
-                    className="bg-green-500 hover:bg-green-600"
-                  >
-                    Resume Tournament
-                  </Button>
-                  <Button
-                    onClick={() => setIsFinished(true)}
-                    className="bg-red-500 hover:bg-red-600"
-                  >
-                    End Tournament
-                  </Button>
-                </div>
-              )}
-              {isFinished && (
-                <Button
-                  onClick={() => {
-                    localStorage.removeItem(STORAGE_KEY);
-                    window.location.reload();
-                  }}
-                  className="bg-yellow-600 hover:bg-yellow-700"
-                >
-                  Start New Tournament
-                </Button>
-              )}
-            </div>
+            <TournamentPaused
+              isFinished={isFinished}
+              scores={scores}
+              setIsPaused={setIsPaused}
+              setIsFinished={setIsFinished}
+            />
           ) : (
             <>
-              {isLastRound() && (
-                <div className="mb-4 p-4 bg-orange-100 rounded-lg text-center">
-                  <h3 className="font-semibold text-orange-800">
-                    Final Round!
-                  </h3>
-                </div>
-              )}
-
               {sittingOutPlayers.length > 0 && (
                 <div className="mb-4 p-4 bg-gray-300 rounded-lg text-center">
                   <h3 className="font-semibold">Sitting Out This Round:</h3>
@@ -627,7 +494,6 @@ export default function App() {
               )}
 
               <Matches
-                onUpdateKnockoutMatches={setKnockoutMatches}
                 maxRounds={maxRounds}
                 matches={matches}
                 scores={scores}
@@ -644,14 +510,6 @@ export default function App() {
                 onPause={handlePauseChange}
                 pointSystem={pointSystem}
                 format={format}
-                groupStandings={groupStandings}
-                isGroupStage={isGroupStage}
-                onUpdateGroupStandings={(newGroupStandings) =>
-                  setGroupStandings(newGroupStandings)
-                }
-                onStartKnockoutStage={startKnockoutStage}
-                knockoutMatches={knockoutMatches}
-                teamsAdvancing={teamsAdvancing}
               />
             </>
           )}

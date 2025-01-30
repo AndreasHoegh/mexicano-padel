@@ -1,7 +1,6 @@
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import "./globals.css";
-import GoogleAnalytics from "@/components/GoogleAnalytics";
 import { LanguageProvider } from "@/lib/LanguageContext";
 import React from "react";
 import Head from "next/head";
@@ -94,7 +93,6 @@ export default function RootLayout({
             }),
           }}
         />
-        <GoogleAnalytics />
       </Head>
       <body
         className={`${inter.className} min-h-screen bg-gradient-to-br from-gray-700 to-green-900`}

@@ -1,12 +1,15 @@
-import { useForm, FieldValues } from "react-hook-form";
+/* import { useForm, FieldValues } from "react-hook-form";
 import { Button } from "./ui/button";
 import { TournamentSettings, Court } from "@/lib/types";
-import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
-import { Label } from "@/components/ui/label";
-import { Input } from "./ui/input";
-import { useState, useRef, useEffect } from "react";
+import { useState, useEffect } from "react";
 import { useLanguage } from "@/lib/LanguageContext";
 import { translations } from "@/lib/translations";
+import { NamesSection } from "./NamesSection";
+import { PointSystemSection } from "./PointSystemSection";
+import { CourtsSection } from "./CourtsSection";
+import { PointSelection } from "./PointSelection";
+import { RoundsSelector } from "./RoundsSelector";
+import { FinalRoundPairingSelector } from "./FinalRoundPairingSelector";
 
 type PlayerNamesFormProps = {
   initialPlayerCount: number;
@@ -34,7 +37,6 @@ export default function PlayerNamesForm({
   onSubmit,
   mode,
   format,
-  onPlayerCountChange,
 }: PlayerNamesFormProps) {
   const [playerCount, setPlayerCount] = useState(initialPlayerCount);
   const { register, handleSubmit, setValue, watch } = useForm<FormValues>({
@@ -48,10 +50,8 @@ export default function PlayerNamesForm({
     },
   });
 
-  // Update player count and reset form when initialPlayerCount or mode changes
   useEffect(() => {
     setPlayerCount(initialPlayerCount);
-    // Reset only the fields we need based on the current player count
     const count = mode === "team" ? initialPlayerCount / 2 : initialPlayerCount;
     for (let i = 0; i < count; i++) {
       setValue(
@@ -92,7 +92,6 @@ export default function PlayerNamesForm({
   const { language } = useLanguage();
   const t = translations[language];
 
-  // Calculate and set courts whenever player count changes
   useEffect(() => {
     const numCourts = Math.floor(playerCount / 4);
     setCourts((prevCourts) => {
@@ -142,13 +141,11 @@ export default function PlayerNamesForm({
     let playerNames: string[] = [];
 
     if (mode === "team") {
-      // For team mode, we only want the team entries (which are at even indices)
-      const teamCount = playerCount / 2; // This is the actual number of teams
+      const teamCount = playerCount / 2;
       for (let i = 0; i < teamCount; i++) {
-        playerNames.push(data[`playerName${i * 2}`]); // Only take team names
+        playerNames.push(data[`playerName${i * 2}`]);
       }
     } else {
-      // For individual mode, take all player names up to playerCount
       playerNames = Object.keys(data)
         .filter((key) => key.startsWith("playerName"))
         .map((key) => data[key])
@@ -185,408 +182,35 @@ export default function PlayerNamesForm({
         onSubmit={handleSubmit(handlePlayerNamesSubmit)}
         className="mb-12 space-y-8 w-full max-w-2xl px-4"
       >
-        {format === "groups" && (
-          <>
-            <div className="space-y-3">
-              <h2 className="text-2xl font-semibold text-center text-gray-200">
-                {t.teamsPerGroup}
-              </h2>
-              <RadioGroup
-                value={watch("teamsPerGroup")}
-                className="grid grid-cols-2 sm:grid-cols-3 gap-4"
-                onValueChange={(value) => setValue("teamsPerGroup", value)}
-              >
-                {[4, 6, "custom"].map((num) => (
-                  <div key={num}>
-                    <RadioGroupItem
-                      value={num.toString()}
-                      id={`teamsPerGroup-${num}`}
-                      className="peer sr-only"
-                    />
-                    <Label
-                      htmlFor={`teamsPerGroup-${num}`}
-                      className="text-black flex flex-col items-center justify-between rounded-md border-2 bg-white p-4 peer-data-[state=checked]:border-yellow-600 peer-data-[state=checked]:border-4 [&:has([data-state=checked])]:scale-105 cursor-pointer transition-transform"
-                    >
-                      <span className="text-xl font-semibold">
-                        {num === "custom" ? t.custom : num}
-                      </span>
-                      <span className="text-sm text-muted-foreground">
-                        {t.teams}
-                      </span>
-                    </Label>
-                  </div>
-                ))}
-              </RadioGroup>
-              <div
-                className={`flex justify-center transition-all duration-300 ${
-                  watch("teamsPerGroup") === "custom"
-                    ? "h-12 opacity-100"
-                    : "h-0 opacity-0"
-                }`}
-              >
-                <input
-                  type="number"
-                  min={3}
-                  className="text-black text-center text-xl font-semibold w-20 h-12 rounded-md border-2 focus:border-black focus:outline-none transition-all p-2 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
-                  placeholder={t.teams}
-                  {...register("customTeamsPerGroup", {
-                    min: 3,
-                    valueAsNumber: true,
-                  })}
-                />
-              </div>
-            </div>
+        <NamesSection
+          mode={mode}
+          playerCount={playerCount}
+          register={register}
+        />
+        <PointSystemSection
+          register={register}
+          setValue={setValue}
+          watch={watch}
+        />
 
-            <div className="space-y-3">
-              <h2 className="text-2xl font-semibold text-center text-gray-200">
-                Teams Advancing
-              </h2>
-              <RadioGroup
-                value={watch("teamsAdvancing")}
-                className="grid grid-cols-2 sm:grid-cols-3 gap-4"
-                onValueChange={(value) => setValue("teamsAdvancing", value)}
-              >
-                {[1, 2].map((num) => (
-                  <div key={num}>
-                    <RadioGroupItem
-                      value={num.toString()}
-                      id={`advancing-${num}`}
-                      className="peer sr-only"
-                    />
-                    <Label
-                      htmlFor={`advancing-${num}`}
-                      className="text-black flex flex-col items-center justify-between rounded-md border-2 bg-white p-4 peer-data-[state=checked]:border-yellow-600 peer-data-[state=checked]:border-4 [&:has([data-state=checked])]:scale-105 cursor-pointer transition-transform"
-                    >
-                      <span className="text-xl font-semibold">{num}</span>
-                      <span className="text-sm text-muted-foreground">
-                        Teams advancing
-                      </span>
-                    </Label>
-                  </div>
-                ))}
-              </RadioGroup>
-            </div>
-          </>
-        )}
-        {mode === "team" ? (
-          <div className="space-y-4">
-            <h2 className="text-2xl font-semibold text-center text-gray-200">
-              {t.teamNames}
-            </h2>
-            {[...Array(Math.floor(playerCount / 2))].map((_, index) => (
-              <div key={index} className="flex items-center gap-2 w-64 mx-auto">
-                <input
-                  className="text-black text-center text-m rounded-md border-2 bg-white focus:border-black focus:outline-none transition-all w-full"
-                  type="text"
-                  defaultValue={`Team ${index + 1}`}
-                  {...register(`playerName${index * 2}`, { required: true })}
-                  onFocus={(e) => e.target.select()}
-                />
-              </div>
-            ))}
-          </div>
-        ) : (
-          <div className="space-y-4">
-            <h2 className="text-2xl font-semibold text-center text-gray-200">
-              {t.playerNames}
-            </h2>
-            {[...Array(playerCount)].map((_, index) => (
-              <div key={index} className="flex items-center gap-2 w-64 mx-auto">
-                <input
-                  className="text-black text-center text-m rounded-md border-2 bg-white focus:border-black focus:outline-none transition-all w-full"
-                  type="text"
-                  defaultValue={`Player ${index + 1}`}
-                  {...register(`playerName${index}`, { required: true })}
-                  onFocus={(e) => e.target.select()}
-                />
-              </div>
-            ))}
-          </div>
-        )}
+        <PointSelection register={register} setValue={setValue} watch={watch} />
 
-        <div className="space-y-3">
-          <h2 className="text-2xl font-semibold text-center text-gray-200">
-            {t.pointSystem}
-          </h2>
-          <RadioGroup
-            defaultValue="pointsToPlay"
-            className="grid grid-cols-1 sm:grid-cols-2 gap-4"
-            onValueChange={(value) =>
-              setValue("pointSystem", value as FormValues["pointSystem"])
-            }
-          >
-            {[
-              {
-                value: "pointsToPlay",
-                label: t.pointsToPlay,
-                description: t.pointsToPlayDescription,
-              },
-              {
-                value: "pointsToWin",
-                label: t.pointsToWin,
-                description: t.pointsToWinDescription,
-              },
-              {
-                value: "TimePlay",
-                label: t.timePlay,
-                description: "Play for a set amount of time",
-              },
-            ].map((option) => (
-              <div key={option.value}>
-                <RadioGroupItem
-                  value={option.value}
-                  id={option.value}
-                  className="peer sr-only"
-                  {...register("pointSystem")}
-                />
-                <Label
-                  htmlFor={option.value}
-                  className="text-black flex flex-col items-center justify-between rounded-md border-2 bg-white p-4 peer-data-[state=checked]:border-yellow-600 peer-data-[state=checked]:border-4 [&:has([data-state=checked])]:scale-105 cursor-pointer transition-transform"
-                >
-                  <span className="text-xl font-semibold">{option.label}</span>
-                  <span className="text-sm text-muted-foreground text-center">
-                    {option.description}
-                  </span>
-                </Label>
-              </div>
-            ))}
-          </RadioGroup>
-        </div>
-
-        <div className="space-y-3">
-          <h2 className="text-2xl font-semibold text-center text-gray-200">
-            {watch("pointSystem") === "TimePlay" ? t.minutes : t.points}
-          </h2>
-
-          {watch("pointSystem") === "TimePlay" ? (
-            <RadioGroup
-              value={watch("points")}
-              className="grid grid-cols-2 sm:grid-cols-3 gap-4"
-              onValueChange={(value) => setValue("points", value)}
-            >
-              {[5, 10, 15, 20, 25, "custom"].map((minutes) => (
-                <div key={minutes}>
-                  <RadioGroupItem
-                    value={minutes.toString()}
-                    id={`points-${minutes}`}
-                    className="peer sr-only"
-                  />
-                  <Label
-                    htmlFor={`points-${minutes}`}
-                    className="text-black flex flex-col items-center justify-between rounded-md border-2 bg-white p-4 peer-data-[state=checked]:border-yellow-600 peer-data-[state=checked]:border-4 [&:has([data-state=checked])]:scale-105 cursor-pointer transition-transform"
-                  >
-                    <span className="text-xl font-semibold">
-                      {minutes === "custom" ? "Custom" : minutes}
-                    </span>
-                    <span className="text-sm text-muted-foreground">
-                      minutes
-                    </span>
-                  </Label>
-                </div>
-              ))}
-            </RadioGroup>
-          ) : (
-            <RadioGroup
-              defaultValue="21"
-              className="grid grid-cols-2 sm:grid-cols-3 gap-4"
-              onValueChange={(value) => setValue("points", value)}
-            >
-              {[15, 16, 20, 21, 24, "custom"].map((points) => (
-                <div key={points}>
-                  <RadioGroupItem
-                    value={points.toString()}
-                    id={`points-${points}`}
-                    className="peer sr-only"
-                    {...register("points")}
-                  />
-                  <Label
-                    htmlFor={`points-${points}`}
-                    className="text-black flex flex-col items-center justify-between rounded-md border-2 bg-white p-4 peer-data-[state=checked]:border-yellow-600 peer-data-[state=checked]:border-4 [&:has([data-state=checked])]:scale-105 cursor-pointer transition-transform"
-                  >
-                    <span className="text-xl font-semibold">
-                      {points === "custom" ? "Custom" : points}
-                    </span>
-                    <span className="text-sm text-muted-foreground">
-                      {t.points}
-                    </span>
-                  </Label>
-                </div>
-              ))}
-            </RadioGroup>
-          )}
-
-          <div
-            className={`flex justify-center transition-all duration-300 ${
-              watch("points") === "custom"
-                ? "h-12 opacity-100"
-                : "h-0 opacity-0"
-            }`}
-          >
-            <input
-              type="number"
-              min={1}
-              className="text-black text-center text-xl font-semibold w-20 h-12 rounded-md border-2 focus:border-black focus:outline-none transition-all p-2 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
-              placeholder={
-                watch("pointSystem") === "TimePlay" ? "Minutes" : "Points"
-              }
-              {...register("customPoints", {
-                min: 1,
-                valueAsNumber: true,
-              })}
-            />
-          </div>
-        </div>
-
-        {format !== "groups" && (
-          <div className="space-y-3">
-            <h2 className="text-2xl font-semibold text-center text-gray-200">
-              {t.numberOfRounds}
-            </h2>
-            <RadioGroup
-              defaultValue="∞"
-              className="grid grid-cols-2 sm:grid-cols-3 gap-4"
-              onValueChange={(value) => setValue("maxRounds", value)}
-            >
-              {[5, 7, 10, 15, "∞", "custom"].map((rounds) => (
-                <div key={rounds}>
-                  <RadioGroupItem
-                    value={rounds.toString()}
-                    id={`rounds-${rounds}`}
-                    className="peer sr-only"
-                    {...register("maxRounds")}
-                  />
-                  <Label
-                    htmlFor={`rounds-${rounds}`}
-                    className="text-black flex flex-col items-center justify-between rounded-md border-2 bg-white p-4 peer-data-[state=checked]:border-yellow-600 peer-data-[state=checked]:border-4 [&:has([data-state=checked])]:scale-105 cursor-pointer transition-transform"
-                  >
-                    <span className="text-xl font-semibold">
-                      {rounds === "custom" ? "Custom" : rounds}
-                    </span>
-                    <span className="text-sm text-muted-foreground">
-                      {t.rounds}
-                    </span>
-                  </Label>
-                </div>
-              ))}
-            </RadioGroup>
-            <div
-              className={`flex justify-center transition-all duration-300 ${
-                watch("maxRounds") === "custom"
-                  ? "h-12 opacity-100"
-                  : "h-0 opacity-0"
-              }`}
-            >
-              <input
-                type="number"
-                min={1}
-                className="text-black text-center text-xl font-semibold w-20 h-12 rounded-md border-2 focus:border-black focus:outline-none transition-all p-2 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
-                placeholder="Rounds"
-                {...register("customRounds", {
-                  min: 1,
-                  valueAsNumber: true,
-                })}
-              />
-            </div>
-          </div>
-        )}
+        <RoundsSelector register={register} setValue={setValue} watch={watch} />
 
         {mode === "individual" && (
-          <div className="space-y-3">
-            <h2 className="text-2xl font-semibold text-center text-gray-200">
-              Final Round Pairing
-            </h2>
-            <div className="flex flex-wrap justify-center gap-2">
-              <Button
-                type="button"
-                onClick={(e) => {
-                  e.preventDefault();
-                  setFinalRoundPattern([0, 1, 2, 3]);
-                }}
-                variant={
-                  finalRoundPattern.toString() === [0, 1, 2, 3].toString()
-                    ? "default"
-                    : "outline"
-                }
-                className="text-sm"
-              >
-                1&2 vs 3&4
-              </Button>
-              <Button
-                type="button"
-                onClick={(e) => {
-                  e.preventDefault();
-                  setFinalRoundPattern([0, 2, 1, 3]);
-                }}
-                variant={
-                  finalRoundPattern.toString() === [0, 2, 1, 3].toString()
-                    ? "default"
-                    : "outline"
-                }
-                className="text-sm"
-              >
-                1&3 vs 2&4
-              </Button>
-              <Button
-                type="button"
-                onClick={(e) => {
-                  e.preventDefault();
-                  setFinalRoundPattern([0, 3, 1, 2]);
-                }}
-                variant={
-                  finalRoundPattern.toString() === [0, 3, 1, 2].toString()
-                    ? "default"
-                    : "outline"
-                }
-                className="text-sm"
-              >
-                1&4 vs 2&3
-              </Button>
-            </div>
-          </div>
+          <FinalRoundPairingSelector
+            finalRoundPattern={finalRoundPattern}
+            setFinalRoundPattern={setFinalRoundPattern}
+          />
         )}
 
-        <div className="space-y-3">
-          <h2 className="text-2xl font-semibold text-center text-gray-200">
-            {t.courts}
-          </h2>
-          <div className="space-y-2 w-64 mx-auto flex flex-col items-center">
-            {courts.map((court) => (
-              <div className="flex items-center gap-2 w-64" key={court.id}>
-                <Input
-                  value={court.name}
-                  onFocus={(e) => e.target.select()}
-                  onChange={(e) => updateCourtName(court.id, e.target.value)}
-                  className="flex-1 text-black text-center text-m border-2 bg-white focus:border-black focus:outline-none transition-all"
-                  placeholder="Court name"
-                />
-                {courts.length > 1 && (
-                  <span
-                    onClick={() => removeCourt(court.id)}
-                    className="text-sm text-gray-400 hover:text-red-500 cursor-pointer transition-colors select-none ml-auto"
-                  >
-                    {t.remove}
-                  </span>
-                )}
-              </div>
-            ))}
-            <Button
-              type="button"
-              variant="outline"
-              onClick={addCourt}
-              className="border-2 bg-yellow-600 hover:bg-yellow-600 text-white transition-all duration-300 transform hover:scale-105 shadow-lg"
-              disabled={courts.length >= getMaxCourts(playerCount)}
-            >
-              {t.addCourt}
-            </Button>
-            <p
-              className={`text-sm text-gray-400 ${
-                courts.length >= getMaxCourts(playerCount) ? "block" : "hidden"
-              }`}
-            >
-              {t.addMorePlayersForCourts}
-            </p>
-          </div>
-        </div>
+        <CourtsSection
+          courts={courts}
+          playerCount={playerCount}
+          updateCourtName={updateCourtName}
+          removeCourt={removeCourt}
+          addCourt={addCourt}
+        />
 
         <Button
           className="mx-auto block w-full border-2 h-12 text-l bg-yellow-600 hover:bg-yellow-700 text-white transition-all duration-300 transform hover:scale-105 shadow-lg"
@@ -598,3 +222,4 @@ export default function PlayerNamesForm({
     </div>
   );
 }
+ */

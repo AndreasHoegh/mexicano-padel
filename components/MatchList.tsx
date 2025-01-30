@@ -1,11 +1,11 @@
 // components/MatchList.tsx
-import { EditingScores, Match, KnockoutMatch } from "@/lib/types";
+import { EditingScores, Match } from "@/lib/types";
 import { Court } from "@/lib/types";
 import { MatchCard } from "./MatchCard";
 import { useState } from "react";
 
 interface MatchListProps {
-  matches: Match[] | KnockoutMatch[];
+  matches: Match[];
   editingScores: EditingScores;
   handleScoreChange: (
     index: number,
@@ -37,40 +37,44 @@ export const MatchList = ({
   }>({});
 
   return (
-    <div className="grid grid-cols-1 gap-4">
+    <div className="grid grid-cols-1 gap-4 w-full">
       {matches.map((match, index) => (
-        <MatchCard
-          openPopovers={openPopovers}
-          setOpenPopovers={setOpenPopovers}
+        <div
           key={`${"knockoutRound" in match ? match.knockoutRound : "group"}-${
             match.matchNumber
           }-${index}`}
-          initialMinutes={pointsPerMatch}
-          match={match}
-          index={index}
-          courtName={
-            format === "groups"
-              ? "isKnockout" in match && match.isKnockout
-                ? `${match.knockoutRound} - Match ${match.matchNumber}`
-                : `Group ${
-                    "group" in match && typeof match.group === "number"
-                      ? match.group + 1
-                      : 1
-                  } - Round ${
-                    "round" in match && typeof match.round === "number"
-                      ? match.round
-                      : 1
-                  }`
-              : courts[index % courts.length].name
-          }
-          mode={mode}
-          editingScores={editingScores}
-          pointsPerMatch={pointsPerMatch}
-          pointSystem={pointSystem}
-          handleScoreChange={(index, team, value) =>
-            handleScoreChange(index, team, value, isKnockout)
-          }
-        />
+          className="w-72 md:w-96 3xl:w-[36rem] aspect-[16/9]"
+        >
+          <MatchCard
+            openPopovers={openPopovers}
+            setOpenPopovers={setOpenPopovers}
+            initialMinutes={pointsPerMatch}
+            match={match}
+            index={index}
+            courtName={
+              format === "groups"
+                ? "isKnockout" in match && match.isKnockout
+                  ? `${match.knockoutRound} - Match ${match.matchNumber}`
+                  : `Group ${
+                      "group" in match && typeof match.group === "number"
+                        ? match.group + 1
+                        : 1
+                    } - Round ${
+                      "round" in match && typeof match.round === "number"
+                        ? match.round
+                        : 1
+                    }`
+                : courts[index % courts.length].name
+            }
+            mode={mode}
+            editingScores={editingScores}
+            pointsPerMatch={pointsPerMatch}
+            pointSystem={pointSystem}
+            handleScoreChange={(index, team, value) =>
+              handleScoreChange(index, team, value, isKnockout)
+            }
+          />
+        </div>
       ))}
     </div>
   );

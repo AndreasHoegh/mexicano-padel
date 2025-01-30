@@ -2,23 +2,14 @@
 
 import { X, Pencil, Check } from "lucide-react";
 import { useState, useEffect } from "react";
-
-type PlayerScore = {
-  points: number;
-  wins: number;
-  matchesPlayed: number;
-  pointsPerRound: (number | "sitout")[];
-};
+import { Scores } from "@/lib/types";
 
 type DetailsModalProps = {
   isOpen: boolean;
   onClose: () => void;
-  scores: {
-    [key: string]: PlayerScore;
-  };
-  sortedPlayers: [string, PlayerScore][];
-  getRowColor: (index: number) => string;
-  onUpdateScores?: (newScores: { [key: string]: PlayerScore }) => void;
+  scores: Scores;
+  sortedPlayers: [string, Scores[keyof Scores]][];
+  onUpdateScores?: (newScores: Scores) => void;
 };
 
 export default function DetailsModal({
@@ -26,15 +17,10 @@ export default function DetailsModal({
   onClose,
   scores,
   sortedPlayers,
-  getRowColor,
   onUpdateScores,
 }: DetailsModalProps) {
   const [localScores, setLocalScores] = useState(scores);
   const [isEditMode, setIsEditMode] = useState(false);
-
-  useEffect(() => {
-    setLocalScores(scores);
-  }, [scores]);
 
   const handleScoreEdit = (
     playerName: string,
@@ -44,11 +30,7 @@ export default function DetailsModal({
     const newScores = { ...localScores };
     const newValue = value === "" ? ("sitout" as const) : Number(value);
     newScores[playerName].pointsPerRound[roundIndex] = newValue;
-
-    // Update local state immediately
     setLocalScores(newScores);
-
-    // Update global state - only sum numeric values
     newScores[playerName].points = newScores[
       playerName
     ].pointsPerRound.reduce<number>(
@@ -124,10 +106,10 @@ export default function DetailsModal({
                 </tr>
               </thead>
               <tbody>
-                {sortedPlayers.map(([name], index) => {
+                {sortedPlayers.map(([name]) => {
                   const localStats = localScores[name];
                   return (
-                    <tr key={name} className={`${getRowColor(index)}`}>
+                    <tr key={name}>
                       <td className="px-2 py-2 whitespace-nowrap">{name}</td>
                       {localStats.pointsPerRound.map((points, i) => (
                         <td key={i} className="px-2 py-2 text-center">

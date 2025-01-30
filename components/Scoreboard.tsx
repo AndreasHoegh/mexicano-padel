@@ -1,20 +1,18 @@
 import React, { useRef, useState } from "react";
 import PlayerScores from "./PlayerScores";
 import { X } from "lucide-react";
-import { PlayerScore } from "../lib/types";
+import { Scores } from "../lib/types";
 
 type ScoreboardProps = {
   isOpen: boolean;
   onClose: () => void;
-  scores: {
-    [key: string]: PlayerScore;
-  };
-  sortedPlayers: [string, PlayerScore][];
-  getRowColor: (index: number) => string;
-  onUpdateScores: (newScores: { [key: string]: PlayerScore }) => void;
+  scores: Scores;
+  sortedPlayers: [string, Scores[keyof Scores]][];
+  //getRowColor: (index: number) => string;
+  onUpdateScores: (newScores: Scores) => void;
 };
 
-const Scoreboard: React.FC<ScoreboardProps> = ({ isOpen, onClose, scores }) => {
+const Scoreboard = ({ isOpen, onClose, scores }: ScoreboardProps) => {
   const panelRef = useRef<HTMLDivElement>(null);
   const [touchStart, setTouchStart] = useState<number | null>(null);
   const [touchEnd, setTouchEnd] = useState<number | null>(null);

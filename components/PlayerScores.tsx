@@ -4,29 +4,23 @@ import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Trophy, Target } from "lucide-react";
 import DetailsModal from "./DetailsModal";
+import { Scores } from "@/lib/types";
 
 type PlayerScoresProps = {
-  scores: {
-    [key: string]: {
-      points: number;
-      wins: number;
-      matchesPlayed: number;
-      pointsPerRound: (number | "sitout")[];
-    };
-  };
+  scores: Scores;
 };
 
 export default function PlayerScores({ scores }: PlayerScoresProps) {
   const [sortBy, setSortBy] = useState<"points" | "wins">("points");
-  const [searchTerm, setSearchTerm] = useState("");
   const [sortedPlayers, setSortedPlayers] = useState<
-    [string, PlayerScoresProps["scores"][string]][]
+    [string, Scores[keyof Scores]][]
   >([]);
+
   const [isDetailsOpen, setIsDetailsOpen] = useState(false);
 
   useEffect(() => {
     const sorted = Object.entries(scores)
-      .filter(([name]) => name.toLowerCase().includes(searchTerm.toLowerCase()))
+      .filter(([name]) => name.toLowerCase())
       .sort((a, b) => {
         if (sortBy === "points") {
           if (a[1].points !== b[1].points) {
@@ -39,7 +33,8 @@ export default function PlayerScores({ scores }: PlayerScoresProps) {
           }
           return b[1].points - a[1].points;
         }
-      });
+      }) as [string, Scores[keyof Scores]][]; // Explicit cast
+
     setSortedPlayers(sorted);
   }, [scores, sortBy]);
 
@@ -112,7 +107,7 @@ export default function PlayerScores({ scores }: PlayerScoresProps) {
             </tr>
           </thead>
           <tbody>
-            {sortedPlayers.map(([name, stats], index) => (
+            {sortedPlayers.map(([name], index) => (
               <tr
                 key={name}
                 className={`${getRowColor(
@@ -128,13 +123,13 @@ export default function PlayerScores({ scores }: PlayerScoresProps) {
                   </div>
                 </td>
                 <td className="px-2 py-2 text-center whitespace-nowrap">
-                  {stats.matchesPlayed}
+                  {scores[name].matchesPlayed}
                 </td>
                 <td className="px-2 py-2 text-center font-semibold text-green-600 whitespace-nowrap">
-                  {stats.wins}
+                  {scores[name].wins}
                 </td>
                 <td className="px-2 py-2 text-center font-semibold text-primary whitespace-nowrap">
-                  {stats.points}
+                  {scores[name].points}
                 </td>
               </tr>
             ))}
@@ -147,7 +142,6 @@ export default function PlayerScores({ scores }: PlayerScoresProps) {
         onClose={() => setIsDetailsOpen(false)}
         scores={scores}
         sortedPlayers={sortedPlayers}
-        getRowColor={getRowColor}
       />
     </div>
   );

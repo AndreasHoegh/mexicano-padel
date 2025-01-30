@@ -9,18 +9,6 @@ export interface Court {
   name: string;
 }
 
-export interface KnockoutMatch {
-  team1: string[];
-  team2: string[];
-  team1Score: number;
-  team2Score: number;
-  isScoreSubmitted: boolean;
-  round: number;
-  isKnockout: boolean;
-  knockoutRound: string;
-  matchNumber: number;
-}
-
 export interface TournamentSettings {
   finalRoundPattern: number[];
   playerNames: string[];
@@ -34,17 +22,6 @@ export interface TournamentSettings {
   teamsPerGroup?: number;
   teamsAdvancing?: number;
 }
-
-export interface PlayerScore {
-  points: number;
-  wins: number;
-  matchesPlayed: number;
-  pointsPerRound: (number | "sitout")[];
-}
-/* 
-export interface Scores {
-  [key: string]: PlayerScore;
-} */
 
 export interface Scores {
   [key: string]: {
@@ -63,13 +40,13 @@ export interface Match {
   team1Score: number;
   team2Score: number;
   isScoreSubmitted: boolean;
-  team1Name?: string;
-  team2Name?: string;
-  group?: number;
   round?: number;
   isKnockout?: boolean;
   knockoutRound?: string;
   matchNumber?: number;
+  team1Name?: string;
+  team2Name?: string;
+  group?: number;
 }
 
 export interface EditingScores {
