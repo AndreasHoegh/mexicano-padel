@@ -7,7 +7,7 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover";
 import { memo } from "react";
-
+import padelCourt from "@/app/assets/padelCourt.png";
 type MatchCardProps = {
   initialMinutes: number;
   match: Match;
@@ -218,7 +218,7 @@ export function MatchCard({
     <div className="relative w-full h-full rounded-xl overflow-hidden border border-gray-200 shadow-lg">
       {/* Court Image */}
       <Image
-        src="/padelCourt.png"
+        src={padelCourt}
         alt="Padel Court"
         fill
         className="object-cover"

@@ -1,7 +1,7 @@
 import React, { useRef, useState } from "react";
 import PlayerScores from "./PlayerScores";
 import { X } from "lucide-react";
-import { Scores } from "../lib/types";
+import { Scores } from "../../lib/types";
 
 type ScoreboardProps = {
   isOpen: boolean;

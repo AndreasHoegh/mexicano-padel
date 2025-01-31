@@ -1,7 +1,7 @@
 "use client";
 
 import { useLanguage } from "@/lib/LanguageContext";
-import { Button } from "./ui/button";
+import { Button } from "../ui/button";
 
 export default function LanguageSelector() {
   const { language, setLanguage } = useLanguage();

@@ -4,20 +4,20 @@ import { useEffect, useState, useCallback } from "react";
 import type { SubmitHandler } from "react-hook-form";
 import TournamentNameForm, {
   type TournamentNameFormData,
-} from "./TournamentNameForm";
-import TournamentSettings from "./TournamentSettings";
-import Matches from "./Matches";
+} from "./tournamentSetup/TournamentNameForm";
+import TournamentSettings from "./tournamentSetup/TournamentSettings";
+import Matches from "./match/Matches";
 import type { Court, Match, Scores, EditingScores } from "../lib/types";
 import RestoreDialog from "./RestoreDialog";
 import BackButton from "./ui/backButton";
-import { generateMatches } from "../lib/mexicanoGenerator";
+import { generateMatches } from "@/lib/generators/mexicanoGenerator";
 import {
   generateAmericanoMatches,
   generateAmericanoMatchesTeamMode,
   updatePartnerships,
-} from "../lib/americanoGenerator";
+} from "@/lib/generators/americanoGenerator";
 import Footer from "./Footer";
-import TournamentPaused from "./TournamentPaused";
+import TournamentPaused from "./match/TournamentPaused";
 
 export default function App() {
   const [numberOfPlayers, setNumberOfPlayers] = useState<number>(0);
@@ -81,6 +81,7 @@ export default function App() {
       isFinished,
       maxRounds,
       isPaused,
+      pointSystem,
       courts,
       mode,
       numberOfPlayers,
@@ -151,30 +152,13 @@ export default function App() {
 
   useEffect(() => {
     window.scrollTo(0, 0);
-  }, [isTournamentNameSet, arePlayerNamesSet]);
+  }, [isTournamentNameSet, arePlayerNamesSet, isFinished]);
 
   useEffect(() => {
     if (localStorage.getItem(STORAGE_KEY)) {
       setShowRestoreDialog(true);
     }
   }, []);
-
-  const onNumberSubmit = ({
-    mode,
-    format,
-    count,
-  }: {
-    mode: "individual" | "team";
-    format: "mexicano" | "americano";
-    count: number;
-  }) => {
-    if (count < 4) {
-      return;
-    }
-    setMode(mode);
-    setFormat(format);
-    setNumberOfPlayers(count);
-  };
 
   const isLastRound = useCallback(() => {
     return maxRounds !== null && round === maxRounds;
@@ -337,15 +321,6 @@ export default function App() {
     setArePlayerNamesSet(false);
   };
 
-  const goBackToPlayerNames = () => {
-    setArePlayerNamesSet(false);
-    setMatches([]);
-    setScores({});
-    setRound(1);
-    setSittingOutPlayers([]);
-    setSittingOutCounts({});
-  };
-
   return (
     <article className="flex flex-col min-h-screen">
       {(isTournamentNameSet || numberOfPlayers > 0) &&
@@ -471,10 +446,6 @@ export default function App() {
         </div>
       )}
 
-      {matches.length > 0 && !isFinished && !isPaused && (
-        <BackButton onClick={goBackToPlayerNames} />
-      )}
-
       {matches.length > 0 && (
         <div className="flex flex-col items-center relative space-y-4 mb-12">
           {isFinished || isPaused ? (
@@ -520,6 +491,7 @@ export default function App() {
         <RestoreDialog
           onRestore={() => {
             loadTournamentState();
+            console.log("restore", matches);
             setShowRestoreDialog(false);
           }}
           onNew={() => {

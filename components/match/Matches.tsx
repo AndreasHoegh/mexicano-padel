@@ -5,16 +5,16 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ChevronRight, Trophy } from "lucide-react";
 import Image from "next/image";
-import padelIcon from "../app/assets/padelIcon.png";
-import Scoreboard from "./Scoreboard";
-import DetailsModal from "./DetailsModal";
+import padelIcon from "@/app/assets/padelIcon.png";
+import Scoreboard from "../match/Scoreboard";
+import DetailsModal from "../match/DetailsModal";
 import type { Match, EditingScores, Court, Scores } from "@/lib/types";
-import FinalRoundModal from "./FinalRoundModal";
+import FinalRoundModal from "../match/FinalRoundModal";
 import { useLanguage } from "@/lib/LanguageContext";
 import { translations } from "@/lib/translations";
-import { Timer } from "./Timer";
-import { MatchList } from "./MatchList";
-import TournamentPaused from "./TournamentPaused";
+import { Timer } from "../match/Timer";
+import { MatchList } from "../match/MatchList";
+import TournamentPaused from "../match/TournamentPaused";
 
 interface MatchesProps {
   matches: Match[];

@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from "react";
-import { Button } from "./ui/button";
+import { Button } from "../ui/button";
 import { Play, Pause, RotateCcw } from "lucide-react";
 
 interface TimerProps {

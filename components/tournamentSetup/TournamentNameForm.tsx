@@ -17,7 +17,7 @@ import {
   AccordionTrigger,
 } from "@/components/ui/accordion";
 import { ChevronRight, Trophy, Users, Calendar } from "lucide-react";
-import { translations, type Language } from "../lib/translations";
+import { translations, type Language } from "@/lib/translations";
 import { motion } from "framer-motion";
 import { trackEvent } from "@/lib/analytics";
 import { useLanguage } from "@/lib/LanguageContext";

@@ -1,18 +1,18 @@
-import { useForm, FieldValues } from "react-hook-form";
-import { useState, useEffect } from "react";
-import { Button } from "./ui/button";
-import { RadioGroup, RadioGroupItem } from "./ui/radio-group";
-import { Label } from "./ui/label";
-import { TournamentSettings as Settings, Court } from "@/lib/types";
 import { useLanguage } from "@/lib/LanguageContext";
 import { translations } from "@/lib/translations";
-import { NamesSection } from "./NamesSection";
-import { PointSystemSection } from "./PointSystemSection";
-import { CourtsSection } from "./CourtsSection";
-import { PointSelection } from "./PointSelection";
-import { RoundsSelector } from "./RoundsSelector";
-import { FinalRoundPairingSelector } from "./FinalRoundPairingSelector";
-import FormatSelector from "./FormatSelector";
+import { Court, TournamentSettings as Settings } from "@/lib/types";
+import { useEffect, useState } from "react";
+import { FieldValues, useForm } from "react-hook-form";
+import { CourtsSection } from "../tournamentSetup/CourtsSection";
+import { FinalRoundPairingSelector } from "../tournamentSetup/FinalRoundPairingSelector";
+import FormatSelector from "../tournamentSetup/FormatSelector";
+import { NamesSection } from "../tournamentSetup/NamesSection";
+import { PointSelection } from "../tournamentSetup/PointSelection";
+import { PointSystemSection } from "../tournamentSetup/PointSystemSection";
+import { RoundsSelector } from "../tournamentSetup/RoundsSelector";
+import { Button } from "../ui/button";
+import { Label } from "../ui/label";
+import { RadioGroup, RadioGroupItem } from "../ui/radio-group";
 
 type TournamentSettingsProps = {
   onSubmit: (settings: Settings) => void;
