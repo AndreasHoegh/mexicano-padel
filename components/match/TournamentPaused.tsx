@@ -2,7 +2,6 @@ import { Scores } from "@/lib/types";
 import { Button } from "../ui/button";
 import PlayerScores from "./PlayerScores";
 import { Trophy, Play, X } from "lucide-react";
-import { motion } from "framer-motion";
 
 export default function TournamentPaused({
   isFinished,
@@ -25,11 +24,7 @@ export default function TournamentPaused({
   )[0][0];
 
   return (
-    <motion.div
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-      className="w-full max-w-2xl mx-auto text-center space-y-4 sm:space-y-6 px-2 sm:px-4"
-    >
+    <div className="w-auto max-w-2xl mx-auto text-center space-y-4 sm:space-y-6 px-2 sm:px-4">
       {isFinished ? (
         <div className="space-y-4">
           <div className="bg-gradient-to-r from-yellow-500 to-yellow-600 p-4 sm:p-6 rounded-lg shadow-lg">
@@ -92,6 +87,6 @@ export default function TournamentPaused({
           </Button>
         )}
       </div>
-    </motion.div>
+    </div>
   );
 }
