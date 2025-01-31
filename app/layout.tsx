@@ -81,19 +81,11 @@ export default function RootLayout({
   return (
     <html lang="en">
       <Head>
-        <title>Padel Americano</title>
         <script
           defer
           src="https://umami-blond-eight.vercel.app/script.js"
           data-website-id="dfd6d3bb-0b1f-4966-80db-63bcdb0c5149"
         />
-        <link
-          rel="icon"
-          type="image/png"
-          sizes="16x16"
-          href="/favicon-16x16.png"
-        />
-        <link rel="icon" href="/favicon.ico" />
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{
