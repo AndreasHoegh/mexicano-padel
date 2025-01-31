@@ -30,6 +30,10 @@ export const metadata: Metadata = {
   description: APP_DESCRIPTION,
   keywords: [
     "padel",
+    "Americano App",
+    "Mexicano App",
+    "Americano padel app",
+    "Mexicano padel app",
     "tournament",
     "tournament management",
     "padel tournament",
@@ -37,6 +41,20 @@ export const metadata: Metadata = {
     "tournament generator",
     "americano",
     "mexicano",
+    "padel americano",
+    "padel mexicano",
+    "padel tournament organizer",
+    "padel tournament software",
+    "padel americano rules",
+    "padel mexicano rules",
+    "padel competition generator",
+    "how to organize a padel americano tournament",
+    "free padel tournament generator",
+    "best app for americano padel",
+    "best app for mexicano padel",
+    "best app for padel",
+    "best app for padel tournament",
+    "create a padel americano tournament online",
   ],
   robots: "index, follow",
   openGraph: {
@@ -99,11 +117,11 @@ export default function RootLayout({
       >
         <header className="sr-only">
           <h1 className="text-4xl font-bold text-center pt-6 text-yellow-600">
-            Padel Americano
+            Americano Padel App
           </h1>
           <p className="text-center text-lg text-gray-300 mt-2">
-            The ultimate padel tournament management system for organizing and
-            running americano and mexicano padel tournaments. For free.
+            The ultimate americano padel app for organizing and running
+            americano and mexicano padel tournaments. For free.
           </p>
         </header>
         <LanguageProvider>{children}</LanguageProvider>

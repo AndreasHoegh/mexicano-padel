@@ -18,7 +18,6 @@ import {
 } from "@/components/ui/accordion";
 import { ChevronRight, Trophy, Users, Calendar } from "lucide-react";
 import { translations, type Language } from "@/lib/translations";
-import { motion } from "framer-motion";
 import { trackEvent } from "@/lib/analytics";
 import { useLanguage } from "@/lib/LanguageContext";
 import WorldFlag from "react-world-flags";
@@ -58,11 +57,7 @@ export default function TournamentNameForm({
 
   return (
     <div className="min-h-screen flex items-center justify-center p-4 bg-gradient-to-br from-gray-700 to-green-900">
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.5 }}
-      >
+      <div className="w-full max-w-3xl shadow-2xl bg-white/10 backdrop-blur-lg border border-white/50 relative rounded-xl">
         <Card className="w-full max-w-3xl shadow-2xl bg-white/10 backdrop-blur-lg border border-white/20 relative">
           {/* Language Flags positioned in the top right corner */}
           <div className="absolute top-4 right-4 flex gap-4 z-10">
@@ -153,11 +148,7 @@ export default function TournamentNameForm({
             </div>
 
             <div className="mt-12 grid grid-cols-1 md:grid-cols-3 gap-8 text-center">
-              <motion.div
-                className="flex flex-col items-center space-y-2"
-                whileHover={{ scale: 1.05 }}
-                transition={{ type: "spring", stiffness: 300 }}
-              >
+              <div className="flex flex-col items-center space-y-2">
                 <Trophy className="h-12 w-12 text-yellow-600" />
                 <h3 className="font-semibold text-lg text-white">
                   {t.dynamicTournaments}
@@ -165,23 +156,15 @@ export default function TournamentNameForm({
                 <p className="text-sm text-white/80">
                   {t.shortExcitingMatches}
                 </p>
-              </motion.div>
-              <motion.div
-                className="flex flex-col items-center space-y-2"
-                whileHover={{ scale: 1.05 }}
-                transition={{ type: "spring", stiffness: 300 }}
-              >
+              </div>
+              <div className="flex flex-col items-center space-y-2">
                 <Users className="h-12 w-12 text-blue-400" />
                 <h3 className="font-semibold text-lg text-white">
                   {t.forEveryone}
                 </h3>
                 <p className="text-sm text-white/80">{t.allLevels}</p>
-              </motion.div>
-              <motion.div
-                className="flex flex-col items-center space-y-2"
-                whileHover={{ scale: 1.05 }}
-                transition={{ type: "spring", stiffness: 300 }}
-              >
+              </div>
+              <div className="flex flex-col items-center space-y-2">
                 <Calendar className="h-12 w-12 text-green-400" />
                 <h3 className="font-semibold text-lg text-white">
                   {t.easyToOrganize}
@@ -189,11 +172,11 @@ export default function TournamentNameForm({
                 <p className="text-sm text-white/80">
                   {t.createManageEffortlessly}
                 </p>
-              </motion.div>
+              </div>
             </div>
           </CardContent>
         </Card>
-      </motion.div>
+      </div>
     </div>
   );
 }

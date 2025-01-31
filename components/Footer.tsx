@@ -29,17 +29,6 @@ export default function Footer() {
           </div>
         </div>
       </footer>
-      <div className="fixed bottom-1 right-2 text-[7px] text-gray-400/60">
-        <a
-          href="https://www.flaticon.com/free-icons/padel"
-          title="padel icons"
-          target="_blank"
-          rel="noopener noreferrer"
-          className="hover:text-yellow-500/60 transition-colors"
-        >
-          Icons by Freepik - Flaticon
-        </a>
-      </div>
     </>
   );
 }
