@@ -1,4 +1,4 @@
-import { Match, Scores, Court } from "./types";
+import { Match, Scores, Court } from "@/lib/types";
 
 function findLeastPlayedWith(
   player: string,

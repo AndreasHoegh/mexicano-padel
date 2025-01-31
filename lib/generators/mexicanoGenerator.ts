@@ -1,4 +1,4 @@
-import { Match, Scores, Court } from "../lib/types";
+import { Match, Scores, Court } from "@/lib/types";
 
 export const shuffle = (players: string[]): string[] => {
   const shuffledPlayers = [...players];
