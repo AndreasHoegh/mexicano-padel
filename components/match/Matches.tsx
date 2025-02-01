@@ -259,7 +259,7 @@ export default function Matches({
           </Card>
 
           <div className="flex flex-col items-center gap-4">
-            {mode === "individual" && !isLastRound ? (
+            {!isLastRound ? (
               <div className="flex flex-col sm:flex-row items-center gap-4">
                 <Button
                   onClick={handleNextRound}
