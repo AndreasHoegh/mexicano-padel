@@ -2,6 +2,8 @@ import { Scores } from "@/lib/types";
 import { Button } from "../ui/button";
 import PlayerScores from "./PlayerScores";
 import { Trophy, Play, X } from "lucide-react";
+import { translations } from "@/lib/translations";
+import { useLanguage } from "@/lib/LanguageContext";
 
 export default function TournamentPaused({
   isFinished,
@@ -14,6 +16,9 @@ export default function TournamentPaused({
   setIsPaused: (paused: boolean) => void;
   setIsFinished: (finished: boolean) => void;
 }) {
+  const { language } = useLanguage();
+  const t = translations[language];
+
   const handleStartNewTournament = () => {
     localStorage.removeItem("tournament_state");
     window.location.reload();
@@ -30,11 +35,11 @@ export default function TournamentPaused({
           <div className="bg-gradient-to-r from-yellow-500 to-yellow-600 p-4 sm:p-6 rounded-lg shadow-lg">
             <Trophy className="w-12 h-12 sm:w-16 sm:h-16 mx-auto text-white mb-2 sm:mb-4" />
             <h2 className="text-2xl sm:text-3xl font-bold text-white mb-2">
-              Tournament Complete!
+              {t.tournamentComplete}
             </h2>
             <div className="bg-white/10 backdrop-blur-sm rounded-lg p-3 sm:p-4 mt-2 sm:mt-4">
               <p className="text-lg sm:text-xl text-white">
-                Congratulations to{" "}
+                {t.tournamentCompleteDescription}{" "}
                 <span className="font-bold text-yellow-200">{winner}</span>!
               </p>
             </div>
@@ -43,7 +48,7 @@ export default function TournamentPaused({
       ) : (
         <div className="bg-gray-800/50 backdrop-blur-sm p-4 sm:p-6 rounded-lg shadow-lg border border-gray-700">
           <h2 className="text-2xl sm:text-3xl font-bold text-white">
-            Tournament Paused
+            {t.tournamentPaused}
           </h2>
         </div>
       )}
@@ -51,7 +56,7 @@ export default function TournamentPaused({
       <div className="bg-white rounded-xl shadow-xl overflow-hidden">
         <div className="bg-gray-200 px-4 sm:px-6 py-3 sm:py-4">
           <h3 className="text-lg sm:text-xl font-bold text-gray-800">
-            {isFinished ? "Final" : "Current"} Standings
+            {isFinished ? t.finalStandings : t.currentStandings}
           </h3>
         </div>
         <div className="p-2 sm:p-4">

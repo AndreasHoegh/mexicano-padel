@@ -5,12 +5,17 @@ import { Button } from "@/components/ui/button";
 import { Trophy, Target } from "lucide-react";
 import DetailsModal from "./DetailsModal";
 import { Scores } from "@/lib/types";
+import { useLanguage } from "@/lib/LanguageContext";
+import { translations } from "@/lib/translations";
 
 type PlayerScoresProps = {
   scores: Scores;
 };
 
 export default function PlayerScores({ scores }: PlayerScoresProps) {
+  const { language } = useLanguage();
+  const t = translations[language];
+
   const [sortBy, setSortBy] = useState<"points" | "wins">("points");
   const [sortedPlayers, setSortedPlayers] = useState<
     [string, Scores[keyof Scores]][]
@@ -71,7 +76,7 @@ export default function PlayerScores({ scores }: PlayerScoresProps) {
             className="flex items-center gap-2 flex-1 sm:flex-auto"
           >
             <Trophy className="h-4 w-4" />
-            Points
+            {t.points}
           </Button>
           <Button
             onClick={() => setSortBy("wins")}
@@ -80,7 +85,7 @@ export default function PlayerScores({ scores }: PlayerScoresProps) {
             className="flex items-center gap-2 flex-1 sm:flex-auto"
           >
             <Target className="h-4 w-4" />
-            Wins
+            {t.wins}
           </Button>
           <Button
             onClick={() => setIsDetailsOpen(true)}
@@ -88,7 +93,7 @@ export default function PlayerScores({ scores }: PlayerScoresProps) {
             size="sm"
             className="flex items-center gap-2"
           >
-            View Details
+            {t.viewDetails}
           </Button>
         </div>
       </div>
@@ -97,13 +102,17 @@ export default function PlayerScores({ scores }: PlayerScoresProps) {
         <table className="w-full border-collapse table-auto">
           <thead className="bg-muted">
             <tr>
-              <th className=" py-1 text-left whitespace-nowrap">Rank</th>
-              <th className="px-1 py-2 text-left">Player</th>
+              <th className=" py-1 text-left whitespace-nowrap">{t.rank}</th>
+              <th className="px-1 py-2 text-left">{t.player}</th>
               <th className="px-1 py-2 text-center whitespace-nowrap">
-                Matches
+                {t.matches}
               </th>
-              <th className="px-1 py-2 text-center whitespace-nowrap">Wins</th>
-              <th className=" py-2 text-center whitespace-nowrap">Points</th>
+              <th className="px-1 py-2 text-center whitespace-nowrap">
+                {t.wins}
+              </th>
+              <th className=" py-2 text-center whitespace-nowrap">
+                {t.points}
+              </th>
             </tr>
           </thead>
           <tbody>

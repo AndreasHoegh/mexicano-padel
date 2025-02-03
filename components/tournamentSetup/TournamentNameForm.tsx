@@ -57,7 +57,7 @@ export default function TournamentNameForm({
 
   return (
     <div className="min-h-screen flex items-center justify-center p-4 bg-gradient-to-br from-gray-700 to-green-900">
-      <div className="w-full max-w-3xl shadow-2xl bg-white/10 backdrop-blur-lg border border-white/50 relative rounded-xl">
+      <div className="w-full max-w-3xl shadow-2xl bg-white/5 backdrop-blur-lg border border-white/50 relative rounded-xl">
         <Card className="w-full max-w-3xl shadow-2xl bg-white/10 backdrop-blur-lg border border-white/20 relative">
           {/* Language Flags positioned in the top right corner */}
           <div className="absolute top-4 right-4 flex gap-4 z-10">

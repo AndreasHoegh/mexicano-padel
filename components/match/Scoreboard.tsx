@@ -2,6 +2,8 @@ import React, { useRef, useState } from "react";
 import PlayerScores from "./PlayerScores";
 import { X } from "lucide-react";
 import { Scores } from "../../lib/types";
+import { useLanguage } from "@/lib/LanguageContext";
+import { translations } from "@/lib/translations";
 
 type ScoreboardProps = {
   isOpen: boolean;
@@ -13,6 +15,9 @@ type ScoreboardProps = {
 };
 
 const Scoreboard = ({ isOpen, onClose, scores }: ScoreboardProps) => {
+  const { language } = useLanguage();
+  const t = translations[language];
+
   const panelRef = useRef<HTMLDivElement>(null);
   const [touchStart, setTouchStart] = useState<number | null>(null);
   const [touchEnd, setTouchEnd] = useState<number | null>(null);
@@ -80,7 +85,7 @@ const Scoreboard = ({ isOpen, onClose, scores }: ScoreboardProps) => {
       >
         <div className="flex items-center justify-between p-4 border-b">
           <h2 className="text-xl font-semibold text-gray-800 dark:text-white">
-            Tournament Standings
+            {t.tournamentStandings}
           </h2>
           <button
             onClick={onClose}

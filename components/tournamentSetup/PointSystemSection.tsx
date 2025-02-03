@@ -49,8 +49,8 @@ export function PointSystemSection({
           },
           {
             value: "TimePlay",
-            label: "TimePlay",
-            description: "Play for a set amount of time",
+            label: t.timePlay,
+            description: t.timePlayDescription,
           },
         ].map((option) => (
           <div key={option.value}>

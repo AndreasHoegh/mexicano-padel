@@ -224,7 +224,7 @@ export default function Matches({
                   className="opacity-90"
                 />
                 <span className="px-4 py-2 rounded-lg">
-                  {isLastRound ? "Final Round" : `Round ${localRound}`}
+                  {isLastRound ? t.finalRound : `${t.round} ${localRound}`}
                 </span>
               </CardTitle>
             </CardHeader>
@@ -240,8 +240,7 @@ export default function Matches({
             )}
             {pointSystem === "TimePlay" && (
               <span className="mt-2 px-6 text-center text-white text-xs flex justify-center">
-                Tip: Keep this window open and adjust your device&apos;s screen
-                timeout settings to ensure sound playback.
+                {t.timePlayTip}
               </span>
             )}
             <CardContent className="space-y-6 pt-6">
@@ -266,7 +265,7 @@ export default function Matches({
                   className="hover:scale-105 text-lg bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 border-none shadow-lg transition-all duration-200 disabled:from-gray-400 disabled:to-gray-500 w-48 h-12"
                   disabled={!areAllScoresValid() || tournamentCompleted}
                 >
-                  Next Round <ChevronRight className="ml-1" />
+                  {t.nextRound} <ChevronRight className="ml-1" />
                 </Button>
                 <Button
                   onClick={() => {
@@ -281,7 +280,7 @@ export default function Matches({
                   className="hover:scale-105 text-lg bg-gradient-to-r from-gray-900 to-gray-800 hover:from-gray-800 hover:to-gray-900 border-none shadow-lg transition-all duration-200 disabled:from-gray-400 disabled:to-gray-500 w-48 h-12"
                   disabled={!areAllScoresValid() || tournamentCompleted}
                 >
-                  Final Round
+                  {t.startFinalRound}
                 </Button>
               </div>
             ) : (
@@ -290,7 +289,7 @@ export default function Matches({
                 className="hover:scale-105 text-lg bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 border-none shadow-lg transition-all duration-200 disabled:from-gray-400 disabled:to-gray-500 w-48 h-12"
                 disabled={!areAllScoresValid() || tournamentCompleted}
               >
-                End Tournament
+                {t.endTournament}
               </Button>
             )}
           </div>
@@ -301,7 +300,7 @@ export default function Matches({
               className="hover:scale-105 bg-yellow-600 hover:bg-yellow-600 text-white px-6 py-3 rounded-lg shadow-lg flex items-center justify-center gap-2"
             >
               <Trophy className="h-5 w-5" />
-              <span>View Standings</span>
+              <span>{t.viewStandings}</span>
             </button>
 
             <Button
@@ -309,7 +308,7 @@ export default function Matches({
               variant={isPaused ? "default" : "outline"}
               className="hover:scale-105 bg-red-600 hover:bg-red-700 text-white px-6 py-3 rounded-lg shadow-lg flex items-center justify-center gap-2"
             >
-              {isPaused ? t.resume : "End Tournament"}
+              {isPaused ? t.resume : t.endTournament}
             </Button>
           </div>
 

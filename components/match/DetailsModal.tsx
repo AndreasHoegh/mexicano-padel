@@ -3,6 +3,8 @@
 import { X, Pencil, Check } from "lucide-react";
 import { useState } from "react";
 import { Scores } from "@/lib/types";
+import { useLanguage } from "@/lib/LanguageContext";
+import { translations } from "@/lib/translations";
 
 type DetailsModalProps = {
   isOpen: boolean;
@@ -21,6 +23,9 @@ export default function DetailsModal({
 }: DetailsModalProps) {
   const [localScores, setLocalScores] = useState(scores);
   const [isEditMode, setIsEditMode] = useState(false);
+
+  const { language } = useLanguage();
+  const t = translations[language];
 
   const handleScoreEdit = (
     playerName: string,
@@ -51,7 +56,7 @@ export default function DetailsModal({
       <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
         <div className="bg-white dark:bg-gray-800 rounded-lg shadow-xl max-w-4xl w-full max-h-[90vh] overflow-hidden">
           <div className="flex items-center justify-between p-4 border-b">
-            <h2 className="text-xl font-semibold">Detailed Score History</h2>
+            <h2 className="text-xl font-semibold">{t.detailedScoreHistory}</h2>
             <div className="flex gap-2">
               <button
                 onClick={() => setIsEditMode(!isEditMode)}
@@ -68,12 +73,12 @@ export default function DetailsModal({
                 {isEditMode ? (
                   <>
                     <Check className="h-4 w-4" />
-                    <span>Save Changes</span>
+                    <span>{t.saveChanges}</span>
                   </>
                 ) : (
                   <>
                     <Pencil className="h-4 w-4" />
-                    <span>Edit Scores</span>
+                    <span>{t.editScores}</span>
                   </>
                 )}
               </button>
@@ -89,14 +94,14 @@ export default function DetailsModal({
             <table className="w-full border-collapse table-auto">
               <thead className="bg-muted">
                 <tr>
-                  <th className="px-2 py-2 text-left">Player</th>
+                  <th className="px-2 py-2 text-left">{t.player}</th>
                   {localScores[Object.keys(localScores)[0]]?.pointsPerRound.map(
                     (_, i) => (
                       <th
                         key={i}
                         className="px-2 py-2 text-center whitespace-nowrap"
                       >
-                        Round {i + 1}
+                        {t.round} {i + 1}
                       </th>
                     )
                   )}
