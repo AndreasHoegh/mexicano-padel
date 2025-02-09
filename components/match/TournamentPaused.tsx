@@ -21,6 +21,7 @@ export default function TournamentPaused({
 
   const handleStartNewTournament = () => {
     localStorage.removeItem("tournament_state");
+    window.history.pushState({}, "", window.location.pathname);
     window.location.reload();
   };
 

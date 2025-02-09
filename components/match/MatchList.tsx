@@ -10,15 +10,13 @@ interface MatchListProps {
   handleScoreChange: (
     index: number,
     team: "team1" | "team2",
-    value: number,
-    isKnockout?: boolean
+    value: number
   ) => void;
   pointsPerMatch: number;
   pointSystem: "pointsToPlay" | "pointsToWin" | "TimePlay";
   courts: Court[];
-  format?: "mexicano" | "americano" | "groups";
+  format?: "mexicano" | "americano";
   mode: "individual" | "team";
-  isKnockout?: boolean;
 }
 
 export const MatchList = ({
@@ -30,7 +28,6 @@ export const MatchList = ({
   courts,
   format,
   mode,
-  isKnockout = false,
 }: MatchListProps) => {
   const [openPopovers, setOpenPopovers] = useState<{
     [key: string | number]: boolean;
@@ -51,27 +48,13 @@ export const MatchList = ({
             initialMinutes={pointsPerMatch}
             match={match}
             index={index}
-            courtName={
-              format === "groups"
-                ? "isKnockout" in match && match.isKnockout
-                  ? `${match.knockoutRound} - Match ${match.matchNumber}`
-                  : `Group ${
-                      "group" in match && typeof match.group === "number"
-                        ? match.group + 1
-                        : 1
-                    } - Round ${
-                      "round" in match && typeof match.round === "number"
-                        ? match.round
-                        : 1
-                    }`
-                : courts[index % courts.length].name
-            }
+            courtName={courts[index % courts.length].name}
             mode={mode}
             editingScores={editingScores}
             pointsPerMatch={pointsPerMatch}
             pointSystem={pointSystem}
             handleScoreChange={(index, team, value) =>
-              handleScoreChange(index, team, value, isKnockout)
+              handleScoreChange(index, team, value)
             }
           />
         </div>

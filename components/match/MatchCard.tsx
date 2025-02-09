@@ -1,6 +1,6 @@
 import { Button } from "@/components/ui/button";
 import Image from "next/image";
-import { Match, EditingScores } from "@/lib/types";
+import type { Match, EditingScores } from "@/lib/types";
 import {
   Popover,
   PopoverContent,
@@ -218,7 +218,7 @@ export function MatchCard({
     <div className="relative w-full h-full rounded-xl overflow-hidden border border-gray-200 shadow-lg">
       {/* Court Image */}
       <Image
-        src={padelCourt}
+        src={padelCourt || "/placeholder.svg"}
         alt="Padel Court"
         fill
         className="object-cover"

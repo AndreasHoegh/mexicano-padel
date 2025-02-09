@@ -2,8 +2,9 @@ import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import "./globals.css";
 import { LanguageProvider } from "@/lib/LanguageContext";
-import React from "react";
-import Head from "next/head";
+import type React from "react";
+import { ToastProvider } from "@/components/ui/toast";
+import { Toaster } from "@/components/ui/toaster";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -80,7 +81,7 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en">
-      <Head>
+      <head>
         <script
           defer
           src="https://umami-blond-eight.vercel.app/script.js"
@@ -103,7 +104,7 @@ export default function RootLayout({
             }),
           }}
         />
-      </Head>
+      </head>
       <body
         className={`${inter.className} min-h-screen bg-gradient-to-br from-gray-700 to-green-900`}
       >

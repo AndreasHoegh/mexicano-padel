@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ChevronRight, Trophy } from "lucide-react";
@@ -15,6 +15,7 @@ import { translations } from "@/lib/translations";
 import { Timer } from "../match/Timer";
 import { MatchList } from "../match/MatchList";
 import TournamentPaused from "../match/TournamentPaused";
+import { saveScores } from "@/lib/tournamentStorage";
 
 interface MatchesProps {
   matches: Match[];
@@ -33,6 +34,9 @@ interface MatchesProps {
   onStartFinalRound: (editingScores: EditingScores) => void;
   onPause: (paused: boolean) => void;
   format?: "mexicano" | "americano";
+  editingScores: EditingScores;
+  onUpdateEditingScores: (newEditingScores: EditingScores) => void;
+  tournamentId: string;
 }
 
 export default function Matches({
@@ -51,8 +55,10 @@ export default function Matches({
   onStartFinalRound,
   onPause,
   format,
+  editingScores,
+  onUpdateEditingScores,
+  tournamentId,
 }: MatchesProps) {
-  const [editingScores, setEditingScores] = useState<EditingScores>({});
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isPaused, setIsPaused] = useState(false);
   const [isDetailsOpen, setIsDetailsOpen] = useState(false);
@@ -65,42 +71,34 @@ export default function Matches({
   const [localRound, setLocalRound] = useState(round);
   const [tournamentCompleted, setTournamentCompleted] =
     useState<boolean>(false);
-  const STORAGE_KEY = "tournament_state";
 
   const { language } = useLanguage();
   const t = translations[language];
-
-  useEffect(() => {
-    const initialEditingScores: EditingScores = {};
-    localMatches.forEach((_, index) => {
-      initialEditingScores[index] = { team1: 0, team2: 0 };
-    });
-    setEditingScores(initialEditingScores);
-  }, [localMatches]);
 
   const handleScoreChange = (
     index: number,
     team: "team1" | "team2",
     value: number
   ) => {
-    setEditingScores((prev) => {
-      const newScores = { ...prev };
-      if (!newScores[index]) {
-        newScores[index] = { team1: 0, team2: 0 };
-      }
-      if (pointSystem === "pointsToPlay") {
-        if (team === "team1") {
-          newScores[index].team1 = value;
-          newScores[index].team2 = pointsPerMatch - value;
-        } else {
-          newScores[index].team2 = value;
-          newScores[index].team1 = pointsPerMatch - value;
-        }
+    const newScores = { ...editingScores };
+    if (!newScores[index]) {
+      newScores[index] = { team1: 0, team2: 0 };
+    }
+    if (pointSystem === "pointsToPlay") {
+      if (team === "team1") {
+        newScores[index].team1 = value;
+        newScores[index].team2 = pointsPerMatch - value;
       } else {
-        newScores[index][team] = value;
+        newScores[index].team2 = value;
+        newScores[index].team1 = pointsPerMatch - value;
       }
-      return newScores;
-    });
+    } else {
+      newScores[index][team] = value;
+    }
+    onUpdateEditingScores(newScores);
+
+    // Save scores to localStorage
+    saveScores(tournamentId, newScores);
   };
 
   const isScoreValid = (key: string) => {
@@ -174,15 +172,7 @@ export default function Matches({
       }
     });
 
-    const updatedMatches = matches.map((match, index) => ({
-      ...match,
-      team1Score: editingScores[index].team1,
-      team2Score: editingScores[index].team2,
-      isScoreSubmitted: true,
-    }));
-
     onUpdateScores(newScores);
-    onUpdateMatches(updatedMatches);
 
     if (isLastRound) {
       setTournamentCompleted(true);

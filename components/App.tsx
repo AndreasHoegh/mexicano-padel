@@ -18,8 +18,22 @@ import {
 } from "@/lib/generators/americanoGenerator";
 import Footer from "./Footer";
 import TournamentPaused from "./match/TournamentPaused";
+import { ShareButton } from "./ui/ShareButton";
+import {
+  generateTournamentId,
+  saveTournamentState as saveState,
+  loadTournamentState as loadState,
+  getTournamentShareUrl,
+} from "../lib/tournamentStorage";
+import { saveScores, loadScores } from "../lib/tournamentStorage";
 
 export default function App() {
+  const [editingScores, setEditingScores] = useState<EditingScores>({});
+  const updateEditingScores = (newScores: EditingScores) => {
+    setEditingScores(newScores);
+    updateUrlWithScores(newScores);
+  };
+  const [tournamentId, setTournamentId] = useState<string>("");
   const [numberOfPlayers, setNumberOfPlayers] = useState<number>(0);
   const [names, setNames] = useState<string[]>([]);
   const [tournamentName, setTournamentName] = useState<string>("");
@@ -60,6 +74,7 @@ export default function App() {
   const [matches, setMatches] = useState<Match[]>([]);
   const [scores, setScores] = useState<Scores>({});
   const [round, setRound] = useState<number>(1);
+
   const updateMatches = (updatedMatches: Match[]) => {
     setMatches(updatedMatches);
   };
@@ -68,8 +83,108 @@ export default function App() {
     setScores(updatedScores);
   };
 
+  useEffect(() => {
+    // Check for tournament ID in URL
+    const params = new URLSearchParams(window.location.search);
+    const urlTournamentId = params.get("tournamentId");
+    const urlScores = params.get("scores");
+
+    if (urlTournamentId) {
+      const savedState = loadState(urlTournamentId);
+      if (savedState) {
+        // Load all state from saved tournament
+        setNames(savedState.names);
+        setMatches(savedState.matches);
+        setScores(savedState.scores);
+        setRound(savedState.round);
+        setTournamentName(savedState.tournamentName);
+        setSittingOutPlayers(savedState.sittingOutPlayers);
+        setSittingOutCounts(savedState.sittingOutCounts);
+        setPointsPerMatch(savedState.pointsPerMatch);
+        setPointSystem(savedState.pointSystem);
+        setIsFinished(savedState.isFinished);
+        setMaxRounds(savedState.maxRounds);
+        setIsPaused(savedState.isPaused);
+        setCourts(savedState.courts);
+        setMode(savedState.mode);
+        setNumberOfPlayers(savedState.numberOfPlayers);
+        setIsTournamentNameSet(savedState.isTournamentNameSet);
+        setArePlayerNamesSet(savedState.arePlayerNamesSet);
+        setTournamentHistory(savedState.tournamentHistory || []);
+        setPartnerships(savedState.partnerships || {});
+        setTournamentId(urlTournamentId);
+
+        // Load editingScores from URL, localStorage, or saved state
+        let loadedEditingScores;
+        if (urlScores) {
+          try {
+            loadedEditingScores = JSON.parse(urlScores);
+          } catch (error) {
+            console.error("Error parsing URL scores:", error);
+          }
+        }
+        if (!loadedEditingScores) {
+          loadedEditingScores = loadScores(urlTournamentId);
+        }
+        if (!loadedEditingScores && savedState.editingScores) {
+          loadedEditingScores = savedState.editingScores;
+        }
+        if (loadedEditingScores) {
+          updateEditingScores(loadedEditingScores);
+        }
+      }
+    }
+  }, []);
+
+  const handleTournamentNameSubmit: SubmitHandler<TournamentNameFormData> = (
+    data
+  ) => {
+    resetTournament();
+    setTournamentName(data.tournamentName);
+    setIsTournamentNameSet(true);
+
+    // Generate new tournament ID if one doesn't exist
+    if (!tournamentId) {
+      const newId = generateTournamentId();
+      setTournamentId(newId);
+
+      // Update URL with the new tournament ID
+      const newUrl = getTournamentShareUrl(newId, editingScores);
+      window.history.pushState({ tournamentId: newId }, "", newUrl);
+    }
+  };
+
+  // Add event listener for browser back/forward buttons
+  useEffect(() => {
+    const handlePopState = (event: PopStateEvent) => {
+      const params = new URLSearchParams(window.location.search);
+      const urlTournamentId = params.get("tournamentId");
+
+      if (urlTournamentId) {
+        const savedState = loadState(urlTournamentId);
+        if (savedState) {
+          setTournamentId(urlTournamentId);
+        }
+      } else {
+        setTournamentId("");
+        setIsTournamentNameSet(false);
+        setArePlayerNamesSet(false);
+      }
+    };
+
+    window.addEventListener("popstate", handlePopState);
+    return () => window.removeEventListener("popstate", handlePopState);
+  }, []);
+
+  useEffect(() => {
+    if (isTournamentNameSet && tournamentId) {
+      saveTournamentState();
+    }
+  }, [tournamentId, isTournamentNameSet]);
+
   const saveTournamentState = () => {
     const state = {
+      id: tournamentId,
       names,
       matches,
       scores,
@@ -89,8 +204,11 @@ export default function App() {
       arePlayerNamesSet,
       tournamentHistory,
       partnerships,
+      editingScores,
     };
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+    saveState(state);
+    saveScores(tournamentId, editingScores);
+    updateUrlWithScores(editingScores);
   };
 
   const loadTournamentState = () => {
@@ -116,6 +234,7 @@ export default function App() {
       setArePlayerNamesSet(state.arePlayerNamesSet);
       setTournamentHistory(state.tournamentHistory || []);
       setPartnerships(state.partnerships || {});
+      setEditingScores(state.editingScores || {});
       return true;
     }
     return false;
@@ -123,32 +242,7 @@ export default function App() {
 
   useEffect(() => {
     loadTournamentState();
-  }, []);
-
-  useEffect(() => {
-    if (isTournamentNameSet) {
-      saveTournamentState();
-    }
-  }, [
-    names,
-    matches,
-    scores,
-    round,
-    tournamentName,
-    sittingOutPlayers,
-    sittingOutCounts,
-    pointsPerMatch,
-    isFinished,
-    maxRounds,
-    isPaused,
-    courts,
-    mode,
-    numberOfPlayers,
-    isTournamentNameSet,
-    arePlayerNamesSet,
-    tournamentHistory,
-    partnerships,
-  ]);
+  }, [loadTournamentState]); // Added loadTournamentState to dependencies
 
   useEffect(() => {
     window.scrollTo(0, 0);
@@ -253,15 +347,16 @@ export default function App() {
       });
       setMatches([]);
       setRound((prevRound: number) => prevRound + 1);
+      updateEditingScores({ 0: { team1: 0, team2: 0 } });
     }
-  }, [checkTournamentEnd, matches, scores, round, sittingOutPlayers]);
-
-  const handleTournamentNameSubmit: SubmitHandler<TournamentNameFormData> = (
-    data
-  ) => {
-    setTournamentName(data.tournamentName);
-    setIsTournamentNameSet(true);
-  };
+  }, [
+    checkTournamentEnd,
+    matches,
+    scores,
+    round,
+    sittingOutPlayers,
+    updateEditingScores,
+  ]);
 
   const startFinalRound = useCallback(
     (editingScores: EditingScores) => {
@@ -274,7 +369,6 @@ export default function App() {
       matches.forEach((match, index) => {
         const team1Score = editingScores[index].team1;
         const team2Score = editingScores[index].team2;
-
         [...match.team1, ...match.team2].forEach((player) => {
           newScores[player].matchesPlayed += 1;
         });
@@ -315,10 +409,52 @@ export default function App() {
     [matches, round, updateMatches, scores, sittingOutPlayers]
   );
 
-  const goBackToTournamentName = () => {
+  const resetTournament = () => {
+    setTournamentId("");
     setIsTournamentNameSet(false);
-    setNumberOfPlayers(0);
     setArePlayerNamesSet(false);
+    setNumberOfPlayers(0);
+    setNames([]);
+    setMatches([]);
+    setScores({});
+    setRound(1);
+    setTournamentName("");
+    setSittingOutPlayers([]);
+    setSittingOutCounts({});
+    setPointsPerMatch(21);
+    setIsFinished(false);
+    setMaxRounds(null);
+    setIsPaused(false);
+    setCourts([]);
+    setMode("individual");
+    setTournamentHistory([]);
+    setPartnerships({});
+    setFormat("mexicano");
+    setPointSystem("pointsToPlay");
+    updateEditingScores({});
+
+    window.history.pushState({}, "", window.location.pathname);
+  };
+
+  const goBackToTournamentName = () => {
+    resetTournament();
+  };
+
+  useEffect(() => {
+    if (tournamentId) {
+      saveTournamentState();
+    }
+  }, [editingScores, tournamentId]);
+
+  const updateUrlWithScores = (newScores: EditingScores) => {
+    if (tournamentId) {
+      const newUrl = getTournamentShareUrl(tournamentId, newScores);
+      window.history.replaceState(
+        { tournamentId, scores: newScores },
+        "",
+        newUrl
+      );
+    }
   };
 
   return (
@@ -337,9 +473,14 @@ export default function App() {
       )}
 
       {isTournamentNameSet && (
-        <h1 className="text-center text-2xl font-bold my-8 text-gray-500">
-          {tournamentName}
-        </h1>
+        <div className="flex flex-col items-center gap-4 mb-8 mt-12">
+          <h1 className="text-center text-2xl font-bold text-gray-500">
+            {tournamentName}
+          </h1>
+          {tournamentId && (
+            <ShareButton tournamentId={tournamentId} scores={editingScores} />
+          )}
+        </div>
       )}
 
       {isTournamentNameSet && !arePlayerNamesSet && (
@@ -387,6 +528,7 @@ export default function App() {
               setScores(initialScores);
               setSittingOutCounts({});
               setPointSystem(settings.pointSystem);
+              setFormat(settings.format as "mexicano" | "americano");
 
               let initialMatches: Match[];
               if (
@@ -481,6 +623,9 @@ export default function App() {
                 onPause={handlePauseChange}
                 pointSystem={pointSystem}
                 format={format}
+                editingScores={editingScores}
+                onUpdateEditingScores={updateEditingScores}
+                tournamentId={tournamentId}
               />
             </>
           )}
@@ -491,7 +636,6 @@ export default function App() {
         <RestoreDialog
           onRestore={() => {
             loadTournamentState();
-            console.log("restore", matches);
             setShowRestoreDialog(false);
           }}
           onNew={() => {

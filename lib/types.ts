@@ -65,11 +65,33 @@ export interface PlayerHistory {
   };
 }
 
-export interface GroupStanding {
-  teamName: string;
-  points: number;
-  matchesPlayed: number;
-  wins: number;
-}
-
 export type PointSystem = "pointsToPlay" | "pointsToWin" | "TimePlay";
+
+export interface TournamentState {
+  id: string;
+  names: string[];
+  matches: Match[];
+  scores: Scores;
+  round: number;
+  tournamentName: string;
+  sittingOutPlayers: string[];
+  sittingOutCounts: { [key: string]: number };
+  pointsPerMatch: number;
+  isFinished: boolean;
+  maxRounds: number | null;
+  isPaused: boolean;
+  pointSystem: "pointsToPlay" | "pointsToWin" | "TimePlay";
+  courts: Court[];
+  mode: "individual" | "team";
+  numberOfPlayers: number;
+  isTournamentNameSet: boolean;
+  arePlayerNamesSet: boolean;
+  tournamentHistory: Array<{
+    matches: Match[];
+    scores: Scores;
+    round: number;
+    sittingOutPlayers: string[];
+  }>;
+  partnerships: { [key: string]: { [key: string]: number } };
+  editingScores: EditingScores;
+}
