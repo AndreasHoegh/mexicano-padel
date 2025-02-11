@@ -88,6 +88,9 @@ export const translations = {
     viewStandings: "View Standings",
     tournamentComplete: "Tournament Complete!",
     tournamentCompleteDescription: "Congratulations to",
+    shareLinksInfo: "Share tournament links during matches",
+    loginToSave: "Log in to save and track your tournaments",
+    shareAndSave: "Share and Save",
   },
   es: {
     rank: "Rank",
@@ -178,6 +181,9 @@ export const translations = {
     tournamentPaused: "Torneo en Pausa",
     saveChanges: "Guardar Cambios",
     editScores: "Editar Puntuaciones",
+    shareLinksInfo: "Comparte enlaces del torneo durante los partidos",
+    loginToSave: "Inicia sesión para guardar y seguir tus torneos",
+    shareAndSave: "Compartir y Guardar",
   },
   da: {
     rank: "Placering",
@@ -266,6 +272,9 @@ export const translations = {
     timePlayTip: "Tip: Hold dette vindue åben for at sikre at lyden afspilles.",
     endTournament: "Afslut turnering",
     viewStandings: "Se stilling",
+    shareLinksInfo: "Del turneringslinks under kampene",
+    loginToSave: "Log ind for at gemme og følge dine turneringer",
+    shareAndSave: "Del og Gem",
   },
 };
 
@@ -336,4 +345,7 @@ export interface Translations {
   teamsPerGroup: string;
   teams: string;
   timePlay: string;
+  shareLinksInfo: string;
+  loginToSave: string;
+  shareAndSave: string;
 }
