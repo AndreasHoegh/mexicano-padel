@@ -18,7 +18,7 @@ export default function RegisterForm({ onSwitch }: { onSwitch: () => void }) {
       console.log("Sending registration request:", { username, password });
 
       const response = await fetch(
-        "https://www.padelamericano.org/api/auth/register",
+        "https://jwtauthdotnet920250211104511.azurewebsites.net/api/auth/register",
         {
           method: "POST",
           headers: {
@@ -29,8 +29,20 @@ export default function RegisterForm({ onSwitch }: { onSwitch: () => void }) {
       );
 
       console.log("Response status:", response.status);
-      const data = await response.json();
-      console.log("Registration response:", data);
+
+      // Check if the response is JSON
+      const contentType = response.headers.get("Content-Type");
+      let data;
+      if (contentType && contentType.includes("application/json")) {
+        data = await response.json();
+        console.log("Registration response:", data);
+      } else {
+        // Handle non-JSON response (for debugging purposes)
+        const text = await response.text();
+        console.error("Non-JSON response:", text);
+        setError("Unexpected response format");
+        return;
+      }
 
       if (response.ok) {
         router.push("/login");

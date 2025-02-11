@@ -2,7 +2,7 @@
 export async function completeTournament(token: string): Promise<any> {
   // Increment user's tournament count.
   const incrementResponse = await fetch(
-    "https://www.padelamericano.org/api/auth/increment-tournaments",
+    "https://jwtauthdotnet920250211104511.azurewebsites.net/api/auth/increment-tournaments",
     {
       method: "POST",
       headers: {
@@ -15,7 +15,7 @@ export async function completeTournament(token: string): Promise<any> {
   }
   // Fetch the updated user profile.
   const profileResponse = await fetch(
-    "https://www.padelamericano.org/api/auth/profile",
+    "https://jwtauthdotnet920250211104511.azurewebsites.net/api/auth/profile",
     {
       headers: {
         Authorization: `Bearer ${token}`,

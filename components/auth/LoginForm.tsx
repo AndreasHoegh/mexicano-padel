@@ -18,7 +18,7 @@ export default function LoginForm({ onSwitch }: { onSwitch: () => void }) {
 
     try {
       const response = await fetch(
-        "https://www.padelamericano.org/api/auth/login",
+        "https://jwtauthdotnet920250211104511.azurewebsites.net/api/auth/login",
         {
           method: "POST",
           headers: {
@@ -33,7 +33,7 @@ export default function LoginForm({ onSwitch }: { onSwitch: () => void }) {
         const token = data.accessToken;
         // Fetch user profile with the returned token
         const profileResponse = await fetch(
-          "https://www.padelamericano.org/api/auth/profile",
+          "https://jwtauthdotnet920250211104511.azurewebsites.net/api/auth/profile",
           {
             headers: {
               Authorization: `Bearer ${token}`,
