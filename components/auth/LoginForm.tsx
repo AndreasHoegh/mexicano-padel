@@ -60,7 +60,7 @@ export default function LoginForm({ onSwitch }: { onSwitch: () => void }) {
   return (
     <div className="flex justify-center items-center min-h-screen">
       <div className="space-y-4 w-2/3 md:w-1/3">
-        <h2 className="text-2xl font-bold text-center">Login</h2>
+        <h2 className="text-2xl font-bold text-center text-gray-200">Login</h2>
         <form onSubmit={handleSubmit} className="space-y-4">
           {error && <div className="text-red-500 text-center">{error}</div>}
           <input

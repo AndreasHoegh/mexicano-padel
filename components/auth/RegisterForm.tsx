@@ -14,6 +14,12 @@ export default function RegisterForm({ onSwitch }: { onSwitch: () => void }) {
     e.preventDefault();
     setError("");
 
+    // Password validation
+    if (password.length < 6) {
+      setError("Password must be at least 6 characters long");
+      return;
+    }
+
     try {
       console.log("Sending registration request:", { username, password });
 
@@ -58,7 +64,9 @@ export default function RegisterForm({ onSwitch }: { onSwitch: () => void }) {
   return (
     <div className="flex justify-center items-center min-h-screen">
       <div className="space-y-4 w-2/3 md:w-1/3">
-        <h2 className="text-2xl font-bold text-center">Register</h2>
+        <h2 className="text-2xl font-bold text-center text-gray-200">
+          Register
+        </h2>
         <form onSubmit={handleSubmit} className="space-y-4">
           {error && <div className="text-red-500 text-center">{error}</div>}
           <input
@@ -67,14 +75,21 @@ export default function RegisterForm({ onSwitch }: { onSwitch: () => void }) {
             onChange={(e) => setUsername(e.target.value)}
             placeholder="Username"
             className="w-full p-2 border rounded"
+            required
           />
-          <input
-            type="password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            placeholder="Password"
-            className="w-full p-2 border rounded"
-          />
+          <div className="space-y-1">
+            <input
+              type="password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              placeholder="Password"
+              className="w-full p-2 border rounded"
+              required
+            />
+            <p className="text-sm text-gray-500">
+              Password must be at least 6 characters long
+            </p>
+          </div>
           <Button type="submit" className="w-full">
             Register
           </Button>
