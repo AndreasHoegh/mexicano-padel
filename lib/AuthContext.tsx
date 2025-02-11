@@ -29,11 +29,14 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     const token = localStorage.getItem("token");
     if (token) {
       // Fetch user profile
-      fetch("https://localhost:7084/api/auth/profile", {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      })
+      fetch(
+        "https://jwtauthdotnet920250211104511.azurewebsites.net/api/auth/profile",
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      )
         .then((res) => res.json())
         .then((data) => {
           setUser(data);
