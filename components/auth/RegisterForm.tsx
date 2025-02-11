@@ -57,7 +57,7 @@ export default function RegisterForm({ onSwitch }: { onSwitch: () => void }) {
 
   return (
     <div className="flex justify-center items-center min-h-screen">
-      <div className="space-y-4 w- md:w-1/3">
+      <div className="space-y-4 w-2/3 md:w-1/3">
         <h2 className="text-2xl font-bold text-center">Register</h2>
         <form onSubmit={handleSubmit} className="space-y-4">
           {error && <div className="text-red-500 text-center">{error}</div>}
