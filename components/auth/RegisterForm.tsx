@@ -14,12 +14,6 @@ export default function RegisterForm({ onSwitch }: { onSwitch: () => void }) {
     e.preventDefault();
     setError("");
 
-    // Password validation
-    if (password.length < 6) {
-      setError("Password must be at least 6 characters long");
-      return;
-    }
-
     try {
       console.log("Sending registration request:", { username, password });
 
@@ -75,21 +69,14 @@ export default function RegisterForm({ onSwitch }: { onSwitch: () => void }) {
             onChange={(e) => setUsername(e.target.value)}
             placeholder="Username"
             className="w-full p-2 border rounded"
-            required
           />
-          <div className="space-y-1">
-            <input
-              type="password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              placeholder="Password"
-              className="w-full p-2 border rounded"
-              required
-            />
-            <p className="text-sm text-gray-500">
-              Password must be at least 6 characters long
-            </p>
-          </div>
+          <input
+            type="password"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            placeholder="Password"
+            className="w-full p-2 border rounded"
+          />
           <Button type="submit" className="w-full">
             Register
           </Button>
