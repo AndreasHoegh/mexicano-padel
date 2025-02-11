@@ -19,9 +19,6 @@ const NavBar: React.FC = () => {
         </div>
 
         <div className="flex items-center gap-2 md:gap-4 text-sm md:text-base">
-          <Link href="/">
-            <span className="hover:text-yellow-400">Home</span>
-          </Link>
           {isAuthenticated && (
             <Link href="/tournament-history">
               <span className="hover:text-yellow-400">Tournament History</span>
