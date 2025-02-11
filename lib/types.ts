@@ -95,3 +95,11 @@ export interface TournamentState {
   partnerships: { [key: string]: { [key: string]: number } };
   editingScores: EditingScores;
 }
+
+export interface Tournament {
+  id: string;
+  username: string;
+  tournamentName: string;
+  scoresJson: string;
+  tournamentDate: string;
+}

@@ -10,11 +10,13 @@ export default function TournamentPaused({
   scores,
   setIsPaused,
   setIsFinished,
+  onTournamentComplete,
 }: {
   isFinished: boolean;
   scores: Scores;
   setIsPaused: (paused: boolean) => void;
   setIsFinished: (finished: boolean) => void;
+  onTournamentComplete: () => void;
 }) {
   const { language } = useLanguage();
   const t = translations[language];
@@ -23,6 +25,10 @@ export default function TournamentPaused({
     localStorage.removeItem("tournament_state");
     window.history.pushState({}, "", window.location.pathname);
     window.location.reload();
+  };
+
+  const handleTournamentComplete = () => {
+    onTournamentComplete();
   };
 
   const winner = Object.entries(scores).sort(
@@ -76,7 +82,10 @@ export default function TournamentPaused({
               Resume Tournament
             </Button>
             <Button
-              onClick={() => setIsFinished(true)}
+              onClick={() => {
+                setIsFinished(true);
+                onTournamentComplete();
+              }}
               className="bg-red-500 hover:bg-red-600 text-white px-4 sm:px-6 py-2 sm:py-3 rounded-lg shadow-lg flex items-center justify-center gap-2 transition-transform hover:scale-105 text-sm sm:text-base w-full sm:w-auto"
             >
               <X className="w-4 h-4 sm:w-5 sm:h-5" />

@@ -7,7 +7,13 @@ import TournamentNameForm, {
 } from "./tournamentSetup/TournamentNameForm";
 import TournamentSettings from "./tournamentSetup/TournamentSettings";
 import Matches from "./match/Matches";
-import type { Court, Match, Scores, EditingScores } from "../lib/types";
+import type {
+  Court,
+  Match,
+  Scores,
+  EditingScores,
+  Tournament,
+} from "../lib/types";
 import RestoreDialog from "./RestoreDialog";
 import BackButton from "./ui/backButton";
 import { generateMatches } from "@/lib/generators/mexicanoGenerator";
@@ -26,8 +32,18 @@ import {
   getTournamentShareUrl,
 } from "../lib/tournamentStorage";
 import { saveScores, loadScores } from "../lib/tournamentStorage";
+import { useAuth } from "@/lib/AuthContext";
+import AuthForms from "./auth/AuthForms";
+import {
+  getTournamentHistory,
+  createTournament,
+} from "../services/tournamentService";
+import { completeTournament } from "../services/handleTournamentComplete";
+import TournamentResult from "./TournamentResult";
+import NavBar from "./NavBar";
 
 export default function App() {
+  const { isAuthenticated, user, updateUser, logout } = useAuth();
   const [editingScores, setEditingScores] = useState<EditingScores>({});
   const updateEditingScores = (newScores: EditingScores) => {
     setEditingScores(newScores);
@@ -74,6 +90,7 @@ export default function App() {
   const [matches, setMatches] = useState<Match[]>([]);
   const [scores, setScores] = useState<Scores>({});
   const [round, setRound] = useState<number>(1);
+  const [tournaments, setTournaments] = useState<Tournament[]>([]);
 
   const updateMatches = (updatedMatches: Match[]) => {
     setMatches(updatedMatches);
@@ -405,8 +422,16 @@ export default function App() {
       setMatches([]);
       setRound((prevRound: number) => prevRound + 1);
       setMaxRounds(round + 1);
+      updateEditingScores({ 0: { team1: 0, team2: 0 } });
     },
-    [matches, round, updateMatches, scores, sittingOutPlayers]
+    [
+      matches,
+      round,
+      updateMatches,
+      scores,
+      sittingOutPlayers,
+      updateEditingScores,
+    ]
   );
 
   const resetTournament = () => {
@@ -457,194 +482,249 @@ export default function App() {
     }
   };
 
+  const fetchTournamentHistory = async () => {
+    const token = localStorage.getItem("token");
+    if (!token) return;
+    try {
+      const data = await getTournamentHistory(token);
+      setTournaments(data);
+    } catch (err) {
+      console.error("Error fetching tournaments", err);
+    }
+  };
+
+  useEffect(() => {
+    if (isAuthenticated) {
+      fetchTournamentHistory();
+    }
+  }, [isAuthenticated]);
+
+  const handleTournamentRecord = async () => {
+    const token = localStorage.getItem("token");
+    if (!token) return;
+    try {
+      // Serialize your scores object (the final scores for the tournament)
+      const scoresJson = JSON.stringify(scores);
+      await createTournament(token, tournamentName, scoresJson);
+      await fetchTournamentHistory();
+    } catch (error) {
+      console.error("Error saving tournament record:", error);
+    }
+  };
+
+  const handleTournamentComplete = async () => {
+    console.log(scores);
+    const token = localStorage.getItem("token");
+    if (!token) return;
+    try {
+      const updatedUser = await completeTournament(token);
+      updateUser(updatedUser);
+      await handleTournamentRecord();
+    } catch (error) {
+      console.error("Error updating tournament count:", error);
+    }
+  };
+
+  /*   if (!isAuthenticated) {
+    return (
+      <div className="flex justify-center items-center min-h-screen">
+        <AuthForms />
+      </div>
+    );
+  } */
+
   return (
-    <article className="flex flex-col min-h-screen">
-      {(isTournamentNameSet || numberOfPlayers > 0) &&
-        !arePlayerNamesSet &&
-        matches.length === 0 && (
-          <BackButton
-            visible={matches.length === 0}
-            onClick={goBackToTournamentName}
-          />
+    <>
+      <article className="flex flex-col min-h-screen">
+        {(isTournamentNameSet || numberOfPlayers > 0) &&
+          !arePlayerNamesSet &&
+          matches.length === 0 && (
+            <BackButton
+              visible={matches.length === 0}
+              onClick={goBackToTournamentName}
+            />
+          )}
+
+        {!isTournamentNameSet && (
+          <TournamentNameForm onSubmit={handleTournamentNameSubmit} />
         )}
 
-      {!isTournamentNameSet && (
-        <TournamentNameForm onSubmit={handleTournamentNameSubmit} />
-      )}
+        {isTournamentNameSet && (
+          <div className="flex flex-col items-center gap-4 mb-8 mt-12">
+            <h1 className="text-center text-2xl font-bold text-gray-500">
+              {tournamentName}
+            </h1>
+            {tournamentId && (
+              <ShareButton tournamentId={tournamentId} scores={editingScores} />
+            )}
+          </div>
+        )}
 
-      {isTournamentNameSet && (
-        <div className="flex flex-col items-center gap-4 mb-8 mt-12">
-          <h1 className="text-center text-2xl font-bold text-gray-500">
-            {tournamentName}
-          </h1>
-          {tournamentId && (
-            <ShareButton tournamentId={tournamentId} scores={editingScores} />
-          )}
-        </div>
-      )}
+        {isTournamentNameSet && !arePlayerNamesSet && (
+          <div className="space-y-8 px-4 max-w-3xl mx-auto w-full">
+            <TournamentSettings
+              onSubmit={(settings) => {
+                const initialCourts =
+                  settings.courts.length > 0
+                    ? settings.courts
+                    : [{ id: 1, name: "Court 1" }];
 
-      {isTournamentNameSet && !arePlayerNamesSet && (
-        <div className="space-y-8 px-4 max-w-3xl mx-auto w-full">
-          <TournamentSettings
-            onSubmit={(settings) => {
-              const initialCourts =
-                settings.courts.length > 0
-                  ? settings.courts
-                  : [{ id: 1, name: "Court 1" }];
+                const initialScores: Scores = {};
+                if (settings.mode === "team") {
+                  for (let i = 0; i < settings.playerNames.length; i += 2) {
+                    const teamIndex = Math.floor(i / 2);
+                    const teamName = `Team ${teamIndex + 1}`;
 
-              const initialScores: Scores = {};
-              if (settings.mode === "team") {
-                for (let i = 0; i < settings.playerNames.length; i += 2) {
-                  const teamIndex = Math.floor(i / 2);
-                  const teamName = `Team ${teamIndex + 1}`;
-
-                  settings.playerNames.slice(i, i + 2).forEach((name) => {
+                    settings.playerNames.slice(i, i + 2).forEach((name) => {
+                      initialScores[name] = {
+                        points: 0,
+                        wins: 0,
+                        matchesPlayed: 0,
+                        pointsPerRound: [],
+                        team: `team${teamIndex + 1}`,
+                        teamName: teamName,
+                      };
+                    });
+                  }
+                } else {
+                  settings.playerNames.forEach((name) => {
                     initialScores[name] = {
                       points: 0,
                       wins: 0,
                       matchesPlayed: 0,
                       pointsPerRound: [],
-                      team: `team${teamIndex + 1}`,
-                      teamName: teamName,
                     };
                   });
                 }
-              } else {
-                settings.playerNames.forEach((name) => {
-                  initialScores[name] = {
-                    points: 0,
-                    wins: 0,
-                    matchesPlayed: 0,
-                    pointsPerRound: [],
-                  };
-                });
-              }
 
-              setNames(settings.playerNames);
-              setPointsPerMatch(settings.points);
-              setMaxRounds(settings.maxRounds);
-              setCourts(initialCourts);
-              setMode(settings.mode);
-              setScores(initialScores);
-              setSittingOutCounts({});
-              setPointSystem(settings.pointSystem);
-              setFormat(settings.format as "mexicano" | "americano");
+                setNames(settings.playerNames);
+                setPointsPerMatch(settings.points);
+                setMaxRounds(settings.maxRounds);
+                setCourts(initialCourts);
+                setMode(settings.mode);
+                setScores(initialScores);
+                setSittingOutCounts({});
+                setPointSystem(settings.pointSystem);
+                setFormat(settings.format as "mexicano" | "americano");
 
-              let initialMatches: Match[];
-              if (
-                settings.format === "americano" &&
-                settings.mode === "individual"
-              ) {
-                initialMatches = generateAmericanoMatches(
-                  settings.playerNames,
-                  initialCourts,
-                  partnerships,
-                  round,
-                  sittingOutCounts,
-                  setSittingOutCounts,
-                  setSittingOutPlayers,
-                  maxRounds,
-                  finalPairingPattern,
-                  scores
-                );
-                const updatedPartnerships = updatePartnerships(
-                  partnerships,
-                  initialMatches
-                );
-                setPartnerships(updatedPartnerships);
-              } else if (
-                settings.format === "americano" &&
-                settings.mode === "team"
-              ) {
-                initialMatches = generateAmericanoMatchesTeamMode(
-                  settings.playerNames,
-                  initialCourts,
-                  partnerships,
-                  round,
-                  sittingOutCounts,
-                  setSittingOutCounts,
-                  setSittingOutPlayers,
-                  settings.mode
-                );
-              } else {
-                initialMatches = generateMatches(
-                  settings.playerNames,
-                  initialCourts,
-                  round,
-                  scores,
-                  settings.mode,
-                  sittingOutCounts,
-                  setSittingOutCounts,
-                  setSittingOutPlayers,
-                  maxRounds,
-                  finalPairingPattern
-                );
-              }
-              setMatches(initialMatches);
-              setArePlayerNamesSet(true);
-              setFinalPairingPattern(settings.finalRoundPattern);
+                let initialMatches: Match[];
+                if (
+                  settings.format === "americano" &&
+                  settings.mode === "individual"
+                ) {
+                  initialMatches = generateAmericanoMatches(
+                    settings.playerNames,
+                    initialCourts,
+                    partnerships,
+                    round,
+                    sittingOutCounts,
+                    setSittingOutCounts,
+                    setSittingOutPlayers,
+                    maxRounds,
+                    finalPairingPattern,
+                    scores
+                  );
+                  const updatedPartnerships = updatePartnerships(
+                    partnerships,
+                    initialMatches
+                  );
+                  setPartnerships(updatedPartnerships);
+                } else if (
+                  settings.format === "americano" &&
+                  settings.mode === "team"
+                ) {
+                  initialMatches = generateAmericanoMatchesTeamMode(
+                    settings.playerNames,
+                    initialCourts,
+                    partnerships,
+                    round,
+                    sittingOutCounts,
+                    setSittingOutCounts,
+                    setSittingOutPlayers,
+                    settings.mode
+                  );
+                } else {
+                  initialMatches = generateMatches(
+                    settings.playerNames,
+                    initialCourts,
+                    round,
+                    scores,
+                    settings.mode,
+                    sittingOutCounts,
+                    setSittingOutCounts,
+                    setSittingOutPlayers,
+                    maxRounds,
+                    finalPairingPattern
+                  );
+                }
+                setMatches(initialMatches);
+                setArePlayerNamesSet(true);
+                setFinalPairingPattern(settings.finalRoundPattern);
+              }}
+            />
+          </div>
+        )}
+
+        {matches.length > 0 && (
+          <div className="flex flex-col items-center relative space-y-4 mb-12">
+            {isFinished || isPaused ? (
+              <TournamentPaused
+                isFinished={isFinished}
+                scores={scores}
+                setIsPaused={setIsPaused}
+                setIsFinished={setIsFinished}
+                onTournamentComplete={handleTournamentComplete}
+              />
+            ) : (
+              <>
+                {sittingOutPlayers.length > 0 && (
+                  <div className="mb-4 p-4 bg-gray-300 rounded-lg text-center">
+                    <h3 className="font-semibold">Sitting Out This Round:</h3>
+                    <p>{sittingOutPlayers.join(", ")}</p>
+                  </div>
+                )}
+
+                <Matches
+                  maxRounds={maxRounds}
+                  matches={matches}
+                  scores={scores}
+                  round={round}
+                  onUpdateMatches={updateMatches}
+                  onUpdateScores={updateScores}
+                  onNextRound={nextRound}
+                  pointsPerMatch={pointsPerMatch}
+                  isLastRound={isLastRound()}
+                  courts={courts}
+                  mode={mode}
+                  sittingOutPlayers={sittingOutPlayers}
+                  onStartFinalRound={startFinalRound}
+                  onPause={handlePauseChange}
+                  pointSystem={pointSystem}
+                  format={format}
+                  editingScores={editingScores}
+                  onUpdateEditingScores={updateEditingScores}
+                  tournamentId={tournamentId}
+                  onTournamentComplete={handleTournamentComplete}
+                />
+              </>
+            )}
+          </div>
+        )}
+
+        {showRestoreDialog && (
+          <RestoreDialog
+            onRestore={() => {
+              loadTournamentState();
+              setShowRestoreDialog(false);
+            }}
+            onNew={() => {
+              localStorage.removeItem(STORAGE_KEY);
+              setShowRestoreDialog(false);
             }}
           />
-        </div>
-      )}
-
-      {matches.length > 0 && (
-        <div className="flex flex-col items-center relative space-y-4 mb-12">
-          {isFinished || isPaused ? (
-            <TournamentPaused
-              isFinished={isFinished}
-              scores={scores}
-              setIsPaused={setIsPaused}
-              setIsFinished={setIsFinished}
-            />
-          ) : (
-            <>
-              {sittingOutPlayers.length > 0 && (
-                <div className="mb-4 p-4 bg-gray-300 rounded-lg text-center">
-                  <h3 className="font-semibold">Sitting Out This Round:</h3>
-                  <p>{sittingOutPlayers.join(", ")}</p>
-                </div>
-              )}
-
-              <Matches
-                maxRounds={maxRounds}
-                matches={matches}
-                scores={scores}
-                round={round}
-                onUpdateMatches={updateMatches}
-                onUpdateScores={updateScores}
-                onNextRound={nextRound}
-                pointsPerMatch={pointsPerMatch}
-                isLastRound={isLastRound()}
-                courts={courts}
-                mode={mode}
-                sittingOutPlayers={sittingOutPlayers}
-                onStartFinalRound={startFinalRound}
-                onPause={handlePauseChange}
-                pointSystem={pointSystem}
-                format={format}
-                editingScores={editingScores}
-                onUpdateEditingScores={updateEditingScores}
-                tournamentId={tournamentId}
-              />
-            </>
-          )}
-        </div>
-      )}
-
-      {showRestoreDialog && (
-        <RestoreDialog
-          onRestore={() => {
-            loadTournamentState();
-            setShowRestoreDialog(false);
-          }}
-          onNew={() => {
-            localStorage.removeItem(STORAGE_KEY);
-            setShowRestoreDialog(false);
-          }}
-        />
-      )}
-      <Footer />
-    </article>
+        )}
+        <Footer />
+      </article>
+    </>
   );
 }

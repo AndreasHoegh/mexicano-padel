@@ -5,6 +5,8 @@ import { LanguageProvider } from "@/lib/LanguageContext";
 import type React from "react";
 import { ToastProvider } from "@/components/ui/toast";
 import { Toaster } from "@/components/ui/toaster";
+import { AuthProvider } from "@/lib/AuthContext";
+import NavBar from "@/components/NavBar";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -117,7 +119,13 @@ export default function RootLayout({
             americano and mexicano padel tournaments. For free.
           </p>
         </header>
-        <LanguageProvider>{children}</LanguageProvider>
+        <AuthProvider>
+          <LanguageProvider>
+            <NavBar />
+            {children}
+            <Toaster />
+          </LanguageProvider>
+        </AuthProvider>
       </body>
     </html>
   );

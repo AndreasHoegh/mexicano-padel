@@ -37,6 +37,7 @@ interface MatchesProps {
   editingScores: EditingScores;
   onUpdateEditingScores: (newEditingScores: EditingScores) => void;
   tournamentId: string;
+  onTournamentComplete: () => void;
 }
 
 export default function Matches({
@@ -58,6 +59,7 @@ export default function Matches({
   editingScores,
   onUpdateEditingScores,
   tournamentId,
+  onTournamentComplete,
 }: MatchesProps) {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isPaused, setIsPaused] = useState(false);
@@ -176,6 +178,7 @@ export default function Matches({
 
     if (isLastRound) {
       setTournamentCompleted(true);
+      onTournamentComplete();
     } else {
       onNextRound();
     }
@@ -200,6 +203,7 @@ export default function Matches({
           scores={localScores}
           setIsPaused={setIsPaused}
           setIsFinished={setTournamentCompleted}
+          onTournamentComplete={onTournamentComplete}
         />
       ) : (
         <>
