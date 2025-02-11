@@ -6,7 +6,7 @@ export async function getTournamentHistory(
   token: string
 ): Promise<Tournament[]> {
   const response = await fetch(
-    "https://www.padelamericano.org/api/tournament/by-user",
+    "https://jwtauthdotnet920250211104511.azurewebsites.net/api/tournament/by-user",
     {
       headers: {
         Authorization: `Bearer ${token}`,
@@ -29,7 +29,7 @@ export async function createTournament(
   scoresJson: string
 ): Promise<Tournament> {
   const response = await fetch(
-    "https://www.padelamericano.org/api/tournament",
+    "https://jwtauthdotnet920250211104511.azurewebsites.net/api/tournament",
     {
       method: "POST",
 
