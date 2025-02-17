@@ -1,12 +1,6 @@
-"use client";
-
-import { useState } from "react";
+import React, { useState } from "react";
 import LoginForm from "./LoginForm";
 import RegisterForm from "./RegisterForm";
-
-type AuthFormsProps = {
-  defaultView?: "login" | "register";
-};
 
 export default function AuthForms({ defaultView = "login" }: AuthFormsProps) {
   const [isLogin, setIsLogin] = useState(defaultView === "login");
@@ -14,16 +8,19 @@ export default function AuthForms({ defaultView = "login" }: AuthFormsProps) {
     null
   );
 
+  // Called when the user clicks "Need an account? Register" from the login form.
   const handleSwitchToRegister = () => {
     setIsLogin(false);
     setRegistrationSuccess(null);
   };
 
+  // Called when the user manually clicks "Already have an account? Login" from the register form.
   const handleSwitchToLogin = () => {
     setIsLogin(true);
-    setRegistrationSuccess(null);
+    // Do not clear registrationSuccess here; if registration was successful, we want it to show.
   };
 
+  // Called only when registration is successful.
   const handleRegisterSuccess = () => {
     setRegistrationSuccess("Registration successful! You can now log in.");
     setIsLogin(true);
@@ -37,7 +34,10 @@ export default function AuthForms({ defaultView = "login" }: AuthFormsProps) {
           registrationSuccess={registrationSuccess}
         />
       ) : (
-        <RegisterForm onSwitch={handleRegisterSuccess} />
+        <RegisterForm
+          onRegisterSuccess={handleRegisterSuccess}
+          onSwitch={handleSwitchToLogin}
+        />
       )}
     </div>
   );

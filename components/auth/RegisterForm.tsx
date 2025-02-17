@@ -63,6 +63,11 @@ export default function RegisterForm({ onSwitch }: { onSwitch: () => void }) {
     }
   };
 
+  const handleSwitchClick = () => {
+    setSuccessMessage("");
+    onSwitch();
+  };
+
   return (
     <div className="flex justify-center items-center min-h-screen">
       <div className="space-y-4 w-2/3 md:w-1/3">
@@ -95,7 +100,7 @@ export default function RegisterForm({ onSwitch }: { onSwitch: () => void }) {
             type="button"
             variant="outline"
             className="w-full"
-            onClick={onSwitch}
+            onClick={handleSwitchClick}
           >
             Already have an account? Login
           </Button>

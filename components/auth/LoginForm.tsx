@@ -76,6 +76,11 @@ export default function LoginForm({
     }
   };
 
+  const handleSwitchClick = () => {
+    setSuccessMessage("");
+    onSwitch();
+  };
+
   return (
     <div className="flex justify-center items-center min-h-screen">
       <div className="space-y-4 w-2/3 md:w-1/3">
@@ -106,7 +111,7 @@ export default function LoginForm({
             type="button"
             variant="outline"
             className="w-full"
-            onClick={onSwitch}
+            onClick={handleSwitchClick}
           >
             Need an account? Register
           </Button>
