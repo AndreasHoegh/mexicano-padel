@@ -50,9 +50,8 @@ export default function RegisterForm({ onSwitch }: { onSwitch: () => void }) {
       }
 
       if (response.ok) {
-        router.push(
-          "/login?success=Registration successful! You can now log in."
-        );
+        onSwitch();
+        setSuccessMessage("Registration successful! You can now log in.");
       } else {
         setError(data.message || "Registration failed");
         setIsLoading(false);
