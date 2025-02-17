@@ -12,7 +12,7 @@ export default function AuthForms({ defaultView = "login" }: AuthFormsProps) {
   const [isLogin, setIsLogin] = useState(defaultView === "login");
 
   return (
-    <div className="w-full max-w-md p-6 bg-white rounded-lg shadow-lg">
+    <div className="min-h-screen bg-gradient-to-br from-gray-700 to-green-900">
       {isLogin ? (
         <LoginForm onSwitch={() => setIsLogin(false)} />
       ) : (
