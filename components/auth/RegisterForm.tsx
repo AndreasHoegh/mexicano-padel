@@ -8,12 +8,14 @@ export default function RegisterForm({ onSwitch }: { onSwitch: () => void }) {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
+  const [successMessage, setSuccessMessage] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const router = useRouter();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError("");
+    setSuccessMessage("");
     setIsLoading(true);
 
     try {
@@ -48,6 +50,7 @@ export default function RegisterForm({ onSwitch }: { onSwitch: () => void }) {
       }
 
       if (response.ok) {
+        setSuccessMessage("Registration successful! You can now log in.");
         onSwitch();
       } else {
         setError(data.message || "Registration failed");
@@ -66,6 +69,9 @@ export default function RegisterForm({ onSwitch }: { onSwitch: () => void }) {
         <h2 className="text-2xl font-bold text-center text-gray-200">
           Register
         </h2>
+        {successMessage && (
+          <div className="text-green-500 text-center">{successMessage}</div>
+        )}
         <form onSubmit={handleSubmit} className="space-y-4">
           {error && <div className="text-red-500 text-center">{error}</div>}
           <input

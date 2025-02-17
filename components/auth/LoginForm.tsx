@@ -10,12 +10,14 @@ export default function LoginForm({ onSwitch }: { onSwitch: () => void }) {
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+  const [successMessage, setSuccessMessage] = useState("");
   const { login } = useAuth();
   const router = useRouter();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError("");
+    setSuccessMessage("");
     setIsLoading(true);
 
     try {
@@ -33,7 +35,6 @@ export default function LoginForm({ onSwitch }: { onSwitch: () => void }) {
       if (response.ok) {
         const data = await response.json();
         const token = data.accessToken;
-        // Fetch user profile with the returned token
         const profileResponse = await fetch(
           "https://jwtauthdotnet920250211104511.azurewebsites.net/api/auth/profile",
           {
@@ -44,20 +45,19 @@ export default function LoginForm({ onSwitch }: { onSwitch: () => void }) {
         );
         if (profileResponse.ok) {
           const profileData = await profileResponse.json();
-          // Update context with the correct user data from the backend
           login(token, profileData);
-          router.push("/"); // Redirect to home after login
+          setSuccessMessage(`Welcome, ${profileData.username}!`);
+          router.push("/");
         } else {
           setError("Failed to load user profile");
-          setIsLoading(false);
         }
       } else {
         const data = await response.json();
         setError(data.message || "Invalid username or password");
-        setIsLoading(false);
       }
     } catch (error) {
       setError("Login failed");
+    } finally {
       setIsLoading(false);
     }
   };
@@ -66,6 +66,9 @@ export default function LoginForm({ onSwitch }: { onSwitch: () => void }) {
     <div className="flex justify-center items-center min-h-screen">
       <div className="space-y-4 w-2/3 md:w-1/3">
         <h2 className="text-2xl font-bold text-center text-gray-200">Login</h2>
+        {successMessage && (
+          <div className="text-green-500 text-center">{successMessage}</div>
+        )}
         <form onSubmit={handleSubmit} className="space-y-4">
           {error && <div className="text-red-500 text-center">{error}</div>}
           <input
