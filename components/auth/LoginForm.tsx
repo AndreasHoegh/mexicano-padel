@@ -9,12 +9,14 @@ export default function LoginForm({ onSwitch }: { onSwitch: () => void }) {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
   const { login } = useAuth();
   const router = useRouter();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError("");
+    setIsLoading(true);
 
     try {
       const response = await fetch(
@@ -47,13 +49,16 @@ export default function LoginForm({ onSwitch }: { onSwitch: () => void }) {
           router.push("/"); // Redirect to home after login
         } else {
           setError("Failed to load user profile");
+          setIsLoading(false);
         }
       } else {
         const data = await response.json();
         setError(data.message || "Invalid username or password");
+        setIsLoading(false);
       }
     } catch (error) {
       setError("Login failed");
+      setIsLoading(false);
     }
   };
 
@@ -77,8 +82,8 @@ export default function LoginForm({ onSwitch }: { onSwitch: () => void }) {
             placeholder="Password"
             className="w-full p-2 border rounded"
           />
-          <Button type="submit" className="w-full">
-            Login
+          <Button type="submit" className="w-full" disabled={isLoading}>
+            {isLoading ? "Logging in..." : "Login"}
           </Button>
           <Button
             type="button"

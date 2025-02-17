@@ -1,8 +1,10 @@
+"use client";
+
 import { useLanguage } from "@/lib/LanguageContext";
 import { translations } from "@/lib/translations";
-import { Court, TournamentSettings as Settings } from "@/lib/types";
+import type { Court, TournamentSettings as Settings } from "@/lib/types";
 import { useEffect, useState } from "react";
-import { FieldValues, useForm } from "react-hook-form";
+import { type FieldValues, useForm } from "react-hook-form";
 import { CourtsSection } from "../tournamentSetup/CourtsSection";
 import { FinalRoundPairingSelector } from "../tournamentSetup/FinalRoundPairingSelector";
 import FormatSelector from "../tournamentSetup/FormatSelector";
@@ -38,17 +40,18 @@ export default function TournamentSettings({
   const [mode, setMode] = useState<"individual" | "team">("individual");
   const [format, setFormat] = useState<"mexicano" | "americano">("mexicano");
   const [playerCount, setPlayerCount] = useState(8);
-  const { register, handleSubmit, setValue, watch } = useForm<FormValues>({
-    defaultValues: {
-      pointSystem: "pointsToPlay",
-      points: "21",
-      maxRounds: "∞",
-      timePlay: "10",
-      teamsPerGroup: "4",
-      teamsAdvancing: "2",
-      "Number of players": "8",
-    },
-  });
+  const { register, handleSubmit, setValue, watch, getValues } =
+    useForm<FormValues>({
+      defaultValues: {
+        pointSystem: "pointsToPlay",
+        points: "21",
+        maxRounds: "∞",
+        timePlay: "10",
+        teamsPerGroup: "4",
+        teamsAdvancing: "2",
+        "Number of players": "8",
+      },
+    });
 
   const { language } = useLanguage();
   const t = translations[language];
@@ -56,19 +59,23 @@ export default function TournamentSettings({
   const currentPlayerCount = watch("Number of players");
 
   useEffect(() => {
-    const count = parseInt(currentPlayerCount);
+    const count = Number.parseInt(currentPlayerCount);
     const actualCount = mode === "team" ? count * 2 : count;
     setPlayerCount(actualCount);
 
-    // Set default names when player count changes
+    // Set default names for new entries when player count changes
     const nameCount = mode === "team" ? actualCount / 2 : actualCount;
     for (let i = 0; i < nameCount; i++) {
-      setValue(
-        `playerName${mode === "team" ? i * 2 : i}`,
-        mode === "team" ? `Team ${i + 1}` : `Player ${i + 1}`
-      );
+      const fieldName = `playerName${mode === "team" ? i * 2 : i}`;
+      const currentValue = getValues(fieldName);
+      if (!currentValue) {
+        setValue(
+          fieldName,
+          mode === "team" ? `Team ${i + 1}` : `Player ${i + 1}`
+        );
+      }
     }
-  }, [currentPlayerCount, mode, setValue]);
+  }, [currentPlayerCount, mode, setValue, getValues]);
 
   useEffect(() => {
     if (pointSystem === "TimePlay") {
@@ -147,15 +154,15 @@ export default function TournamentSettings({
 
     const points =
       data.points === "custom"
-        ? parseInt(data.customPoints)
-        : parseInt(data.points);
+        ? Number.parseInt(data.customPoints)
+        : Number.parseInt(data.points);
 
     const maxRounds =
       data.maxRounds === "∞"
         ? 1000
         : data.maxRounds === "custom"
-        ? parseInt(data.customRounds)
-        : parseInt(data.maxRounds);
+        ? Number.parseInt(data.customRounds)
+        : Number.parseInt(data.maxRounds);
 
     onSubmit({
       playerNames,
@@ -168,6 +175,70 @@ export default function TournamentSettings({
       format,
     });
   };
+
+  const handleRemovePlayer = (index: number, mode: "individual" | "team") => {
+    const currentCount = Number.parseInt(watch("Number of players"));
+    const newCount = mode === "team" ? currentCount - 1 : currentCount - 1;
+
+    if (newCount < 4) {
+      // Don't remove if it would result in fewer than 4 players
+      return;
+    }
+
+    // Update player count
+    setValue("Number of players", newCount.toString());
+
+    if (mode === "team") {
+      // Shift all team names up
+      for (let i = index; i < currentCount - 1; i++) {
+        const nextValue = watch(`playerName${i * 2}`);
+        setValue(`playerName${i * 2}`, nextValue);
+      }
+      // Clear the last team name
+      setValue(`playerName${(currentCount - 1) * 2}`, "");
+    } else {
+      // Shift all player names up
+      for (let i = index; i < currentCount - 1; i++) {
+        const nextValue = watch(`playerName${i + 1}`);
+        setValue(`playerName${i}`, nextValue);
+      }
+      // Clear the last player name
+      setValue(`playerName${currentCount - 1}`, "");
+    }
+
+    setPlayerCount(newCount);
+  };
+
+  // When switching to team mode, force reset even-indexed playerName fields to default team names.
+  useEffect(() => {
+    if (mode === "team") {
+      const currentCountStr = getValues("Number of players");
+      const currentCount = Number.parseInt(currentCountStr);
+      const actualCount = currentCount * 2; // in team mode, playerCount is doubled.
+      const teamCount = actualCount / 2;
+      for (let i = 0; i < teamCount; i++) {
+        setValue(`playerName${i * 2}`, `Team ${i + 1}`);
+      }
+    }
+  }, [mode, getValues, setValue]);
+
+  // When switching to individual mode, reset player names that still look like team defaults.
+  useEffect(() => {
+    if (mode === "individual") {
+      // playerCount in individual mode is the numeric count from the form.
+      const count = Number.parseInt(getValues("Number of players"));
+      // Loop over the individual names
+      for (let i = 0; i < count; i++) {
+        const currentName = getValues(`playerName${i}`);
+        if (
+          typeof currentName === "string" &&
+          currentName.startsWith("Team ")
+        ) {
+          setValue(`playerName${i}`, `Player ${i + 1}`);
+        }
+      }
+    }
+  }, [mode, getValues, setValue]);
 
   return (
     <div className="space-y-8 max-w-2xl mx-auto p-4">
@@ -228,7 +299,7 @@ export default function TournamentSettings({
             </h2>
             <div className="flex justify-center">
               <input
-                defaultValue={8}
+                defaultValue={4}
                 onFocus={(e) => e.target.select()}
                 type="number"
                 min={mode === "team" ? 2 : 4}
@@ -238,12 +309,12 @@ export default function TournamentSettings({
                   required: true,
                   valueAsNumber: true,
                   validate: (value) =>
-                    (parseInt(value) > 0 && Number.isInteger(value)) ||
+                    (Number.parseInt(value) > 0 && Number.isInteger(value)) ||
                     "Must be a positive integer",
                 })}
                 onChange={(e) => {
                   const value = e.target.value;
-                  const numericValue = parseInt(value, 10);
+                  const numericValue = Number.parseInt(value, 10);
                   if (
                     !isNaN(numericValue) &&
                     numericValue >= (mode === "team" ? 2 : 4)
@@ -263,6 +334,9 @@ export default function TournamentSettings({
           mode={mode}
           playerCount={playerCount}
           register={register}
+          setValue={setValue}
+          watch={watch}
+          onRemovePlayer={handleRemovePlayer}
         />
 
         <PointSystemSection

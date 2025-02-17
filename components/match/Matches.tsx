@@ -289,18 +289,18 @@ export default function Matches({
           </div>
 
           <div className="mt-8 flex flex-col justify-center gap-3">
-            <button
+            <Button
               onClick={openModal}
               className="hover:scale-105 bg-yellow-600 hover:bg-yellow-600 text-white px-6 py-3 rounded-lg shadow-lg flex items-center justify-center gap-2"
             >
               <Trophy className="h-5 w-5" />
               <span>{t.viewStandings}</span>
-            </button>
+            </Button>
 
             <Button
               onClick={handlePauseClick}
               variant={isPaused ? "default" : "outline"}
-              className="hover:scale-105 bg-red-600 hover:bg-red-700 text-white px-6 py-3 rounded-lg shadow-lg flex items-center justify-center gap-2"
+              className="hover:scale-105 bg-red-600 hover:bg-red-600 text-white px-6 py-3 rounded-lg shadow-lg flex items-center justify-center gap-2"
             >
               {isPaused ? t.resume : t.endTournament}
             </Button>

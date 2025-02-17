@@ -26,7 +26,6 @@ export const MatchList = ({
   pointsPerMatch,
   pointSystem,
   courts,
-  format,
   mode,
 }: MatchListProps) => {
   const [openPopovers, setOpenPopovers] = useState<{
@@ -34,7 +33,7 @@ export const MatchList = ({
   }>({});
 
   return (
-    <div className="grid grid-cols-1 gap-4 w-full">
+    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 w-full">
       {matches.map((match, index) => (
         <div
           key={`${"knockoutRound" in match ? match.knockoutRound : "group"}-${

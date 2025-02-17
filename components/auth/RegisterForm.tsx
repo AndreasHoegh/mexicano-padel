@@ -8,11 +8,13 @@ export default function RegisterForm({ onSwitch }: { onSwitch: () => void }) {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
   const router = useRouter();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError("");
+    setIsLoading(true);
 
     try {
       console.log("Sending registration request:", { username, password });
@@ -41,17 +43,20 @@ export default function RegisterForm({ onSwitch }: { onSwitch: () => void }) {
         const text = await response.text();
         console.error("Non-JSON response:", text);
         setError("Unexpected response format");
+        setIsLoading(false);
         return;
       }
 
       if (response.ok) {
-        router.push("/login");
+        onSwitch();
       } else {
         setError(data.message || "Registration failed");
+        setIsLoading(false);
       }
     } catch (error) {
       console.error("Registration error:", error);
       setError("Registration failed - " + (error as Error).message);
+      setIsLoading(false);
     }
   };
 
@@ -77,8 +82,8 @@ export default function RegisterForm({ onSwitch }: { onSwitch: () => void }) {
             placeholder="Password"
             className="w-full p-2 border rounded"
           />
-          <Button type="submit" className="w-full">
-            Register
+          <Button type="submit" className="w-full" disabled={isLoading}>
+            {isLoading ? "Registering..." : "Register"}
           </Button>
           <Button
             type="button"
