@@ -1,11 +1,19 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useAuth } from "@/lib/AuthContext";
 import { Button } from "@/components/ui/button";
 import { useRouter } from "next/navigation";
 
-export default function LoginForm({ onSwitch }: { onSwitch: () => void }) {
+interface LoginFormProps {
+  onSwitch: () => void;
+  registrationSuccess?: string | null;
+}
+
+export default function LoginForm({
+  onSwitch,
+  registrationSuccess,
+}: LoginFormProps) {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
@@ -13,6 +21,12 @@ export default function LoginForm({ onSwitch }: { onSwitch: () => void }) {
   const [successMessage, setSuccessMessage] = useState("");
   const { login } = useAuth();
   const router = useRouter();
+
+  useEffect(() => {
+    if (registrationSuccess) {
+      setSuccessMessage(registrationSuccess);
+    }
+  }, [registrationSuccess]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
