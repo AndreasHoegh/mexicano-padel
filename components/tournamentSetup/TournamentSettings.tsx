@@ -4,7 +4,7 @@ import { useLanguage } from "@/lib/LanguageContext";
 import { translations } from "@/lib/translations";
 import type { Court, TournamentSettings as Settings } from "@/lib/types";
 import { useEffect, useState } from "react";
-import { useForm, type FieldValues } from "react-hook-form";
+import { type FieldValues, useForm } from "react-hook-form";
 import { CourtsSection } from "../tournamentSetup/CourtsSection";
 import { FinalRoundPairingSelector } from "../tournamentSetup/FinalRoundPairingSelector";
 import FormatSelector from "../tournamentSetup/FormatSelector";
@@ -63,27 +63,16 @@ export default function TournamentSettings({
     const actualCount = mode === "team" ? count * 2 : count;
     setPlayerCount(actualCount);
 
+    // Set default names for new entries when player count changes
     const nameCount = mode === "team" ? actualCount / 2 : actualCount;
     for (let i = 0; i < nameCount; i++) {
       const fieldName = `playerName${mode === "team" ? i * 2 : i}`;
       const currentValue = getValues(fieldName);
-      if (mode === "individual") {
-        // In individual mode, force default if current value is empty or still a team default
-        if (
-          !currentValue ||
-          (typeof currentValue === "string" && currentValue.startsWith("Team "))
-        ) {
-          setValue(fieldName, `Player ${i + 1}`);
-        }
-      } else {
-        // In team mode, force default if current value is empty or still an individual default
-        if (
-          !currentValue ||
-          (typeof currentValue === "string" &&
-            currentValue.startsWith("Player "))
-        ) {
-          setValue(fieldName, `Team ${i + 1}`);
-        }
+      if (!currentValue) {
+        setValue(
+          fieldName,
+          mode === "team" ? `Team ${i + 1}` : `Player ${i + 1}`
+        );
       }
     }
   }, [currentPlayerCount, mode, setValue, getValues]);
