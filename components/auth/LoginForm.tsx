@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import { useAuth } from "@/lib/AuthContext";
 import { Button } from "@/components/ui/button";
 import { useRouter } from "next/navigation";
+import { useSearchParams } from "next/navigation";
 
 export default function LoginForm({ onSwitch }: { onSwitch: () => void }) {
   const [username, setUsername] = useState("");
@@ -13,14 +14,15 @@ export default function LoginForm({ onSwitch }: { onSwitch: () => void }) {
   const [successMessage, setSuccessMessage] = useState("");
   const { login } = useAuth();
   const router = useRouter();
+  const searchParams = useSearchParams();
 
   useEffect(() => {
     // Check if the query is defined and has a success parameter
-    const { success } = router.query || {};
+    const success = searchParams.get("success");
     if (success) {
       setSuccessMessage(success);
     }
-  }, [router.query]);
+  }, [searchParams]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
