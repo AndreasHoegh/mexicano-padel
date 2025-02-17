@@ -4,7 +4,7 @@ import { useLanguage } from "@/lib/LanguageContext";
 import { translations } from "@/lib/translations";
 import type { Court, TournamentSettings as Settings } from "@/lib/types";
 import { useEffect, useState } from "react";
-import { type FieldValues, useForm } from "react-hook-form";
+import { useForm, type FieldValues } from "react-hook-form";
 import { CourtsSection } from "../tournamentSetup/CourtsSection";
 import { FinalRoundPairingSelector } from "../tournamentSetup/FinalRoundPairingSelector";
 import FormatSelector from "../tournamentSetup/FormatSelector";
