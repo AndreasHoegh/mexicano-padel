@@ -51,7 +51,6 @@ export default function RegisterForm({ onSwitch }: { onSwitch: () => void }) {
 
       if (response.ok) {
         setSuccessMessage("Registration successful! You can now log in.");
-        onSwitch();
       } else {
         setError(data.message || "Registration failed");
         setIsLoading(false);
