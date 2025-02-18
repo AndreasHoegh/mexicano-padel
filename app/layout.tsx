@@ -7,6 +7,7 @@ import { ToastProvider } from "@/components/ui/toast";
 import { Toaster } from "@/components/ui/toaster";
 import { AuthProvider } from "@/lib/AuthContext";
 import NavBar from "@/components/NavBar";
+import WakeupDatabase from "@/components/WakeupDatabase";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -121,6 +122,7 @@ export default function RootLayout({
         </header>
         <AuthProvider>
           <LanguageProvider>
+            <WakeupDatabase />
             <NavBar />
             {children}
             <Toaster />
