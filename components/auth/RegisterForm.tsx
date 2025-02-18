@@ -2,25 +2,27 @@
 
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
-import { useRouter } from "next/navigation";
 
-export default function RegisterForm({ onSwitch }: { onSwitch: () => void }) {
+interface RegisterFormProps {
+  onSwitch: () => void;
+  onSuccess: () => void;
+  onError: (message: string) => void;
+}
+
+export default function RegisterForm({
+  onSwitch,
+  onSuccess,
+  onError,
+}: RegisterFormProps) {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
-  const [error, setError] = useState("");
-  const [successMessage, setSuccessMessage] = useState("");
   const [isLoading, setIsLoading] = useState(false);
-  const router = useRouter();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setError("");
-    setSuccessMessage("");
     setIsLoading(true);
 
     try {
-      console.log("Sending registration request:", { username, password });
-
       const response = await fetch(
         "https://jwtauthdotnet920250211104511.azurewebsites.net/api/auth/register",
         {
@@ -32,80 +34,65 @@ export default function RegisterForm({ onSwitch }: { onSwitch: () => void }) {
         }
       );
 
-      console.log("Response status:", response.status);
-
-      // Check if the response is JSON
       const contentType = response.headers.get("Content-Type");
       let data;
+
       if (contentType && contentType.includes("application/json")) {
         data = await response.json();
-        console.log("Registration response:", data);
       } else {
-        // Handle non-JSON response (for debugging purposes)
         const text = await response.text();
         console.error("Non-JSON response:", text);
-        setError("Unexpected response format");
-        setIsLoading(false);
-        return;
+        throw new Error("Unexpected response format");
       }
 
       if (response.ok) {
-        onSwitch();
-        setSuccessMessage("Registration successful! You can now log in.");
+        onSuccess();
       } else {
-        setError(data.message || "Registration failed");
-        setIsLoading(false);
+        onError(data.message || "Registration failed");
       }
     } catch (error) {
-      console.error("Registration error:", error);
-      setError("Registration failed - " + (error as Error).message);
+      onError("Registration failed. Please try again later.");
+    } finally {
       setIsLoading(false);
     }
   };
 
-  const handleSwitchClick = () => {
-    setSuccessMessage("");
-    onSwitch();
-  };
-
   return (
-    <div className="flex justify-center items-center min-h-screen">
-      <div className="space-y-4 w-2/3 md:w-1/3">
-        <h2 className="text-2xl font-bold text-center text-gray-200">
-          Register
-        </h2>
-        {successMessage && (
-          <div className="text-green-500 text-center">{successMessage}</div>
-        )}
-        <form onSubmit={handleSubmit} className="space-y-4">
-          {error && <div className="text-red-500 text-center">{error}</div>}
-          <input
-            type="text"
-            value={username}
-            onChange={(e) => setUsername(e.target.value)}
-            placeholder="Username"
-            className="w-full p-2 border rounded"
-          />
-          <input
-            type="password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            placeholder="Password"
-            className="w-full p-2 border rounded"
-          />
-          <Button type="submit" className="w-full" disabled={isLoading}>
-            {isLoading ? "Registering..." : "Register"}
-          </Button>
-          <Button
-            type="button"
-            variant="outline"
-            className="w-full"
-            onClick={handleSwitchClick}
-          >
-            Already have an account? Login
-          </Button>
-        </form>
+    <form onSubmit={handleSubmit} className="space-y-4">
+      <div className="space-y-2">
+        <input
+          type="text"
+          value={username}
+          onChange={(e) => setUsername(e.target.value)}
+          placeholder="Username"
+          className="w-full p-3 border border-gray-300 rounded-md bg-white/10 text-gray-100 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent"
+        />
+        <input
+          type="password"
+          value={password}
+          onChange={(e) => setPassword(e.target.value)}
+          placeholder="Password"
+          className="w-full p-3 border border-gray-300 rounded-md bg-white/10 text-gray-100 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent"
+        />
       </div>
-    </div>
+
+      <Button
+        type="submit"
+        className="w-full bg-green-600 hover:bg-green-700 text-white"
+        disabled={isLoading}
+      >
+        {isLoading ? "Creating account..." : "Create Account"}
+      </Button>
+
+      <div className="text-center">
+        <button
+          type="button"
+          onClick={onSwitch}
+          className="text-gray-300 hover:text-white text-sm"
+        >
+          Already have an account? Log in
+        </button>
+      </div>
+    </form>
   );
 }

@@ -1,37 +1,24 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { useAuth } from "@/lib/AuthContext";
 import { Button } from "@/components/ui/button";
 import { useRouter } from "next/navigation";
 
 interface LoginFormProps {
   onSwitch: () => void;
-  registrationSuccess?: string | null;
+  onError: (message: string) => void;
 }
 
-export default function LoginForm({
-  onSwitch,
-  registrationSuccess,
-}: LoginFormProps) {
+export default function LoginForm({ onSwitch, onError }: LoginFormProps) {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
-  const [error, setError] = useState("");
   const [isLoading, setIsLoading] = useState(false);
-  const [successMessage, setSuccessMessage] = useState("");
   const { login } = useAuth();
   const router = useRouter();
 
-  useEffect(() => {
-    if (registrationSuccess) {
-      setSuccessMessage(registrationSuccess);
-    }
-  }, [registrationSuccess]);
-
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setError("");
-    setSuccessMessage("");
     setIsLoading(true);
 
     try {
@@ -57,66 +44,61 @@ export default function LoginForm({
             },
           }
         );
+
         if (profileResponse.ok) {
           const profileData = await profileResponse.json();
           login(token, profileData);
-          setSuccessMessage(`Welcome, ${profileData.username}!`);
           router.push("/");
         } else {
-          setError("Failed to load user profile");
+          onError("Failed to load user profile");
         }
       } else {
         const data = await response.json();
-        setError(data.message || "Invalid username or password");
+        onError(data.message || "Invalid username or password");
       }
     } catch (error) {
-      setError("Login failed");
+      onError("Login failed. Please try again later.");
     } finally {
       setIsLoading(false);
     }
   };
 
-  const handleSwitchClick = () => {
-    setSuccessMessage("");
-    onSwitch();
-  };
-
   return (
-    <div className="flex justify-center items-center min-h-screen">
-      <div className="space-y-4 w-2/3 md:w-1/3">
-        <h2 className="text-2xl font-bold text-center text-gray-200">Login</h2>
-        {successMessage && (
-          <div className="text-green-500 text-center">{successMessage}</div>
-        )}
-        <form onSubmit={handleSubmit} className="space-y-4">
-          {error && <div className="text-red-500 text-center">{error}</div>}
-          <input
-            type="text"
-            value={username}
-            onChange={(e) => setUsername(e.target.value)}
-            placeholder="Username"
-            className="w-full p-2 border rounded"
-          />
-          <input
-            type="password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            placeholder="Password"
-            className="w-full p-2 border rounded"
-          />
-          <Button type="submit" className="w-full" disabled={isLoading}>
-            {isLoading ? "Logging in..." : "Login"}
-          </Button>
-          <Button
-            type="button"
-            variant="outline"
-            className="w-full"
-            onClick={handleSwitchClick}
-          >
-            Need an account? Register
-          </Button>
-        </form>
+    <form onSubmit={handleSubmit} className="space-y-4">
+      <div className="space-y-2">
+        <input
+          type="text"
+          value={username}
+          onChange={(e) => setUsername(e.target.value)}
+          placeholder="Username"
+          className="w-full p-3 border border-gray-300 rounded-md bg-white/10 text-gray-100 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent"
+        />
+        <input
+          type="password"
+          value={password}
+          onChange={(e) => setPassword(e.target.value)}
+          placeholder="Password"
+          className="w-full p-3 border border-gray-300 rounded-md bg-white/10 text-gray-100 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent"
+        />
       </div>
-    </div>
+
+      <Button
+        type="submit"
+        className="w-full bg-green-600 hover:bg-green-700 text-white"
+        disabled={isLoading}
+      >
+        {isLoading ? "Logging in..." : "Login"}
+      </Button>
+
+      <div className="text-center">
+        <button
+          type="button"
+          onClick={onSwitch}
+          className="text-gray-300 hover:text-white text-sm"
+        >
+          Don&apos;t have an account? Sign up
+        </button>
+      </div>
+    </form>
   );
 }
