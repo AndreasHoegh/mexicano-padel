@@ -14,6 +14,15 @@ export default function Footer() {
             </p>
           </div>
           <div className="flex items-center gap-2 sm:gap-4">
+            <div className="flex items-center gap-2">
+              <span>Found a bug?</span>
+              <a
+                href="mailto:ahoegh2602@gmail.com?subject=PadelAmericano Bug Report"
+                className="text-green-400 hover:text-green-300 underline transition-colors"
+              >
+                Write me an email
+              </a>
+            </div>
             <a
               href="/privacy"
               className="hover:text-yellow-500 transition-colors"

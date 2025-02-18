@@ -3,6 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Court } from "@/lib/types";
 import { translations } from "@/lib/translations";
 import { useLanguage } from "@/lib/LanguageContext";
+import { X } from "lucide-react";
 
 type CourtsSectionProps = {
   courts: Court[];
@@ -39,12 +40,15 @@ export function CourtsSection({
               placeholder="Court name"
             />
             {courts.length > 1 && (
-              <span
+              <Button
+                type="button"
+                variant="ghost"
+                size="sm"
+                className="p-2 hover:bg-red-100 text-red-500"
                 onClick={() => removeCourt(court.id)}
-                className="text-sm text-gray-400 hover:text-red-500 cursor-pointer transition-colors select-none ml-auto"
               >
-                {t.remove}
-              </span>
+                <X className="h-4 w-4" />
+              </Button>
             )}
           </div>
         ))}
