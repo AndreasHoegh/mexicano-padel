@@ -1,34 +1,36 @@
-import React from "react";
+"use client";
+
+import type React from "react";
+import { useState } from "react";
 import Link from "next/link";
 import { useAuth } from "@/lib/AuthContext";
-import { Menu } from "lucide-react";
+import { Menu, X } from "lucide-react";
 
 const NavBar: React.FC = () => {
   const { isAuthenticated, user, logout } = useAuth();
-  const [isMenuOpen, setIsMenuOpen] = React.useState(false);
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
+
+  const toggleMenu = () => setIsMenuOpen(!isMenuOpen);
 
   return (
     <nav className="bg-white/10 text-white p-4">
       <div className="container mx-auto">
         <div className="flex items-center justify-between">
-          {/* Logo */}
           <Link href="/">
-            <span className="font-bold text-base md:text-xl hover:text-yellow-400">
+            <span className="font-bold text-xl hover:text-yellow-400 transition-colors">
               PadelAmericano
             </span>
           </Link>
-
-          {/* Desktop Navigation */}
-          <div className="hidden md:flex items-center gap-6">
+          <div className="hidden md:flex items-center space-x-4">
             {isAuthenticated && (
               <Link href="/tournament-history">
-                <span className="hover:text-yellow-400">
+                <span className="hover:text-yellow-400 transition-colors">
                   Tournament History
                 </span>
               </Link>
             )}
             {isAuthenticated ? (
-              <>
+              <div className="flex items-center space-x-4">
                 <span className="text-green-300">
                   Welcome,{" "}
                   <span className="font-semibold">
@@ -38,64 +40,65 @@ const NavBar: React.FC = () => {
                 </span>
                 <button
                   onClick={logout}
-                  className="hover:text-yellow-400 cursor-pointer"
+                  className="hover:text-yellow-400 transition-colors"
                 >
                   Logout
                 </button>
-              </>
+              </div>
             ) : (
               <Link href="/login">
-                <span className="hover:text-yellow-400 cursor-pointer">
+                <span className="hover:text-yellow-400 transition-colors">
                   Login/Register
                 </span>
               </Link>
             )}
           </div>
-
-          {/* Mobile Menu Button */}
           <button
-            className="md:hidden"
-            onClick={() => setIsMenuOpen(!isMenuOpen)}
+            className="md:hidden text-white focus:outline-none"
+            onClick={toggleMenu}
           >
-            <Menu className="h-6 w-6" />
+            {isMenuOpen ? <X size={24} /> : <Menu size={24} />}
           </button>
         </div>
-
-        {/* Mobile Navigation */}
-        {isMenuOpen && (
-          <div className="md:hidden mt-4 space-y-3">
-            {isAuthenticated && (
-              <Link href="/tournament-history">
-                <span className="block py-2 hover:text-yellow-400">
-                  Tournament History
+      </div>
+      {/* Mobile menu */}
+      <div
+        className={`md:hidden ${
+          isMenuOpen ? "max-h-64" : "max-h-0"
+        } overflow-hidden transition-all duration-300 ease-in-out`}
+      >
+        <div className="flex flex-col items-center space-y-4 mt-4">
+          {isAuthenticated && (
+            <Link href="/tournament-history">
+              <span className="hover:text-yellow-400 transition-colors">
+                Tournament History
+              </span>
+            </Link>
+          )}
+          {isAuthenticated ? (
+            <>
+              <span className="text-green-300">
+                Welcome,{" "}
+                <span className="font-semibold">
+                  {user?.username || "User"}
                 </span>
-              </Link>
-            )}
-            {isAuthenticated ? (
-              <>
-                <div className="py-2 text-green-300">
-                  Welcome,{" "}
-                  <span className="font-semibold">
-                    {user?.username || "User"}
-                  </span>
-                  !
-                </div>
-                <button
-                  onClick={logout}
-                  className="block w-full text-left py-2 hover:text-yellow-400"
-                >
-                  Logout
-                </button>
-              </>
-            ) : (
-              <Link href="/login">
-                <span className="block py-2 hover:text-yellow-400">
-                  Login/Register
-                </span>
-              </Link>
-            )}
-          </div>
-        )}
+                !
+              </span>
+              <button
+                onClick={logout}
+                className="hover:text-yellow-400 transition-colors"
+              >
+                Logout
+              </button>
+            </>
+          ) : (
+            <Link href="/login">
+              <span className="hover:text-yellow-400 transition-colors">
+                Login/Register
+              </span>
+            </Link>
+          )}
+        </div>
       </div>
     </nav>
   );
