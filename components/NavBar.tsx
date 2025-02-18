@@ -5,7 +5,7 @@ import Link from "next/link";
 import { useAuth } from "@/lib/AuthContext";
 
 const NavBar: React.FC = () => {
-  const { isAuthenticated, logout } = useAuth();
+  const { isAuthenticated, user, logout } = useAuth();
 
   return (
     <nav className="bg-white/10 text-white p-4">
@@ -25,12 +25,21 @@ const NavBar: React.FC = () => {
             </Link>
           )}
           {isAuthenticated ? (
-            <span
-              onClick={logout}
-              className="hover:text-yellow-400 cursor-pointer"
-            >
-              Logout
-            </span>
+            <div className="flex items-center gap-4">
+              <span className="text-green-300">
+                Welcome,{" "}
+                <span className="font-semibold">
+                  {user?.username || "User"}
+                </span>
+                !
+              </span>
+              <span
+                onClick={logout}
+                className="hover:text-yellow-400 cursor-pointer"
+              >
+                Logout
+              </span>
+            </div>
           ) : (
             <Link href="/login">
               <span className="hover:text-yellow-400 cursor-pointer">
