@@ -17,7 +17,7 @@ const NavBar: React.FC = () => {
       <div className="container mx-auto">
         <div className="flex items-center justify-between">
           <Link href="/">
-            <span className="font-bold text-xl hover:text-yellow-400 transition-colors">
+            <span className="font-bold text-md sm:text-xl hover:text-yellow-400 transition-colors">
               PadelAmericano
             </span>
           </Link>
@@ -65,7 +65,7 @@ const NavBar: React.FC = () => {
       <div
         className={`md:hidden ${
           isMenuOpen ? "max-h-64" : "max-h-0"
-        } overflow-hidden transition-all duration-300 ease-in-out`}
+        } overflow-hidden transition-all duration-100 ease-in-out`}
       >
         <div className="flex flex-col items-center space-y-4 mt-4">
           {isAuthenticated && (
@@ -77,13 +77,7 @@ const NavBar: React.FC = () => {
           )}
           {isAuthenticated ? (
             <>
-              <span className="text-green-300">
-                Welcome,{" "}
-                <span className="font-semibold">
-                  {user?.username || "User"}
-                </span>
-                !
-              </span>
+              <span className="text-green-300">{user?.username || "User"}</span>
               <button
                 onClick={logout}
                 className="hover:text-yellow-400 transition-colors"
