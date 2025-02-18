@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+/* import React, { useState } from "react";
 import LoginForm from "./LoginForm";
 import RegisterForm from "./RegisterForm";
 
@@ -42,3 +42,4 @@ export default function AuthForms({ defaultView = "login" }: AuthFormsProps) {
     </div>
   );
 }
+ */

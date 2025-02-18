@@ -1,4 +1,4 @@
-export default function RegisterForm({
+/* export default function RegisterForm({
   onRegisterSuccess,
   onSwitch,
 }: {
@@ -7,3 +7,4 @@ export default function RegisterForm({
 }) {
   // ... rest of the component code ...
 }
+ */
