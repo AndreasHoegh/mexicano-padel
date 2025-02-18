@@ -16,11 +16,18 @@ const NavBar: React.FC = () => {
     <nav className="bg-white/10 text-white p-4">
       <div className="container mx-auto">
         <div className="flex items-center justify-between">
-          <Link href="/">
-            <span className="font-bold text-md sm:text-xl hover:text-yellow-400 transition-colors">
-              PadelAmericano
-            </span>
-          </Link>
+          <div className="flex items-center space-x-4">
+            <Link href="/">
+              <span className="font-bold text-md sm:text-xl hover:text-yellow-400 transition-colors">
+                PadelAmericano
+              </span>
+            </Link>
+            {isAuthenticated && (
+              <span className="text-green-300 text-sm sm:text-base">
+                {user?.username || "User"}
+              </span>
+            )}
+          </div>
           <div className="hidden md:flex items-center space-x-4">
             {isAuthenticated && (
               <Link href="/tournament-history">
@@ -30,17 +37,12 @@ const NavBar: React.FC = () => {
               </Link>
             )}
             {isAuthenticated ? (
-              <div className="flex items-center space-x-4">
-                <span className="text-green-300">
-                  {user?.username || "User"}
-                </span>
-                <button
-                  onClick={logout}
-                  className="hover:text-yellow-400 transition-colors"
-                >
-                  Logout
-                </button>
-              </div>
+              <button
+                onClick={logout}
+                className="hover:text-yellow-400 transition-colors"
+              >
+                Logout
+              </button>
             ) : (
               <Link href="/login">
                 <span className="hover:text-yellow-400 transition-colors">
@@ -72,15 +74,12 @@ const NavBar: React.FC = () => {
             </Link>
           )}
           {isAuthenticated ? (
-            <>
-              {/* <span className="text-green-300">{user?.username || "User"}</span> */}
-              <button
-                onClick={logout}
-                className="hover:text-yellow-400 transition-colors"
-              >
-                Logout
-              </button>
-            </>
+            <button
+              onClick={logout}
+              className="hover:text-yellow-400 transition-colors"
+            >
+              Logout
+            </button>
           ) : (
             <Link href="/login">
               <span className="hover:text-yellow-400 transition-colors">
