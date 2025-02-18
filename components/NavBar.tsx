@@ -32,11 +32,7 @@ const NavBar: React.FC = () => {
             {isAuthenticated ? (
               <div className="flex items-center space-x-4">
                 <span className="text-green-300">
-                  Welcome,{" "}
-                  <span className="font-semibold">
-                    {user?.username || "User"}
-                  </span>
-                  !
+                  {user?.username || "User"}
                 </span>
                 <button
                   onClick={logout}
@@ -77,7 +73,7 @@ const NavBar: React.FC = () => {
           )}
           {isAuthenticated ? (
             <>
-              <span className="text-green-300">{user?.username || "User"}</span>
+              {/* <span className="text-green-300">{user?.username || "User"}</span> */}
               <button
                 onClick={logout}
                 className="hover:text-yellow-400 transition-colors"
