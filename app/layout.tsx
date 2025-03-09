@@ -123,7 +123,7 @@ export default function RootLayout({
         <AuthProvider>
           <LanguageProvider>
             <WakeupDatabase />
-            <NavBar />
+            {/* <NavBar /> */}
             {children}
             <Toaster />
           </LanguageProvider>

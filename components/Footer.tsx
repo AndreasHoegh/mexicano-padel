@@ -20,7 +20,7 @@ export default function Footer() {
                 href="mailto:ahoegh2602@gmail.com?subject=PadelAmericano Bug Report"
                 className="text-green-400 hover:text-green-300 underline transition-colors"
               >
-                Write me an email
+                Send email
               </a>
             </div>
             <a
