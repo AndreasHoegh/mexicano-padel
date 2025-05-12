@@ -86,6 +86,20 @@ export default function RootLayout({
     <html lang="en">
       <head>
         <script
+          async
+          src="https://www.googletagmanager.com/gtag/js?id=G-R1984ZPVCX"
+        />
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `
+              window.dataLayer = window.dataLayer || [];
+              function gtag(){dataLayer.push(arguments);}
+              gtag('js', new Date());
+              gtag('config', 'G-R1984ZPVCX');
+            `,
+          }}
+        />
+        <script
           defer
           src="https://umami-blond-eight.vercel.app/script.js"
           data-website-id="dfd6d3bb-0b1f-4966-80db-63bcdb0c5149"
