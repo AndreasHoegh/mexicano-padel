@@ -2,9 +2,9 @@ import App from "@/components/App";
 import { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: "Americano Padel App",
+  title: "Padel Americano & Mexicano Tournament Generator – Free App",
   description:
-    "The ultimate americano padel app for organizing and running americano and mexicano padel tournaments. For free.",
+    "Create and manage Americano and Mexicano padel tournaments for free. Easy, fast, and online – perfect for clubs and friends.",
 };
 
 export default function Home() {

@@ -46,8 +46,20 @@ export default function App() {
   const { isAuthenticated, user, updateUser, logout } = useAuth();
   const [editingScores, setEditingScores] = useState<EditingScores>({});
   const updateEditingScores = (newScores: EditingScores) => {
+    if (isReadOnly) return; // Prevent edits in read-only mode
     setEditingScores(newScores);
     updateUrlWithScores(newScores);
+
+    // Broadcast score update to any view-only links
+    if (tournamentId) {
+      const scoreUpdateEvent = new CustomEvent("scoreUpdate", {
+        detail: {
+          tournamentId,
+          scores: newScores,
+        },
+      });
+      window.dispatchEvent(scoreUpdateEvent);
+    }
   };
   const [tournamentId, setTournamentId] = useState<string>("");
   const [numberOfPlayers, setNumberOfPlayers] = useState<number>(0);
@@ -85,6 +97,7 @@ export default function App() {
   const [pointSystem, setPointSystem] = useState<
     "pointsToPlay" | "pointsToWin" | "TimePlay"
   >("pointsToPlay");
+
   const STORAGE_KEY = "tournament_state";
 
   const [matches, setMatches] = useState<Match[]>([]);
@@ -92,12 +105,27 @@ export default function App() {
   const [round, setRound] = useState<number>(1);
   const [tournaments, setTournaments] = useState<Tournament[]>([]);
 
+  const [isReadOnly, setIsReadOnly] = useState<boolean>(false);
+
   const updateMatches = (updatedMatches: Match[]) => {
+    if (isReadOnly) return;
     setMatches(updatedMatches);
   };
 
   const updateScores = (updatedScores: Scores) => {
+    if (isReadOnly) return;
     setScores(updatedScores);
+  };
+
+  const updateUrlWithScores = (newScores: EditingScores) => {
+    if (tournamentId) {
+      const newUrl = getTournamentShareUrl(tournamentId, newScores);
+      window.history.replaceState(
+        { tournamentId, scores: newScores },
+        "",
+        newUrl
+      );
+    }
   };
 
   useEffect(() => {
@@ -105,8 +133,15 @@ export default function App() {
     const params = new URLSearchParams(window.location.search);
     const urlTournamentId = params.get("tournamentId");
     const urlScores = params.get("scores");
+    const urlReadonly = params.get("readonly");
+    const urlState = params.get("state");
+
+    setIsReadOnly(urlReadonly === "1");
 
     if (urlTournamentId) {
+      // Always set the tournament ID first
+      setTournamentId(urlTournamentId);
+
       const savedState = loadState(urlTournamentId);
       if (savedState) {
         // Load all state from saved tournament
@@ -129,11 +164,10 @@ export default function App() {
         setArePlayerNamesSet(savedState.arePlayerNamesSet);
         setTournamentHistory(savedState.tournamentHistory || []);
         setPartnerships(savedState.partnerships || {});
-        setTournamentId(urlTournamentId);
 
         // Load editingScores from URL, localStorage, or saved state
         let loadedEditingScores;
-        if (urlScores) {
+        if (urlScores && !urlReadonly) {
           try {
             loadedEditingScores = JSON.parse(urlScores);
           } catch (error) {
@@ -147,15 +181,227 @@ export default function App() {
           loadedEditingScores = savedState.editingScores;
         }
         if (loadedEditingScores) {
-          updateEditingScores(loadedEditingScores);
+          setEditingScores(loadedEditingScores);
         }
       }
+
+      // If read-only and an embedded state exists, prefer it for display
+      if (urlReadonly && urlState) {
+        try {
+          const decoded = JSON.parse(decodeURIComponent(urlState));
+          setNames(decoded.names);
+          setMatches(decoded.matches);
+          setScores(decoded.scores);
+          setRound(decoded.round);
+          setTournamentName(decoded.tournamentName);
+          setSittingOutPlayers(decoded.sittingOutPlayers);
+          setSittingOutCounts(decoded.sittingOutCounts);
+          setPointsPerMatch(decoded.pointsPerMatch);
+          setPointSystem(decoded.pointSystem);
+          setIsFinished(decoded.isFinished);
+          setMaxRounds(decoded.maxRounds);
+          setIsPaused(decoded.isPaused);
+          setCourts(decoded.courts);
+          setMode(decoded.mode);
+          setNumberOfPlayers(decoded.numberOfPlayers);
+          setIsTournamentNameSet(decoded.isTournamentNameSet);
+          setArePlayerNamesSet(decoded.arePlayerNamesSet);
+          setTournamentHistory(decoded.tournamentHistory || []);
+          setPartnerships(decoded.partnerships || {});
+          setEditingScores(decoded.editingScores || {});
+        } catch (e) {
+          console.warn("Failed to parse embedded state from URL", e);
+        }
+      }
+
+      // Set up live score updates for all link types
+      const checkForUpdates = () => {
+        try {
+          // Check for score updates
+          const currentScores = loadScores(urlTournamentId);
+          if (
+            currentScores &&
+            JSON.stringify(currentScores) !== JSON.stringify(editingScores)
+          ) {
+            setEditingScores(currentScores);
+            // Also update URL for normal links
+            if (!urlReadonly) {
+              updateUrlWithScores(currentScores);
+            }
+          }
+
+          // Check for tournament state updates
+          const savedState = loadState(urlTournamentId);
+          if (savedState) {
+            // Update all tournament state variables if they've changed
+            if (savedState.round !== round) setRound(savedState.round);
+            if (JSON.stringify(savedState.matches) !== JSON.stringify(matches))
+              setMatches(savedState.matches);
+            if (JSON.stringify(savedState.scores) !== JSON.stringify(scores))
+              setScores(savedState.scores);
+            if (savedState.isFinished !== isFinished)
+              setIsFinished(savedState.isFinished);
+            if (savedState.isPaused !== isPaused)
+              setIsPaused(savedState.isPaused);
+            if (savedState.maxRounds !== maxRounds)
+              setMaxRounds(savedState.maxRounds);
+            if (
+              JSON.stringify(savedState.sittingOutPlayers) !==
+              JSON.stringify(sittingOutPlayers)
+            )
+              setSittingOutPlayers(savedState.sittingOutPlayers);
+            if (
+              JSON.stringify(savedState.sittingOutCounts) !==
+              JSON.stringify(sittingOutCounts)
+            )
+              setSittingOutCounts(savedState.sittingOutCounts);
+            if (
+              JSON.stringify(savedState.tournamentHistory) !==
+              JSON.stringify(tournamentHistory)
+            )
+              setTournamentHistory(savedState.tournamentHistory || []);
+            if (
+              JSON.stringify(savedState.partnerships) !==
+              JSON.stringify(partnerships)
+            )
+              setPartnerships(savedState.partnerships || {});
+          }
+        } catch (error) {
+          console.warn("Failed to check for updates:", error);
+        }
+      };
+
+      // Check immediately
+      checkForUpdates();
+
+      // Set up interval to check for updates every 2 seconds
+      const interval = setInterval(checkForUpdates, 2000);
+
+      // Listen for custom score update events
+      const handleScoreUpdate = (e: CustomEvent) => {
+        if (e.detail.tournamentId === urlTournamentId) {
+          setEditingScores(e.detail.scores);
+          // Also update URL for normal links
+          if (!urlReadonly) {
+            updateUrlWithScores(e.detail.scores);
+          }
+
+          // Also check for other tournament state updates
+          const savedState = loadState(urlTournamentId);
+          if (savedState) {
+            if (savedState.round !== round) setRound(savedState.round);
+            if (JSON.stringify(savedState.matches) !== JSON.stringify(matches))
+              setMatches(savedState.matches);
+            if (JSON.stringify(savedState.scores) !== JSON.stringify(scores))
+              setScores(savedState.scores);
+            if (savedState.isFinished !== isFinished)
+              setIsFinished(savedState.isFinished);
+            if (savedState.isPaused !== isPaused)
+              setIsPaused(savedState.isPaused);
+            if (savedState.maxRounds !== maxRounds)
+              setMaxRounds(savedState.maxRounds);
+            if (
+              JSON.stringify(savedState.sittingOutPlayers) !==
+              JSON.stringify(sittingOutPlayers)
+            )
+              setSittingOutPlayers(savedState.sittingOutPlayers);
+            if (
+              JSON.stringify(savedState.sittingOutCounts) !==
+              JSON.stringify(sittingOutCounts)
+            )
+              setSittingOutCounts(savedState.sittingOutCounts);
+            if (
+              JSON.stringify(savedState.tournamentHistory) !==
+              JSON.stringify(tournamentHistory)
+            )
+              setTournamentHistory(savedState.tournamentHistory || []);
+            if (
+              JSON.stringify(savedState.partnerships) !==
+              JSON.stringify(partnerships)
+            )
+              setPartnerships(savedState.partnerships || {});
+          }
+        }
+      };
+
+      // Listen for storage events (when localStorage changes in other tabs/windows)
+      const handleStorageChange = (e: StorageEvent) => {
+        // Listen for both score changes and tournament state changes
+        if (e.key === `tournament_${urlTournamentId}_scores` && e.newValue) {
+          try {
+            const newScores = JSON.parse(e.newValue);
+            setEditingScores(newScores);
+            // Also update URL for normal links
+            if (!urlReadonly) {
+              updateUrlWithScores(newScores);
+            }
+          } catch (error) {
+            console.warn("Failed to parse updated scores:", error);
+          }
+        }
+
+        // Listen for tournament state changes
+        if (e.key === `tournament_${urlTournamentId}` && e.newValue) {
+          try {
+            const newState = JSON.parse(e.newValue);
+            // Update all tournament state variables
+            if (newState.round !== round) setRound(newState.round);
+            if (JSON.stringify(newState.matches) !== JSON.stringify(matches))
+              setMatches(newState.matches);
+            if (JSON.stringify(newState.scores) !== JSON.stringify(scores))
+              setScores(newState.scores);
+            if (newState.isFinished !== isFinished)
+              setIsFinished(newState.isFinished);
+            if (newState.isPaused !== isPaused) setIsPaused(newState.isPaused);
+            if (newState.maxRounds !== maxRounds)
+              setMaxRounds(newState.maxRounds);
+            if (
+              JSON.stringify(newState.sittingOutPlayers) !==
+              JSON.stringify(sittingOutPlayers)
+            )
+              setSittingOutPlayers(newState.sittingOutPlayers);
+            if (
+              JSON.stringify(newState.sittingOutCounts) !==
+              JSON.stringify(sittingOutCounts)
+            )
+              setSittingOutCounts(newState.sittingOutCounts);
+            if (
+              JSON.stringify(newState.tournamentHistory) !==
+              JSON.stringify(tournamentHistory)
+            )
+              setTournamentHistory(newState.tournamentHistory || []);
+            if (
+              JSON.stringify(newState.partnerships) !==
+              JSON.stringify(partnerships)
+            )
+              setPartnerships(newState.partnerships || {});
+          } catch (error) {
+            console.warn("Failed to parse updated tournament state:", error);
+          }
+        }
+      };
+
+      window.addEventListener(
+        "scoreUpdate",
+        handleScoreUpdate as EventListener
+      );
+      window.addEventListener("storage", handleStorageChange);
+
+      return () => {
+        clearInterval(interval);
+        window.removeEventListener(
+          "scoreUpdate",
+          handleScoreUpdate as EventListener
+        );
+        window.removeEventListener("storage", handleStorageChange);
+      };
     }
   }, []);
 
   const handleTournamentNameSubmit: SubmitHandler<TournamentNameFormData> = (
     data
   ) => {
+    if (isReadOnly) return; // no-op in readonly
     resetTournament();
     setTournamentName(data.tournamentName);
     setIsTournamentNameSet(true);
@@ -176,11 +422,92 @@ export default function App() {
     const handlePopState = (event: PopStateEvent) => {
       const params = new URLSearchParams(window.location.search);
       const urlTournamentId = params.get("tournamentId");
+      const urlReadonly = params.get("readonly");
+      const urlState = params.get("state");
+
+      // Update read-only state
+      setIsReadOnly(urlReadonly === "1");
 
       if (urlTournamentId) {
-        const savedState = loadState(urlTournamentId);
-        if (savedState) {
-          setTournamentId(urlTournamentId);
+        setTournamentId(urlTournamentId);
+
+        // If it's a view-only link with embedded state, load from that
+        if (urlReadonly && urlState) {
+          try {
+            const decoded = JSON.parse(decodeURIComponent(urlState));
+            setNames(decoded.names);
+            setMatches(decoded.matches);
+            setScores(decoded.scores);
+            setRound(decoded.round);
+            setTournamentName(decoded.tournamentName);
+            setSittingOutPlayers(decoded.sittingOutPlayers);
+            setSittingOutCounts(decoded.sittingOutCounts);
+            setPointsPerMatch(decoded.pointsPerMatch);
+            setPointSystem(decoded.pointSystem);
+            setIsFinished(decoded.isFinished);
+            setMaxRounds(decoded.maxRounds);
+            setIsPaused(decoded.isPaused);
+            setCourts(decoded.courts);
+            setMode(decoded.mode);
+            setNumberOfPlayers(decoded.numberOfPlayers);
+            setIsTournamentNameSet(decoded.isTournamentNameSet);
+            setArePlayerNamesSet(decoded.arePlayerNamesSet);
+            setTournamentHistory(decoded.tournamentHistory || []);
+            setPartnerships(decoded.partnerships || {});
+            setEditingScores(decoded.editingScores || {});
+          } catch (e) {
+            console.warn("Failed to parse embedded state from URL", e);
+            // Fallback to localStorage if available
+            const savedState = loadState(urlTournamentId);
+            if (savedState) {
+              // Load basic state from localStorage
+              setNames(savedState.names);
+              setMatches(savedState.matches);
+              setScores(savedState.scores);
+              setRound(savedState.round);
+              setTournamentName(savedState.tournamentName);
+              setSittingOutPlayers(savedState.sittingOutPlayers);
+              setSittingOutCounts(savedState.sittingOutCounts);
+              setPointsPerMatch(savedState.pointsPerMatch);
+              setPointSystem(savedState.pointSystem);
+              setIsFinished(savedState.isFinished);
+              setMaxRounds(savedState.maxRounds);
+              setIsPaused(savedState.isPaused);
+              setCourts(savedState.courts);
+              setMode(savedState.mode);
+              setNumberOfPlayers(savedState.numberOfPlayers);
+              setIsTournamentNameSet(savedState.isTournamentNameSet);
+              setArePlayerNamesSet(savedState.arePlayerNamesSet);
+              setTournamentHistory(savedState.tournamentHistory || []);
+              setPartnerships(savedState.partnerships || {});
+              setEditingScores(savedState.editingScores || {});
+            }
+          }
+        } else {
+          // Regular editable link - load from localStorage
+          const savedState = loadState(urlTournamentId);
+          if (savedState) {
+            setNames(savedState.names);
+            setMatches(savedState.matches);
+            setScores(savedState.scores);
+            setRound(savedState.round);
+            setTournamentName(savedState.tournamentName);
+            setSittingOutPlayers(savedState.sittingOutPlayers);
+            setSittingOutCounts(savedState.sittingOutCounts);
+            setPointsPerMatch(savedState.pointsPerMatch);
+            setPointSystem(savedState.pointSystem);
+            setIsFinished(savedState.isFinished);
+            setMaxRounds(savedState.maxRounds);
+            setIsPaused(savedState.isPaused);
+            setCourts(savedState.courts);
+            setMode(savedState.mode);
+            setNumberOfPlayers(savedState.numberOfPlayers);
+            setIsTournamentNameSet(savedState.isTournamentNameSet);
+            setArePlayerNamesSet(savedState.arePlayerNamesSet);
+            setTournamentHistory(savedState.tournamentHistory || []);
+            setPartnerships(savedState.partnerships || {});
+            setEditingScores(savedState.editingScores || {});
+          }
         }
       } else {
         setTournamentId("");
@@ -194,10 +521,10 @@ export default function App() {
   }, []);
 
   useEffect(() => {
-    if (isTournamentNameSet && tournamentId) {
+    if (isTournamentNameSet && tournamentId && !isReadOnly) {
       saveTournamentState();
     }
-  }, [tournamentId, isTournamentNameSet]);
+  }, [tournamentId, isTournamentNameSet, isReadOnly]);
 
   const saveTournamentState = () => {
     const state = {
@@ -229,6 +556,9 @@ export default function App() {
   };
 
   const loadTournamentState = () => {
+    // Don't load from localStorage if we're in read-only mode
+    if (isReadOnly) return false;
+
     const savedState = localStorage.getItem(STORAGE_KEY);
     if (savedState) {
       const state = JSON.parse(savedState);
@@ -258,18 +588,22 @@ export default function App() {
   };
 
   useEffect(() => {
-    loadTournamentState();
-  }, [loadTournamentState]); // Added loadTournamentState to dependencies
+    // Only load from localStorage if not in read-only mode
+    if (!isReadOnly) {
+      loadTournamentState();
+    }
+  }, [isReadOnly]); // Changed dependency to isReadOnly
 
   useEffect(() => {
     window.scrollTo(0, 0);
   }, [isTournamentNameSet, arePlayerNamesSet, isFinished]);
 
   useEffect(() => {
-    if (localStorage.getItem(STORAGE_KEY)) {
+    // Don't show restore dialog in read-only mode
+    if (!isReadOnly && localStorage.getItem(STORAGE_KEY)) {
       setShowRestoreDialog(true);
     }
-  }, []);
+  }, [isReadOnly]);
 
   const isLastRound = useCallback(() => {
     return maxRounds !== null && round === maxRounds;
@@ -277,8 +611,10 @@ export default function App() {
 
   useEffect(() => {
     if (round > 1 && names.length > 0 && matches.length === 0) {
+      let newMatches: Match[];
+
       if (format === "americano" && mode === "individual") {
-        const newMatches = generateAmericanoMatches(
+        newMatches = generateAmericanoMatches(
           names,
           courts,
           partnerships,
@@ -295,9 +631,8 @@ export default function App() {
           newMatches
         );
         setPartnerships(updatedPartnerships);
-        setMatches(newMatches);
       } else if (format === "americano" && mode === "team") {
-        const newMatches = generateAmericanoMatchesTeamMode(
+        newMatches = generateAmericanoMatchesTeamMode(
           names,
           courts,
           partnerships,
@@ -307,9 +642,8 @@ export default function App() {
           setSittingOutPlayers,
           mode
         );
-        setMatches(newMatches);
       } else {
-        const newMatches = generateMatches(
+        newMatches = generateMatches(
           names,
           courts,
           round,
@@ -321,7 +655,19 @@ export default function App() {
           maxRounds,
           finalPairingPattern
         );
-        setMatches(newMatches);
+      }
+      setMatches(newMatches);
+
+      // Initialize editing scores for new round and update URL
+      const newEditingScores: EditingScores = {};
+      newMatches.forEach((match, index) => {
+        newEditingScores[index] = { team1: 0, team2: 0 };
+      });
+      setEditingScores(newEditingScores);
+
+      // Update URL with the new scores
+      if (tournamentId) {
+        updateUrlWithScores(newEditingScores);
       }
     }
   }, [
@@ -336,6 +682,7 @@ export default function App() {
     maxRounds,
     finalPairingPattern,
     scores,
+    tournamentId,
   ]);
 
   const checkTournamentEnd = useCallback(() => {
@@ -348,10 +695,12 @@ export default function App() {
   }, [round, maxRounds]);
 
   const handlePauseChange = (paused: boolean) => {
+    if (isReadOnly) return;
     setIsPaused(paused);
   };
 
   const nextRound = useCallback(() => {
+    if (isReadOnly) return;
     if (!checkTournamentEnd()) {
       setTournamentHistory((prevHistory) => {
         const newState = {
@@ -364,7 +713,10 @@ export default function App() {
       });
       setMatches([]);
       setRound((prevRound: number) => prevRound + 1);
-      updateEditingScores({ 0: { team1: 0, team2: 0 } });
+
+      // Initialize with default scores and update URL immediately
+      const defaultScores = { 0: { team1: 0, team2: 0 } };
+      updateEditingScores(defaultScores);
     }
   }, [
     checkTournamentEnd,
@@ -373,10 +725,12 @@ export default function App() {
     round,
     sittingOutPlayers,
     updateEditingScores,
+    isReadOnly,
   ]);
 
   const startFinalRound = useCallback(
     (editingScores: EditingScores) => {
+      if (isReadOnly) return;
       const newScores = { ...scores };
 
       sittingOutPlayers.forEach((player) => {
@@ -431,10 +785,12 @@ export default function App() {
       scores,
       sittingOutPlayers,
       updateEditingScores,
+      isReadOnly,
     ]
   );
 
   const resetTournament = () => {
+    if (isReadOnly) return;
     setTournamentId("");
     setIsTournamentNameSet(false);
     setArePlayerNamesSet(false);
@@ -456,7 +812,7 @@ export default function App() {
     setPartnerships({});
     setFormat("mexicano");
     setPointSystem("pointsToPlay");
-    updateEditingScores({});
+    setEditingScores({});
 
     window.history.pushState({}, "", window.location.pathname);
   };
@@ -466,21 +822,32 @@ export default function App() {
   };
 
   useEffect(() => {
-    if (tournamentId) {
+    if (tournamentId && !isReadOnly) {
       saveTournamentState();
     }
-  }, [editingScores, tournamentId]);
+  }, [editingScores, tournamentId, isReadOnly]);
 
-  const updateUrlWithScores = (newScores: EditingScores) => {
-    if (tournamentId) {
-      const newUrl = getTournamentShareUrl(tournamentId, newScores);
-      window.history.replaceState(
-        { tournamentId, scores: newScores },
-        "",
-        newUrl
+  // Listen for score updates from other instances (for all link types)
+  useEffect(() => {
+    if (!tournamentId) return;
+
+    const handleScoreUpdate = (e: CustomEvent) => {
+      if (e.detail.tournamentId === tournamentId) {
+        // Update editingScores and URL for all link types
+        setEditingScores(e.detail.scores);
+        updateUrlWithScores(e.detail.scores);
+      }
+    };
+
+    window.addEventListener("scoreUpdate", handleScoreUpdate as EventListener);
+
+    return () => {
+      window.removeEventListener(
+        "scoreUpdate",
+        handleScoreUpdate as EventListener
       );
-    }
-  };
+    };
+  }, [tournamentId]);
 
   const fetchTournamentHistory = async () => {
     const token = localStorage.getItem("token");
@@ -554,8 +921,16 @@ export default function App() {
             <h1 className="text-center text-2xl font-bold text-gray-500">
               {tournamentName}
             </h1>
-            {tournamentId && (
-              <ShareButton tournamentId={tournamentId} scores={editingScores} />
+            {tournamentId && matches.length > 0 && (
+              <ShareButton
+                tournamentId={tournamentId}
+                scores={editingScores}
+                round={round}
+              />
+            )}
+
+            {isReadOnly && (
+              <span className="text-xs text-gray-400">View-only mode</span>
             )}
           </div>
         )}
@@ -660,6 +1035,18 @@ export default function App() {
                 setMatches(initialMatches);
                 setArePlayerNamesSet(true);
                 setFinalPairingPattern(settings.finalRoundPattern);
+
+                // Initialize editing scores and update URL
+                const initialEditingScores: EditingScores = {};
+                initialMatches.forEach((match, index) => {
+                  initialEditingScores[index] = { team1: 0, team2: 0 };
+                });
+                setEditingScores(initialEditingScores);
+
+                // Update URL with the initial scores if we have a tournament ID
+                if (tournamentId) {
+                  updateUrlWithScores(initialEditingScores);
+                }
               }}
             />
           </div>
@@ -705,6 +1092,7 @@ export default function App() {
                   onUpdateEditingScores={updateEditingScores}
                   tournamentId={tournamentId}
                   onTournamentComplete={handleTournamentComplete}
+                  readOnly={isReadOnly}
                 />
               </>
             )}

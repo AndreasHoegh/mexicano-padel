@@ -88,10 +88,10 @@ export default function TournamentNameForm({
         </div>
 
         <CardHeader className="text-center pt-16">
-          <h2 className="text-4xl sm:text-5xl font-bold text-white mb-2">
+          <h1 className="text-2xl sm:text-3xl font-bold text-white mb-2">
             {t.welcome}
-          </h2>
-          <CardDescription className="text-lg sm:text-xl text-white/80 mt-2">
+          </h1>
+          <CardDescription className="text-m sm:text-lg text-white/80 mt-2">
             {t.createTournaments}
           </CardDescription>
         </CardHeader>
@@ -150,16 +150,16 @@ export default function TournamentNameForm({
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 text-center">
             <div className="flex flex-col items-center space-y-2">
               <Trophy className="h-12 w-12 text-yellow-600" />
-              <h3 className="font-semibold text-lg text-white">
+              <h2 className="font-semibold text-lg text-white">
                 {t.dynamicTournaments}
-              </h3>
+              </h2>
               <p className="text-sm text-white/80">{t.shortExcitingMatches}</p>
             </div>
             <div className="flex flex-col items-center space-y-2">
               <Users className="h-12 w-12 text-blue-400" />
-              <h3 className="font-semibold text-lg text-white">
+              <h2 className="font-semibold text-lg text-white">
                 {t.forEveryone}
-              </h3>
+              </h2>
               <p className="text-sm text-white/80">{t.allLevels}</p>
             </div>
             <div className="flex flex-col items-center space-y-2">

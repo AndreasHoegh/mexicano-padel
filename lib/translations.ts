@@ -13,8 +13,9 @@ export const translations = {
     editScores: "Edit Scores",
     detailedScoreHistory: "Detailed Score History",
     tournamentPaused: "Tournament Paused",
-    welcome: "Welcome to Padel Americano!",
-    createTournaments: "Create exciting tournaments with just a few clicks",
+    welcome: "Free Americano & Mexicano Padel Tournament App",
+    createTournaments:
+      "Create and manage padel Americano and padel Mexicano tournaments online – easy, fun, and 100% free",
     whatIsPadelTournaments:
       "What are Mexicano and Americano Padel Tournaments?",
     aboutPadelTournaments:
@@ -105,8 +106,9 @@ export const translations = {
     detailedScoreHistory: "Historial de Puntuaciones Detallado",
     tournamentComplete: "¡Torneo Completado!",
     tournamentCompleteDescription: "¡Felicidades a",
-    welcome: "¡Bienvenidos al Padel Americano!",
-    createTournaments: "Crea torneos emocionantes con solo unos clics",
+    welcome: "Aplicación gratis para torneos de Pádel Americano y Mexicano",
+    createTournaments:
+      "Crea y organiza torneos de pádel Americano y Mexicano online – fácil, divertido y totalmente gratis",
     whatIsPadelTournaments:
       "¿Qué son los torneos de Mexicano y Americano Padel?",
     aboutPadelTournaments:
@@ -201,8 +203,9 @@ export const translations = {
     tournamentPaused: "Turneringen er på pause",
     tournamentComplete: "Turneringen er slut!",
     tournamentCompleteDescription: "Tillykke til",
-    welcome: "Velkommen til Padel Americano!",
-    createTournaments: "Opret spændende turneringer med bare få klik",
+    welcome: "Gratis app til Americano og Mexicano padel turneringer",
+    createTournaments:
+      "Opret og administrer Americano og Mexicano padel turneringer online – nemt, sjovt og helt gratis",
     whatIsPadelTournaments: "Hvad er Mexicano og Americano Padel Turneringer?",
     aboutPadelTournaments:
       "Mexicano og Americano er populære og engagerende padel-turneringsformater, der passer til forskellige spillestile og præferencer. I Mexicano er kampene designet til at skabe en balanceret konkurrence ved at parre spillere baseret på deres niveau og kampresultater, hvilket sikrer tætte og spændende kampe. Americano bruger derimod et alle-mod-alle-format, hvor spillerne skifter makker i hver kamp, så alle spiller med og mod forskellige deltagere. Begge formater er meget fleksible og giver arrangørerne mulighed for at vælge antal point pr. spil og tilpasse oplevelsen til gruppen.",

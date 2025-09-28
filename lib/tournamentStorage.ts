@@ -22,13 +22,28 @@ export function loadTournamentState(id: string): TournamentState | null {
 
 export function getTournamentShareUrl(
   id: string,
-  scores: EditingScores
+  scores: EditingScores,
+  options?: { readOnly?: boolean; state?: TournamentState }
 ): string {
   if (!id) return window.location.href;
 
   const url = new URL(window.location.href);
   url.searchParams.set("tournamentId", id);
-  url.searchParams.set("scores", JSON.stringify(scores));
+
+  if (options?.readOnly) {
+    url.searchParams.set("readonly", "1");
+    if (options.state) {
+      try {
+        const encodedState = encodeURIComponent(JSON.stringify(options.state));
+        url.searchParams.set("state", encodedState);
+      } catch {
+        // If state cannot be stringified (circular), skip embedding
+      }
+    }
+  } else {
+    url.searchParams.set("scores", JSON.stringify(scores));
+  }
+
   return url.toString();
 }
 

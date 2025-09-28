@@ -17,6 +17,7 @@ interface MatchListProps {
   courts: Court[];
   format?: "mexicano" | "americano";
   mode: "individual" | "team";
+  readOnly?: boolean;
 }
 
 export const MatchList = ({
@@ -27,6 +28,7 @@ export const MatchList = ({
   pointSystem,
   courts,
   mode,
+  readOnly = false,
 }: MatchListProps) => {
   const [openPopovers, setOpenPopovers] = useState<{
     [key: string | number]: boolean;
@@ -55,6 +57,7 @@ export const MatchList = ({
             handleScoreChange={(index, team, value) =>
               handleScoreChange(index, team, value)
             }
+            readOnly={readOnly}
           />
         </div>
       ))}

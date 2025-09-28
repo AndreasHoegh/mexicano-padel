@@ -26,6 +26,7 @@ type MatchCardProps = {
     team: "team1" | "team2",
     value: number
   ) => void;
+  readOnly?: boolean;
 };
 
 function TeamDisplay({
@@ -87,6 +88,7 @@ function ScorePopover({
   pointSystem,
   handleScoreChange,
   isTeam1,
+  readOnly = false,
 }: {
   index: number;
   team: "team1" | "team2";
@@ -101,15 +103,17 @@ function ScorePopover({
     value: number
   ) => void;
   isTeam1: boolean;
+  readOnly?: boolean;
 }) {
   return (
-    <Popover open={isOpen} onOpenChange={onOpenChange}>
+    <Popover open={isOpen} onOpenChange={(o) => !readOnly && onOpenChange(o)}>
       <PopoverTrigger asChild>
         <Button
           variant="outline"
           role="spinbutton"
           aria-valuenow={score}
           className="w-12 sm:w-16 text-center text-lg sm:text-xl border text-white bg-gray-800"
+          disabled={readOnly}
         >
           {score}
         </Button>
@@ -124,9 +128,11 @@ function ScorePopover({
                 variant="outline"
                 className="h-8 w-8"
                 onClick={() => {
+                  if (readOnly) return;
                   handleScoreChange(index, team, i);
                   onOpenChange(false);
                 }}
+                disabled={readOnly}
               >
                 {i}
               </Button>
@@ -148,6 +154,7 @@ function ScoreControls({
   openPopovers,
   setOpenPopovers,
   handleScoreChange,
+  readOnly = false,
 }: {
   index: number;
   editingScores: EditingScores;
@@ -162,6 +169,7 @@ function ScoreControls({
     team: "team1" | "team2",
     value: number
   ) => void;
+  readOnly?: boolean;
 }) {
   return (
     <div className="flex flex-row items-center gap-4">
@@ -180,6 +188,7 @@ function ScoreControls({
         pointSystem={pointSystem}
         handleScoreChange={handleScoreChange}
         isTeam1={true}
+        readOnly={readOnly}
       />
 
       <MemoizedScorePopover
@@ -197,6 +206,7 @@ function ScoreControls({
         pointSystem={pointSystem}
         handleScoreChange={handleScoreChange}
         isTeam1={false}
+        readOnly={readOnly}
       />
     </div>
   );
@@ -213,6 +223,7 @@ export function MatchCard({
   openPopovers,
   setOpenPopovers,
   handleScoreChange,
+  readOnly = false,
 }: MatchCardProps) {
   return (
     <div className="relative w-full h-full rounded-xl overflow-hidden border border-gray-200 shadow-lg">
@@ -248,6 +259,7 @@ export function MatchCard({
             openPopovers={openPopovers}
             setOpenPopovers={setOpenPopovers}
             handleScoreChange={handleScoreChange}
+            readOnly={readOnly}
           />
         </div>
 

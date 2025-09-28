@@ -38,6 +38,7 @@ interface MatchesProps {
   onUpdateEditingScores: (newEditingScores: EditingScores) => void;
   tournamentId: string;
   onTournamentComplete: () => void;
+  readOnly?: boolean;
 }
 
 export default function Matches({
@@ -60,12 +61,13 @@ export default function Matches({
   onUpdateEditingScores,
   tournamentId,
   onTournamentComplete,
+  readOnly = false,
 }: MatchesProps) {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isPaused, setIsPaused] = useState(false);
   const [isDetailsOpen, setIsDetailsOpen] = useState(false);
   const [sortedPlayers, setSortedPlayers] = useState<
-    [string, Scores[string]][]
+    Array<[string, Scores[string]]>
   >([]);
   const [localScores, setLocalScores] = useState<Scores>(scores);
   const [showFinalRoundModal, setShowFinalRoundModal] = useState(false);
@@ -82,6 +84,7 @@ export default function Matches({
     team: "team1" | "team2",
     value: number
   ) => {
+    if (readOnly) return;
     const newScores = { ...editingScores };
     if (!newScores[index]) {
       newScores[index] = { team1: 0, team2: 0 };
@@ -129,6 +132,7 @@ export default function Matches({
   };
 
   const handleNextRound = () => {
+    if (readOnly) return;
     if (!areAllScoresValid()) {
       alert("Please ensure all match scores are valid before proceeding.");
       return;
@@ -185,6 +189,7 @@ export default function Matches({
   };
 
   const handlePauseClick = () => {
+    if (readOnly) return;
     setIsPaused((prev) => {
       const newPausedState = !prev;
       onPause(newPausedState);
@@ -247,6 +252,7 @@ export default function Matches({
                 courts={courts}
                 format={format}
                 mode={mode}
+                readOnly={readOnly}
               />
             </CardContent>
           </Card>
@@ -257,7 +263,9 @@ export default function Matches({
                 <Button
                   onClick={handleNextRound}
                   className="hover:scale-105 text-lg bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 border-none shadow-lg transition-all duration-200 disabled:from-gray-400 disabled:to-gray-500 w-48 h-12"
-                  disabled={!areAllScoresValid() || tournamentCompleted}
+                  disabled={
+                    readOnly || !areAllScoresValid() || tournamentCompleted
+                  }
                 >
                   {t.nextRound} <ChevronRight className="ml-1" />
                 </Button>
@@ -272,7 +280,9 @@ export default function Matches({
                     }
                   }}
                   className="hover:scale-105 text-lg bg-gradient-to-r from-gray-900 to-gray-800 hover:from-gray-800 hover:to-gray-900 border-none shadow-lg transition-all duration-200 disabled:from-gray-400 disabled:to-gray-500 w-48 h-12"
-                  disabled={!areAllScoresValid() || tournamentCompleted}
+                  disabled={
+                    readOnly || !areAllScoresValid() || tournamentCompleted
+                  }
                 >
                   {t.startFinalRound}
                 </Button>
@@ -281,7 +291,9 @@ export default function Matches({
               <Button
                 onClick={handleNextRound}
                 className="hover:scale-105 text-lg bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 border-none shadow-lg transition-all duration-200 disabled:from-gray-400 disabled:to-gray-500 w-48 h-12"
-                disabled={!areAllScoresValid() || tournamentCompleted}
+                disabled={
+                  readOnly || !areAllScoresValid() || tournamentCompleted
+                }
               >
                 {t.endTournament}
               </Button>
@@ -301,6 +313,7 @@ export default function Matches({
               onClick={handlePauseClick}
               variant={isPaused ? "default" : "outline"}
               className="hover:scale-105 bg-red-600 hover:bg-red-600 text-white px-6 py-3 rounded-lg shadow-lg flex items-center justify-center gap-2"
+              disabled={readOnly}
             >
               {isPaused ? t.resume : t.endTournament}
             </Button>

@@ -3,10 +3,8 @@ import { Inter } from "next/font/google";
 import "./globals.css";
 import { LanguageProvider } from "@/lib/LanguageContext";
 import type React from "react";
-import { ToastProvider } from "@/components/ui/toast";
 import { Toaster } from "@/components/ui/toaster";
 import { AuthProvider } from "@/lib/AuthContext";
-import NavBar from "@/components/NavBar";
 import WakeupDatabase from "@/components/WakeupDatabase";
 
 const inter = Inter({ subsets: ["latin"] });
@@ -125,15 +123,6 @@ export default function RootLayout({
       <body
         className={`${inter.className} min-h-screen bg-gradient-to-br from-gray-700 to-green-900`}
       >
-        <header className="sr-only">
-          <h1 className="text-4xl font-bold text-center pt-6 text-yellow-600">
-            Americano Padel App
-          </h1>
-          <p className="text-center text-lg text-gray-300 mt-2">
-            The ultimate americano padel app for organizing and running
-            americano and mexicano padel tournaments. For free.
-          </p>
-        </header>
         <AuthProvider>
           <LanguageProvider>
             <WakeupDatabase />
